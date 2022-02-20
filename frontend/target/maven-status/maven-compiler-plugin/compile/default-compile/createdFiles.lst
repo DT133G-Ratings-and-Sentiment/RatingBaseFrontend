@@ -1,0 +1,10 @@
+com\dt002g\reviewapplication\frontend\Review.class
+com\dt002g\reviewapplication\frontend\service\ReviewBackendEntity.class
+com\dt002g\reviewapplication\frontend\service\ServiceBuilder.class
+module-info.class
+com\dt002g\reviewapplication\frontend\Controller.class
+com\dt002g\reviewapplication\frontend\service\GetReviewsCallBack.class
+com\dt002g\reviewapplication\frontend\App.class
+com\dt002g\reviewapplication\frontend\service\ReviewBackendAPIService$1.class
+com\dt002g\reviewapplication\frontend\service\ReviewBackendAPIService.class
+com\dt002g\reviewapplication\frontend\service\ReviewService.class
