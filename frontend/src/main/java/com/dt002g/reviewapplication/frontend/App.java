@@ -4,6 +4,11 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
@@ -13,24 +18,34 @@ import com.dt002g.reviewapplication.frontend.App;
 import com.dt002g.reviewapplication.frontend.Controller;
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendAPIService;
 
+
 /**
  * JavaFX App
  */
 public class App extends Application {
 
-	 private static Scene scene;
-	    private Controller controller;
+ 	private static Scene scene;
+    private Controller controller;
+    
 
 	    @Override
 	    public void start(Stage stage) throws IOException {
+	    
+	    
+	    	
+	    
 	    	
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("search.fxml"));
 			
-			GridPane grid = loader.load();
+			
+	    	GridPane grid = loader.load();
 			
 			controller = loader.getController();
+		
 			
-	        Scene scene = new Scene(grid, 600, 400);
+	        Scene scene = new Scene(grid, 1200, 800);
+	    
+	
 	        stage.setScene(scene);
 	        stage.setTitle("Review Search");
 	        stage.setAlwaysOnTop(false);
@@ -55,6 +70,10 @@ public class App extends Application {
 	    
 	    public void readReviews() {
 	    	ReviewBackendAPIService.getInstance().getReviews(controller);
+	    }
+	    
+	    private void showGraph(Stage stage) {
+	    	
 	    }
 
 
