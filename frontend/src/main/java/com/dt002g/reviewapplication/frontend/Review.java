@@ -64,5 +64,9 @@ public class Review {
 		return rating;
 	}
 	
+	@Override
+	public String toString(){
+		return "Id: " +id.toString() + ", Freetext: " + this.getFreeText() + " Rating: " + this.getRating();
+	}
 	
 }

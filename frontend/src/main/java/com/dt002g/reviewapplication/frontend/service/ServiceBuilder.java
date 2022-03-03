@@ -13,7 +13,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class ServiceBuilder {
 	
-	private static final String URL = "http://localhost:8080/api/v1/references/";
+	private static final String URL = "http://localhost:8080/api/v1/reviews/";
 	
 	private static ServiceBuilder instance;
 	

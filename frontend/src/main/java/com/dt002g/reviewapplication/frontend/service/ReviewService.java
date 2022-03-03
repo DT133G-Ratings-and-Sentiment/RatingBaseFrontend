@@ -9,8 +9,11 @@ import retrofit2.http.Path;
 
 public interface ReviewService {
 	
-	@GET(".")
+	@GET("getAll")
 	Call<List<ReviewBackendEntity>> getReviews();
+	
+	@GET("getTopReviews")
+	Call<List<ReviewBackendEntity>> getTopReviews();
 	
 	@GET("{id}")
 	Call<ReviewBackendEntity> getReview(@Path("id")String id);

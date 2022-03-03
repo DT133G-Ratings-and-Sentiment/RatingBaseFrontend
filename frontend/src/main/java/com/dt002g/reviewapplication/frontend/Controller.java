@@ -9,6 +9,8 @@ import java.util.ResourceBundle;
 
 import com.dt002g.reviewapplication.frontend.service.GetReviewsCallBack;
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendEntity;
+
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -32,6 +34,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TableColumn;
 
 public class Controller  implements Initializable, GetReviewsCallBack {
@@ -53,7 +56,8 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 	@FXML final ToggleGroup group = new ToggleGroup();
 	private String selection = "Get all";
 
-	private final ObservableList<Review> reviews = FXCollections.observableArrayList();
+	private final ObservableList<Review> reviewsInTable = FXCollections.observableArrayList();
+	private ArrayList<Review> reviews = new ArrayList<>();
 	
 	private final HashMap<Integer, Review> referenceMap = new HashMap<>();
 
@@ -78,12 +82,13 @@ public class Controller  implements Initializable, GetReviewsCallBack {
     
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		referenceTable.setItems(reviews);
+		referenceTable.setItems(reviewsInTable);
 		idColumn.setCellValueFactory(rowData -> rowData.getValue().idProperty());
 		ratingColumn.setCellValueFactory(rowData -> rowData.getValue().ratingProperty());
 		freeTextColumn.setCellValueFactory(rowData -> rowData.getValue().freeTextProperty());
 		searchField.setOnKeyPressed(this::setActionTarget);
 
+		
 		//  Radio button code
 		getAllRadioButton.setToggleGroup(group);
 		getByStringRadioButton.setToggleGroup(group);
@@ -124,17 +129,33 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 	
 	}
 	
-	public void setReviews(List<Review> pReviews) {
-		reviews.addAll(pReviews);
+	public void setReviews(List<Review> pReviews, int page) {
+		for(int i = (page*25); i < ((page*25) + 25); i++) {
+			reviewsInTable.add(pReviews.get(i));
+		}
+		Platform.runLater(() -> {
+        ScrollBar tvScrollBar = (ScrollBar) referenceTable.lookup(".scroll-bar:vertical");
+        tvScrollBar.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if ((Double) newValue == 1.0) {
+                Review temp = reviewsInTable.get(reviewsInTable.size()-15);
+                if(reviewsInTable.size() < reviews.size()) {
+                	setReviews(reviews, reviewsInTable.size()/25);
+                	referenceTable.scrollTo(temp);
+                }
+            }
+        });
+		});
 	}
 
 	@Override
 	public void processGetReviewsCallBack(List<ReviewBackendEntity> response) {
-		ArrayList<Review> reviews = new ArrayList<>();
+		reviews.clear();
+		reviewsInTable.clear();
+		reviews = new ArrayList<>();
 		for(ReviewBackendEntity rev: response) {
 			reviews.add(new Review(rev));
 		}
-		setReviews(reviews);
+		setReviews(reviews, 0);
 		
 	}
 	
@@ -153,9 +174,9 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 			System.out.println(group.getSelectedToggle().toString());
 		
 	    
-	    	reviews.addAll(new Review(1, 5, actiontarget.getText()),
+	    	/*reviews.addAll(new Review(1, 5, actiontarget.getText()),
 					new Review(2, 2, "This sucks"),
-					new Review(3, 4, "I like how it works, but expensive"));
+					new Review(3, 4, "I like how it works, but expensive"));*/
 	    }
 	    
 	  @FXML protected void onRadioButtonChange(Event event) {

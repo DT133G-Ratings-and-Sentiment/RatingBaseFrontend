@@ -30,7 +30,7 @@ public class App extends Application {
 
 	    @Override
 	    public void start(Stage stage) throws IOException {
-	    
+	    	System.out.println("Running app");
 	    
 	    	
 	    
@@ -43,7 +43,7 @@ public class App extends Application {
 			controller = loader.getController();
 		
 			
-	        Scene scene = new Scene(grid, 1200, 800);
+	        Scene scene = new Scene(grid);
 	    
 	
 	        stage.setScene(scene);
@@ -69,7 +69,8 @@ public class App extends Application {
 	    }
 	    
 	    public void readReviews() {
-	    	ReviewBackendAPIService.getInstance().getReviews(controller);
+	    	System.out.println("App readReviews");
+	    	ReviewBackendAPIService.getInstance().getTop100Reviews(controller);
 	    }
 	    
 	    private void showGraph(Stage stage) {
