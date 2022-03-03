@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
 
 import com.dt002g.reviewapplication.frontend.service.GetReviewsCallBack;
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendEntity;
+import com.dt002g.reviewapplication.frontend.util.SearchHandler;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -19,6 +20,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableView;
@@ -30,9 +32,15 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
+import javafx.stage.Popup;
+import javafx.stage.Stage;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TableColumn;
@@ -46,7 +54,6 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 	@FXML private HBox radioHBox = new HBox();
 	
 	@FXML private GridPane grid = new GridPane();
-	@FXML private Text actiontarget;
 	@FXML private TextField searchField;
 	@FXML final CategoryAxis xAxis = new CategoryAxis();
 	@FXML final NumberAxis yAxis = new NumberAxis();
@@ -64,10 +71,7 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 	public HashMap<Integer, Review> getReferenceMap(){
 		return referenceMap;
 	}
-	
 
-	
-	
     @FXML
     private TableView<Review> referenceTable;
     
@@ -86,15 +90,14 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 		idColumn.setCellValueFactory(rowData -> rowData.getValue().idProperty());
 		ratingColumn.setCellValueFactory(rowData -> rowData.getValue().ratingProperty());
 		freeTextColumn.setCellValueFactory(rowData -> rowData.getValue().freeTextProperty());
-		searchField.setOnKeyPressed(this::setActionTarget);
 
-		
 		//  Radio button code
+
 		getAllRadioButton.setToggleGroup(group);
-		getByStringRadioButton.setToggleGroup(group);
 		getByRatingRadioButton.setToggleGroup(group);
 		getByStringsRadioButton.setToggleGroup(group);
 		getByRatingAndStringsRadioButton.setToggleGroup(group);
+		getAllRadioButton.setSelected(true);
 
 		group.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
 			public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
@@ -102,31 +105,15 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 					selection = group.getSelectedToggle().getUserData().toString();
 				}
 				if(selection.equals("Get all")) {
-					System.out.println("Get all");
 					searchField.setVisible(false);
 					searchField.setManaged(false);
 				}
-				else if(selection.equals("Get by string")) {
-					System.out.println("Get by string");
+				else {
 					searchField.setVisible(true);
 					searchField.setManaged(true);
 				}
-				else if(selection.equals("Get by rating")){
-					// add field for integer
-					System.out.println("Get by rating");
-				}
-				else if(selection.equals("Get by strings")) {
-					// add 10 searchfields
-					System.out.println("Get by strings");
-				}
-				else if(selection.equals("Get by rating and string")) {
-					// add two fields, one for integer and one for string
-					System.out.println("Get by rating and sttring");
-				}
-						
 			}
 		});
-	
 	}
 	
 	public void setReviews(List<Review> pReviews, int page) {
@@ -134,16 +121,16 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 			reviewsInTable.add(pReviews.get(i));
 		}
 		Platform.runLater(() -> {
-        ScrollBar tvScrollBar = (ScrollBar) referenceTable.lookup(".scroll-bar:vertical");
-        tvScrollBar.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if ((Double) newValue == 1.0) {
-                Review temp = reviewsInTable.get(reviewsInTable.size()-15);
-                if(reviewsInTable.size() < reviews.size()) {
-                	setReviews(reviews, reviewsInTable.size()/25);
-                	referenceTable.scrollTo(temp);
-                }
-            }
-        });
+	        ScrollBar tvScrollBar = (ScrollBar) referenceTable.lookup(".scroll-bar:vertical");
+	        tvScrollBar.valueProperty().addListener((observable, oldValue, newValue) -> {
+	            if ((Double) newValue == 1.0) {
+	                Review temp = reviewsInTable.get(reviewsInTable.size()-15);
+	                if(reviewsInTable.size() < reviews.size()) {
+	                	setReviews(reviews, reviewsInTable.size()/25);
+	                	referenceTable.scrollTo(temp);
+	                }
+	            }
+	        });
 		});
 	}
 
@@ -158,35 +145,46 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 		setReviews(reviews, 0);
 		
 	}
-	
-	
-	
-	  @FXML protected void temporarySearch(ActionEvent event) {
-		if(!grid.getChildren().get(0).isVisible()) {
-			grid.getChildren().get(0).setVisible(true);
-			grid.getChildren().get(0).setManaged(true);
-		}
-		else {
-			grid.getChildren().get(0).setVisible(false);
-			grid.getChildren().get(0).setManaged(false);
-		}
-		
-			System.out.println(group.getSelectedToggle().toString());
-		
-	    
-	    	/*reviews.addAll(new Review(1, 5, actiontarget.getText()),
-					new Review(2, 2, "This sucks"),
-					new Review(3, 4, "I like how it works, but expensive"));*/
-	    }
-	    
-	  @FXML protected void onRadioButtonChange(Event event) {
-		  System.out.println("HERE");
-	  }
-	  
-	    @FXML protected void setActionTarget(KeyEvent keyEvent) {
-	    	System.out.println(keyEvent.getCharacter());
-	    	actiontarget.setText(searchField.getText()+keyEvent.getText());
-	    }
-	    
 
+	@FXML protected void searchAction(ActionEvent event) {
+		if(selection.equals("Get all")) {
+			SearchHandler.getInstance().getAll(this);
+			return;
+		}
+		
+		if(searchField.getText().isEmpty() || searchField == null) {
+			Alert alert = new Alert(AlertType.WARNING, "Empty search string");
+			alert.show();
+			return;
+		}
+		
+		if(selection.equals("Get by strings")){	
+			SearchHandler.getInstance().getByStrings(this, searchField.getText());
+		}
+		else if(selection.equals("Get by rating")) {
+			try {
+				int rating = Integer.parseInt(searchField.getText());
+				SearchHandler.getInstance().getByRating(this, rating);
+			}
+			catch(NumberFormatException e) {
+				Alert alert = new Alert(AlertType.WARNING, "Could not parse integer");
+				alert.show();
+			}
+		}
+		else if(selection.equals("Get by rating and string")){
+			try {
+				// Här under ska den hämta från en annan sökruta
+				//int rating = Integer.parseInt(INTEGERSÖKRUTA.getText());
+				int temp = 1;
+				SearchHandler.getInstance().getByRatingAndString(this, temp, searchField.getText());
+			}
+			catch(NumberFormatException e) {
+				Alert alert = new Alert(AlertType.WARNING, "Could not parse integer");
+				alert.show();
+			}
+		}
+		else if(selection.equals("Get by strings")){
+			SearchHandler.getInstance().getByStrings(this, searchField.getText());
+		}
+    }
 }

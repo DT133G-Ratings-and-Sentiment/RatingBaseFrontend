@@ -1,9 +1,12 @@
 package com.dt002g.reviewapplication.frontend.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.dt002g.reviewapplication.frontend.Review;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,16 +38,16 @@ public class ReviewBackendAPIService {
 					getReviewsCallBack.processGetReviewsCallBack(reviews);
 				}
 				else {
-					
+					Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+					alert.show();
 				}
 			}
 
 			@Override
 			public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
-				// TODO Auto-generated method stub
-				
+				Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+				alert.show();
 			}
-			
 		});
 	}
 	
@@ -61,16 +64,93 @@ public class ReviewBackendAPIService {
 					getReviewsCallBack.processGetReviewsCallBack(reviews);
 				}
 				else {
-					
+					Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+					alert.show();
 				}
 			}
 
 			@Override
 			public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
-				// TODO Auto-generated method stub
-				
+				Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+				alert.show();
 			}
-			
+		});
+	}
+	
+	public void getByStrings(GetReviewsCallBack getReviewsCallBack, Map<String, String> searchString) {
+		
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<ReviewBackendEntity>> reviewRequest = reviewService.getByStrings(searchString);
+		reviewRequest.enqueue(new Callback<List<ReviewBackendEntity>>() {
+
+			@Override
+			public void onResponse(Call<List<ReviewBackendEntity>> call, Response<List<ReviewBackendEntity>> response) {
+				if(response.isSuccessful()) {
+					List<ReviewBackendEntity> reviews = response.body();
+					getReviewsCallBack.processGetReviewsCallBack(reviews);
+				}
+				else {
+					Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+					alert.show();
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
+				Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+				alert.show();
+			}
+		});
+	}
+	public void getByRating(GetReviewsCallBack getReviewsCallBack, int rating) {
+		
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<ReviewBackendEntity>> reviewRequest = reviewService.getByRating(rating);
+		reviewRequest.enqueue(new Callback<List<ReviewBackendEntity>>() {
+
+			@Override
+			public void onResponse(Call<List<ReviewBackendEntity>> call, Response<List<ReviewBackendEntity>> response) {
+				if(response.isSuccessful()) {
+					List<ReviewBackendEntity> reviews = response.body();
+					getReviewsCallBack.processGetReviewsCallBack(reviews);
+				}
+				else {
+					Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+					alert.show();
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
+				Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+				alert.show();
+			}
+		});
+	}
+	
+public void getByRatingAndString(GetReviewsCallBack getReviewsCallBack, Map<Integer, String> params) {
+		
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<ReviewBackendEntity>> reviewRequest = reviewService.getByRatingAndString(params);
+		reviewRequest.enqueue(new Callback<List<ReviewBackendEntity>>() {
+
+			@Override
+			public void onResponse(Call<List<ReviewBackendEntity>> call, Response<List<ReviewBackendEntity>> response) {
+				if(response.isSuccessful()) {
+					List<ReviewBackendEntity> reviews = response.body();
+					getReviewsCallBack.processGetReviewsCallBack(reviews);
+				}
+				else {
+					Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+					alert.show();
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
+				Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+				alert.show();
+			}
 		});
 	}
 }
