@@ -32,11 +32,6 @@
                   <Insets right="20.0" />
                </HBox.margin>
             </RadioButton>
-            <RadioButton fx:id="getByStringRadioButton" text="Get by String" userData="Get by string">
-               <HBox.margin>
-                  <Insets right="20.0" />
-               </HBox.margin>
-            </RadioButton>
             <RadioButton fx:id="getByRatingRadioButton" text="Get by Rating" userData="Get by rating">
                <HBox.margin>
                   <Insets right="20.0" />
