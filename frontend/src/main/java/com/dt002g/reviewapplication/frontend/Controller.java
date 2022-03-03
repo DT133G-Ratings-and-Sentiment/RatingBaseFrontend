@@ -54,7 +54,6 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 	@FXML private HBox radioHBox = new HBox();
 	
 	@FXML private GridPane grid = new GridPane();
-	@FXML private Text actiontarget;
 	@FXML private TextField searchField;
 	@FXML final CategoryAxis xAxis = new CategoryAxis();
 	@FXML final NumberAxis yAxis = new NumberAxis();
@@ -91,8 +90,7 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 		idColumn.setCellValueFactory(rowData -> rowData.getValue().idProperty());
 		ratingColumn.setCellValueFactory(rowData -> rowData.getValue().ratingProperty());
 		freeTextColumn.setCellValueFactory(rowData -> rowData.getValue().freeTextProperty());
-		searchField.setOnKeyPressed(this::setActionTarget);
-		
+
 		//  Radio button code
 
 		getAllRadioButton.setToggleGroup(group);
@@ -184,7 +182,6 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 				Alert alert = new Alert(AlertType.WARNING, "Could not parse integer");
 				alert.show();
 			}
-			// lägga till en till sökruta
 		}
 		else if(selection.equals("Get by strings")){
 			SearchHandler.getInstance().getByStrings(this, searchField.getText());

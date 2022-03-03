@@ -52,7 +52,7 @@
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="400.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
          <children>
             <TextField fx:id="searchField" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="1" />
-            <Button onAction="#temporarySearch" text="Search" />
+            <Button onAction="#searchAction" text="Search" />
          </children>
       </HBox>
       <TableView fx:id="referenceTable" prefHeight="200.0" prefWidth="400.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
