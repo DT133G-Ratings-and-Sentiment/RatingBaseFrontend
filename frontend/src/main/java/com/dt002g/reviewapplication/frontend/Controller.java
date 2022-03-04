@@ -126,45 +126,47 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 	}
 	
 	public void setReviews(List<Review> pReviews, int page) {
-		long lastId;
-		if(reviewsInTable.size() > 0) {
-			lastId = reviewsInTable.get(reviewsInTable.size()-1).getId();
+		if(pReviews.size() > 0) {
+			long lastId;
+			if(reviewsInTable.size() > 0) {
+				lastId = reviewsInTable.get(reviewsInTable.size()-1).getId();
+			}
+			reviewsInTable.addAll(pReviews);
+			long fetchId = pReviews.get(pReviews.size()-1).getId();
+			/*for(int i = (page*25); i < ((page*25) + 25); i++) {
+				reviewsInTable.add(pReviews.get(i));
+			}*/
+			Platform.runLater(() -> {
+				if(reviewTableScrollBar != null && scrollListener != null) {
+					reviewTableScrollBar.valueProperty().removeListener(scrollListener);
+				}
+				reviewTableScrollBar = (ScrollBar) referenceTable.lookup(".scroll-bar:vertical");
+				scrollListener = (observable, oldValue, newValue) -> {
+		            if ((Double) newValue == 1.0) {
+		            	if(selection.equals("Get all")) {
+		            		ReviewBackendAPIService.getInstance().getTopReviewsLargerThanId(this, fetchId);
+		            	}
+		            	else if(selection.equals("Get by strings")) {
+		            		SearchHandler.getInstance().getByStrings(this, searchField.getText(), fetchId);
+		            	}
+		            	else if(selection.equals("Get by rating")) {
+		            		int rating = Integer.parseInt(searchField.getText());
+		    				SearchHandler.getInstance().getByRating(this, rating, fetchId);
+		            		
+		            	}else if(selection.equals("Get by rating and string")){
+		            		SearchHandler.getInstance().getByRatingAndStrings(this, 1, searchField.getText(), fetchId);
+		            	}
+		            }
+		        };
+		        Platform.runLater(() -> {reviewTableScrollBar.valueProperty().addListener(scrollListener);});
+			});
+			Platform.runLater(() ->{
+				if((reviewsInTable.size() - pReviews.size())> 0) {
+					Review temp = reviewsInTable.get(reviewsInTable.size() - pReviews.size());
+			        referenceTable.scrollTo(temp);
+				}
+			});
 		}
-		reviewsInTable.addAll(pReviews);
-		long fetchId =  pReviews.get(pReviews.size()-1).getId();
-		/*for(int i = (page*25); i < ((page*25) + 25); i++) {
-			reviewsInTable.add(pReviews.get(i));
-		}*/
-		Platform.runLater(() -> {
-			if(reviewTableScrollBar != null && scrollListener != null) {
-				reviewTableScrollBar.valueProperty().removeListener(scrollListener);
-			}
-			reviewTableScrollBar = (ScrollBar) referenceTable.lookup(".scroll-bar:vertical");
-			scrollListener = (observable, oldValue, newValue) -> {
-	            if ((Double) newValue == 1.0) {
-	            	if(selection.equals("Get all")) {
-	            		ReviewBackendAPIService.getInstance().getTopReviewsLargerThanId(this, fetchId);
-	            	}
-	            	else if(selection.equals("Get by strings")) {
-	            		SearchHandler.getInstance().getByStrings(this, searchField.getText(), fetchId);
-	            	}
-	            	else if(selection.equals("Get by rating")) {
-	            		int rating = Integer.parseInt(searchField.getText());
-	    				SearchHandler.getInstance().getByRating(this, rating, fetchId);
-	            		
-	            	}else if(selection.equals("Get by rating and string")){
-	            		SearchHandler.getInstance().getByRatingAndStrings(this, 1, searchField.getText(), 0L);
-	            	}
-	            }
-	        };
-	        Platform.runLater(() -> {reviewTableScrollBar.valueProperty().addListener(scrollListener);});
-		});
-		Platform.runLater(() ->{
-			if((reviewsInTable.size() - pReviews.size())> 0) {
-				Review temp = reviewsInTable.get(reviewsInTable.size() - pReviews.size());
-		        referenceTable.scrollTo(temp);
-			}
-		});
 	}
 
 	@Override
