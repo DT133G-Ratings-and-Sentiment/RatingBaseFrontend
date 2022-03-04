@@ -73,4 +73,30 @@ public class ReviewBackendAPIService {
 			
 		});
 	}
+	
+	public void getTopReviewsLargerThanId(GetReviewsCallBack getReviewsCallBack, Long id) {
+		
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<ReviewBackendEntity>> reviewRequest = reviewService.getTopReviewsLargerThanId(id);
+		reviewRequest.enqueue(new Callback<List<ReviewBackendEntity>>() {
+
+			@Override
+			public void onResponse(Call<List<ReviewBackendEntity>> call, Response<List<ReviewBackendEntity>> response) {
+				if(response.isSuccessful()) {
+					List<ReviewBackendEntity> reviews = response.body();
+					getReviewsCallBack.processGetReviewsCallBack(reviews);
+				}
+				else {
+					
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+	}
 }

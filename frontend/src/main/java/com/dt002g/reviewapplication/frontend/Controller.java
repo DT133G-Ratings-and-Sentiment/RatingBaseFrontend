@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import com.dt002g.reviewapplication.frontend.service.GetReviewsCallBack;
+import com.dt002g.reviewapplication.frontend.service.ReviewBackendAPIService;
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendEntity;
 
 import javafx.application.Platform;
@@ -54,6 +55,9 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 	@FXML final HBox barChartBox = new HBox();
 	@FXML final Pane barChartPane = new Pane();
 	@FXML final ToggleGroup group = new ToggleGroup();
+	
+	ScrollBar reviewTableScrollBar;
+	ChangeListener<Number> scrollListener;
 	private String selection = "Get all";
 
 	private final ObservableList<Review> reviewsInTable = FXCollections.observableArrayList();
@@ -72,7 +76,7 @@ public class Controller  implements Initializable, GetReviewsCallBack {
     private TableView<Review> referenceTable;
     
     @FXML
-    private TableColumn<Review, Integer> idColumn;
+    private TableColumn<Review, Long> idColumn;
     
     @FXML
     private TableColumn<Review, Integer> ratingColumn;
@@ -88,7 +92,6 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 		freeTextColumn.setCellValueFactory(rowData -> rowData.getValue().freeTextProperty());
 		searchField.setOnKeyPressed(this::setActionTarget);
 
-		
 		//  Radio button code
 		getAllRadioButton.setToggleGroup(group);
 		getByStringRadioButton.setToggleGroup(group);
@@ -130,32 +133,61 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 	}
 	
 	public void setReviews(List<Review> pReviews, int page) {
-		for(int i = (page*25); i < ((page*25) + 25); i++) {
-			reviewsInTable.add(pReviews.get(i));
+		long lastId;
+		if(reviewsInTable.size() > 0) {
+			lastId = reviewsInTable.get(reviewsInTable.size()-1).getId();
 		}
+		reviewsInTable.addAll(pReviews);
+		long fetchId =  pReviews.get(pReviews.size()-1).getId();
+		/*for(int i = (page*25); i < ((page*25) + 25); i++) {
+			reviewsInTable.add(pReviews.get(i));
+		}*/
 		Platform.runLater(() -> {
+			if(reviewTableScrollBar != null && scrollListener != null) {
+				reviewTableScrollBar.valueProperty().removeListener(scrollListener);
+			}
+			reviewTableScrollBar = (ScrollBar) referenceTable.lookup(".scroll-bar:vertical");
+			scrollListener = (observable, oldValue, newValue) -> {
+	            if ((Double) newValue == 1.0) {
+	            	ReviewBackendAPIService.getInstance().getTopReviewsLargerThanId(this, fetchId);
+	            	/*Review temp = reviewsInTable.get(reviewsInTable.size()-15);
+	                if(reviewsInTable.size() < reviews.size()) {
+	                	setReviews(reviews, reviewsInTable.size()/25);
+	                	referenceTable.scrollTo(temp);
+	                }*/
+	            }
+	        };
+	        Platform.runLater(() -> {reviewTableScrollBar.valueProperty().addListener(scrollListener);});
+		});
+		/*Platform.runLater(() -> {
         ScrollBar tvScrollBar = (ScrollBar) referenceTable.lookup(".scroll-bar:vertical");
         tvScrollBar.valueProperty().addListener((observable, oldValue, newValue) -> {
             if ((Double) newValue == 1.0) {
-                Review temp = reviewsInTable.get(reviewsInTable.size()-15);
+            	ReviewBackendAPIService.getInstance().getTopReviewsLargerThanId(this, lastId);
+            	Review temp = reviewsInTable.get(reviewsInTable.size()-15);
                 if(reviewsInTable.size() < reviews.size()) {
                 	setReviews(reviews, reviewsInTable.size()/25);
                 	referenceTable.scrollTo(temp);
                 }
             }
         });
+		});*/
+		Platform.runLater(() ->{
+			if((reviewsInTable.size() - pReviews.size())> 0) {
+				Review temp = reviewsInTable.get(reviewsInTable.size() - pReviews.size());
+		        referenceTable.scrollTo(temp);
+			}
 		});
 	}
 
 	@Override
 	public void processGetReviewsCallBack(List<ReviewBackendEntity> response) {
-		reviews.clear();
-		reviewsInTable.clear();
-		reviews = new ArrayList<>();
+		ArrayList<Review> tempReviews = new ArrayList<>();
 		for(ReviewBackendEntity rev: response) {
 			reviews.add(new Review(rev));
+			tempReviews.add(new Review(rev));
 		}
-		setReviews(reviews, 0);
+		setReviews(tempReviews, 0);
 		
 	}
 	

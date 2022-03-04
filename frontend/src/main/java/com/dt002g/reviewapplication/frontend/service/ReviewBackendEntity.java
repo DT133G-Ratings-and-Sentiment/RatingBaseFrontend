@@ -5,14 +5,14 @@ import com.dt002g.reviewapplication.frontend.Review;
 public class ReviewBackendEntity {
 	
 	public String freeText = "";
-	public int id;
+	public long id;
 	public int rating;
 	
 	public ReviewBackendEntity(){
 		
 	}
 	
-	public ReviewBackendEntity(String freeText, int id, int rating){
+	public ReviewBackendEntity(String freeText, long id, int rating){
 		this.freeText = freeText;
 		this.id = id;
 		this.rating = rating;
@@ -30,10 +30,10 @@ public class ReviewBackendEntity {
 	public void setFreeText(String freeText) {
 		this.freeText = freeText;
 	}
-	public int getId() {
+	public long getId() {
 		return id;
 	}
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 	public int getRating() {

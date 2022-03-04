@@ -15,6 +15,9 @@ public interface ReviewService {
 	@GET("getTopReviews")
 	Call<List<ReviewBackendEntity>> getTopReviews();
 	
+	@GET("getTopReviewsLargerThanId/{id}")
+	Call<List<ReviewBackendEntity>> getTopReviewsLargerThanId(@Path("id")Long id);
+	
 	@GET("{id}")
-	Call<ReviewBackendEntity> getReview(@Path("id")String id);
+	Call<ReviewBackendEntity> getReview(@Path("id")Long id);
 }
