@@ -96,7 +96,6 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 		freeTextColumn.setCellValueFactory(rowData -> rowData.getValue().freeTextProperty());
 
 		//  Radio button code
-
 		getAllRadioButton.setToggleGroup(group);
 		getByRatingRadioButton.setToggleGroup(group);
 		getByStringsRadioButton.setToggleGroup(group);
@@ -105,6 +104,11 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 
 		group.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
 			public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
+				reviewsInTable.clear();
+				reviews.clear();
+				if(reviewTableScrollBar != null && scrollListener != null) {
+					reviewTableScrollBar.valueProperty().removeListener(scrollListener);
+				}
 				if(group.getSelectedToggle().getUserData() != null) {
 					selection = group.getSelectedToggle().getUserData().toString();
 				}
@@ -118,6 +122,7 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 				}
 			}
 		});
+		System.out.println("Selection: " + selection);
 	}
 	
 	public void setReviews(List<Review> pReviews, int page) {
@@ -137,29 +142,23 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 			reviewTableScrollBar = (ScrollBar) referenceTable.lookup(".scroll-bar:vertical");
 			scrollListener = (observable, oldValue, newValue) -> {
 	            if ((Double) newValue == 1.0) {
-	            	ReviewBackendAPIService.getInstance().getTopReviewsLargerThanId(this, fetchId);
-	            	/*Review temp = reviewsInTable.get(reviewsInTable.size()-15);
-	                if(reviewsInTable.size() < reviews.size()) {
-	                	setReviews(reviews, reviewsInTable.size()/25);
-	                	referenceTable.scrollTo(temp);
-	                }*/
+	            	if(selection.equals("Get all")) {
+	            		ReviewBackendAPIService.getInstance().getTopReviewsLargerThanId(this, fetchId);
+	            	}
+	            	else if(selection.equals("Get by strings")) {
+	            		SearchHandler.getInstance().getByStrings(this, searchField.getText(), fetchId);
+	            	}
+	            	else if(selection.equals("Get by rating")) {
+	            		int rating = Integer.parseInt(searchField.getText());
+	    				SearchHandler.getInstance().getByRating(this, rating, fetchId);
+	            		
+	            	}else if(selection.equals("Get by rating and string")){
+	            		SearchHandler.getInstance().getByRatingAndStrings(this, 1, searchField.getText(), 0L);
+	            	}
 	            }
 	        };
 	        Platform.runLater(() -> {reviewTableScrollBar.valueProperty().addListener(scrollListener);});
 		});
-		/*Platform.runLater(() -> {
-        ScrollBar tvScrollBar = (ScrollBar) referenceTable.lookup(".scroll-bar:vertical");
-        tvScrollBar.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if ((Double) newValue == 1.0) {
-            	ReviewBackendAPIService.getInstance().getTopReviewsLargerThanId(this, lastId);
-            	Review temp = reviewsInTable.get(reviewsInTable.size()-15);
-                if(reviewsInTable.size() < reviews.size()) {
-                	setReviews(reviews, reviewsInTable.size()/25);
-                	referenceTable.scrollTo(temp);
-                }
-            }
-        });
-		});*/
 		Platform.runLater(() ->{
 			if((reviewsInTable.size() - pReviews.size())> 0) {
 				Review temp = reviewsInTable.get(reviewsInTable.size() - pReviews.size());
@@ -181,7 +180,7 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 
 	@FXML protected void searchAction(ActionEvent event) {
 		if(selection.equals("Get all")) {
-			SearchHandler.getInstance().getAll(this);
+			SearchHandler.getInstance().getTopReviewsLargerThanId(this, 0L);
 			return;
 		}
 		
@@ -192,12 +191,13 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 		}
 		
 		if(selection.equals("Get by strings")){	
-			SearchHandler.getInstance().getByStrings(this, searchField.getText());
+			SearchHandler.getInstance().getByStrings(this, searchField.getText(), 0L);
 		}
 		else if(selection.equals("Get by rating")) {
+			System.out.println("Get by rating");
 			try {
 				int rating = Integer.parseInt(searchField.getText());
-				SearchHandler.getInstance().getByRating(this, rating);
+				SearchHandler.getInstance().getByRating(this, rating, 0);
 			}
 			catch(NumberFormatException e) {
 				Alert alert = new Alert(AlertType.WARNING, "Could not parse integer");
@@ -205,11 +205,13 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 			}
 		}
 		else if(selection.equals("Get by rating and string")){
+			System.out.println("Get by rating and string");
 			try {
 				// Här under ska den hämta från en annan sökruta
 				//int rating = Integer.parseInt(INTEGERSÖKRUTA.getText());
 				int temp = 1;
-				SearchHandler.getInstance().getByRatingAndString(this, temp, searchField.getText());
+				//SearchHandler.getInstance().getByRatingAndString(this, temp, searchField.getText());
+				SearchHandler.getInstance().getByRatingAndStrings(this, temp, searchField.getText(), 0L);
 			}
 			catch(NumberFormatException e) {
 				Alert alert = new Alert(AlertType.WARNING, "Could not parse integer");
@@ -217,7 +219,7 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 			}
 		}
 		else if(selection.equals("Get by strings")){
-			SearchHandler.getInstance().getByStrings(this, searchField.getText());
+			SearchHandler.getInstance().getByStrings(this, searchField.getText(), 0L);
 		}
     }
 }
