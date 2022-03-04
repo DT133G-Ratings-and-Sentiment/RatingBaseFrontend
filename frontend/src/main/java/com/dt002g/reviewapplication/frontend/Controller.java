@@ -1,52 +1,43 @@
 package com.dt002g.reviewapplication.frontend;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
+import com.dt002g.reviewapplication.frontend.service.GetRatingStatsCallBack;
 import com.dt002g.reviewapplication.frontend.service.GetReviewsCallBack;
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendAPIService;
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendEntity;
 import com.dt002g.reviewapplication.frontend.util.SearchHandler;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Toggle;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.text.Text;
-import javafx.stage.Popup;
-import javafx.stage.Stage;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 
-public class Controller  implements Initializable, GetReviewsCallBack {
+public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack {
 	@FXML private RadioButton getAllRadioButton = new RadioButton();
 	@FXML private RadioButton getByStringRadioButton = new RadioButton();
 	@FXML private RadioButton getByRatingRadioButton = new RadioButton();
@@ -69,6 +60,7 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 
 	private final ObservableList<Review> reviewsInTable = FXCollections.observableArrayList();
 	private ArrayList<Review> reviews = new ArrayList<>();
+	private ArrayList<RatingStats> ratingsByComment = new ArrayList<>();
 	
 	private final HashMap<Integer, Review> referenceMap = new HashMap<>();
 
@@ -176,6 +168,19 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 			tempReviews.add(new Review(rev));
 		}
 		setReviews(tempReviews, 0);
+	}
+	
+	@Override
+	public void processGetMapCallBack(List<Map<Integer, Integer>> response) {
+		ArrayList<RatingStats> tempRatings = new ArrayList<>();
+		for(Map<Integer, Integer> rev: response) {
+			ratingsByComment.add(new RatingStats(rev.get("rating"), rev.get("amount")));
+			tempRatings.add(new RatingStats(rev.get("rating"), rev.get("amount")));
+		}
+		setBarChart(tempRatings);
+	}
+	
+	private void setBarChart(ArrayList<RatingStats> ratingsByComment) {
 		
 	}
 
