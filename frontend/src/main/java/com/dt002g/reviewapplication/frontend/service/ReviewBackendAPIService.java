@@ -128,6 +128,32 @@ public class ReviewBackendAPIService {
 		});
 	}
 	
+	public void getTop100ReviewsByRatingLargerThanId(GetReviewsCallBack getReviewsCallBack, int rating, long minId) {
+		
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<ReviewBackendEntity>> reviewRequest = reviewService.getTop100ReviewsByRatingLargerThanId(rating, minId);
+		reviewRequest.enqueue(new Callback<List<ReviewBackendEntity>>() {
+
+			@Override
+			public void onResponse(Call<List<ReviewBackendEntity>> call, Response<List<ReviewBackendEntity>> response) {
+				if(response.isSuccessful()) {
+					List<ReviewBackendEntity> reviews = response.body();
+					getReviewsCallBack.processGetReviewsCallBack(reviews);
+				}
+				else {
+					Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+					alert.show();
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
+				Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+				alert.show();
+			}
+		});
+	}
+	
 public void getByRatingAndString(GetReviewsCallBack getReviewsCallBack, Map<Integer, String> params) {
 		
 		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
@@ -153,6 +179,58 @@ public void getByRatingAndString(GetReviewsCallBack getReviewsCallBack, Map<Inte
 			}
 		});
 	}
+
+public void getTop100ReviewsByRatingAndStringsLargerThanId(GetReviewsCallBack getReviewsCallBack, int rating, Map<String, String> searchString, long id) {
+	
+	ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+	Call<List<ReviewBackendEntity>> reviewRequest = reviewService.getTop100ReviewsByRatingAndStringLargerThanId(id, rating, searchString);
+	reviewRequest.enqueue(new Callback<List<ReviewBackendEntity>>() {
+
+		@Override
+		public void onResponse(Call<List<ReviewBackendEntity>> call, Response<List<ReviewBackendEntity>> response) {
+			if(response.isSuccessful()) {
+				List<ReviewBackendEntity> reviews = response.body();
+				getReviewsCallBack.processGetReviewsCallBack(reviews);
+			}
+			else {
+				Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+				alert.show();
+			}
+		}
+
+		@Override
+		public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
+			Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+			alert.show();
+		}
+	});
+}
+
+public void getTop100ReviewsByStringsLargerThanId(GetReviewsCallBack getReviewsCallBack, Map<String, String> searchString, long id) {
+	
+	ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+	Call<List<ReviewBackendEntity>> reviewRequest = reviewService.getTop100ReviewsByStringsLargerThanId(id, searchString);
+	reviewRequest.enqueue(new Callback<List<ReviewBackendEntity>>() {
+
+		@Override
+		public void onResponse(Call<List<ReviewBackendEntity>> call, Response<List<ReviewBackendEntity>> response) {
+			if(response.isSuccessful()) {
+				List<ReviewBackendEntity> reviews = response.body();
+				getReviewsCallBack.processGetReviewsCallBack(reviews);
+			}
+			else {
+				Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+				alert.show();
+			}
+		}
+
+		@Override
+		public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
+			Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+			alert.show();
+		}
+	});
+}
 	
 	public void getTopReviewsLargerThanId(GetReviewsCallBack getReviewsCallBack, Long id) {
 		
