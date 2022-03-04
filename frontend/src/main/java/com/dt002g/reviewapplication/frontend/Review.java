@@ -12,13 +12,13 @@ public class Review {
 	//IntegerProperty id = new SimpleIntegerProperty(0);
 	StringProperty freeText = new SimpleStringProperty("");
 	//IntegerProperty rating = new SimpleIntegerProperty(0);
-	ObjectProperty<Integer> id = new SimpleObjectProperty<>(0);
+	ObjectProperty<Long> id = new SimpleObjectProperty<>(0L);
 	ObjectProperty<Integer> rating = new SimpleObjectProperty<>(0);
 	
 	
 	public Review() {}
 	
-	public Review(Integer id, Integer rating, String freeText) {
+	public Review(Long id, Integer rating, String freeText) {
 		this.id.set(id);
 		this.rating.set(rating);
 		this.freeText.set(freeText);
@@ -30,15 +30,15 @@ public class Review {
 		this.freeText.set(reviewBackendEntity.getFreeText());
 	}
 	
-	public void setId(Integer value) {
+	public void setId(Long value) {
 		this.id.set(value);
 	}
 	
-	public Integer getId() {
+	public Long getId() {
 		return this.id.get();
 	}
 	
-	public ObjectProperty<Integer> idProperty(){
+	public ObjectProperty<Long> idProperty(){
 		return id;
 	}
 	

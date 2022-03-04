@@ -18,6 +18,9 @@ public interface ReviewService {
 	@GET("getTopReviews")
 	Call<List<ReviewBackendEntity>> getTopReviews();
 	
+	@GET("getTopReviewsLargerThanId/{id}")
+	Call<List<ReviewBackendEntity>> getTopReviewsLargerThanId(@Path("id")Long id);
+	
 	@GET("{id}")
 	Call<List<ReviewBackendEntity>> getReview(@Path("id")String id);
 	
@@ -32,4 +35,7 @@ public interface ReviewService {
 	
 	@POST("getByRatingAndString/search{searchString}")
 	Call<List<ReviewBackendEntity>> getByRatingAndString(@QueryMap Map<Integer, String> params);
+
+	Call<ReviewBackendEntity> getReview(@Path("id")Long id);
+
 }

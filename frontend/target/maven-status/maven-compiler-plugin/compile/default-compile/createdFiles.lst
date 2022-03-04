@@ -3,6 +3,7 @@ com\dt002g\reviewapplication\frontend\Controller.class
 com\dt002g\reviewapplication\frontend\service\GetReviewsCallBack.class
 com\dt002g\reviewapplication\frontend\service\ReviewService.class
 com\dt002g\reviewapplication\frontend\Review.class
+com\dt002g\reviewapplication\frontend\service\ReviewBackendAPIService$3.class
 com\dt002g\reviewapplication\frontend\service\ReviewBackendEntity.class
 module-info.class
 com\dt002g\reviewapplication\frontend\service\ReviewBackendAPIService$2.class
