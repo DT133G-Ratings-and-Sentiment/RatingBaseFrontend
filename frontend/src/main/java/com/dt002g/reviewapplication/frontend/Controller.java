@@ -197,66 +197,54 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	}
 	
 	@Override
-	public void processGetMapCallBack(List<RatingBackendEntity> response) {
+	public void processGetMapCallBack(List<RatingBackendEntity> response, String searchString) {
 		System.out.println("processGetMapCallBack");
 		ArrayList<RatingStats> tempRatings = new ArrayList<>();
 		for(RatingBackendEntity rev: response) {
 			ratingsByComment.add(new RatingStats(rev.getRating(), rev.getAmount()));
 			tempRatings.add(new RatingStats(rev.getRating(), rev.getAmount()));
 		}
-		setBarChart(tempRatings);
+		setBarChart(tempRatings, searchString);
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void setBarChart(ArrayList<RatingStats> ratingsByComment) {
+	private void setBarChart(ArrayList<RatingStats> ratingsByComment, String searchString) {
 		Platform.runLater(new Runnable() {
 
 			@Override
 			public void run() {
-				try{
-					barChart.getData().remove(0);
-				}
-				catch(IndexOutOfBoundsException e) {
-					// do nothing
-				}
-				int rating1 = 0, rating2 = 0, rating3 = 0, rating4 = 0, rating5 = 0;
-				
-				
-				
-				System.out.println(ratingsByComment.size());
-				barChartXAxis.setLabel("Rating");
-				barChartYAxis.setLabel("Number of reviews");
+				String legend = searchString.substring(0, 1).toUpperCase() + searchString.substring(1);	
+				barChartXAxis.setLabel("Number of Reviews");
+				barChartYAxis.setLabel("Rating");
 
-				
 				XYChart.Series series1 = new XYChart.Series<>();
 				for(RatingStats rating : ratingsByComment) {
 					if(rating.getRating() == 1) {
-						rating1 = rating.getAmount();
+						series1.getData().add(new XYChart.Data<>("1", rating.getAmount()));
 					}
 					else if(rating.getRating() == 2) {
-						rating2 = rating.getAmount();
+						series1.getData().add(new XYChart.Data<>("2", rating.getAmount()));
 					}
 					else if(rating.getRating() == 3) {
-						rating3 = rating.getAmount();
+						series1.getData().add(new XYChart.Data<>("3", rating.getAmount()));
 					}
 					else if(rating.getRating() == 4) {
-						rating4 = rating.getAmount();
+						series1.getData().add(new XYChart.Data<>("4", rating.getAmount()));
 					}
 					else if(rating.getRating() == 5) {
-						rating5 = rating.getAmount();
+						series1.getData().add(new XYChart.Data<>("5", rating.getAmount()));
 					}
 				}
-				series1.getData().add(new XYChart.Data<>("1", rating1));
-				series1.getData().add(new XYChart.Data<>("2", rating2));
-				series1.getData().add(new XYChart.Data<>("3", rating3));
-				series1.getData().add(new XYChart.Data<>("4", rating4));
-				series1.getData().add(new XYChart.Data<>("5", rating5));
-				series1.setName("Ratings");
+			
+				series1.setName(legend);
 		
 				barChart.getData().add(series1);
-				barChart.getData().get(0).getData().forEach((item) ->{
+				
+				//  Ändra färger om vi vill sen
+				/*barChart.getData().get(0).getData().forEach((item) ->{
 					item.getNode().setStyle("-fx-background-color: blue");
 				});
+				*/
 			}
 		});
 	}
@@ -302,4 +290,14 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			}
 		}
     }
+	
+	public void clearChartAndSearchBar(ActionEvent event) {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				searchField.clear();
+				barChart.getData().clear();
+			}
+		});
+	}
 }

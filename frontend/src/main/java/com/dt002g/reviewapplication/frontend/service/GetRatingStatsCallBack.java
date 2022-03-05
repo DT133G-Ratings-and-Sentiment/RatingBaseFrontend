@@ -4,5 +4,5 @@ import java.util.List;
 import java.util.Map;
 
 public interface GetRatingStatsCallBack {
-	void processGetMapCallBack(List<RatingBackendEntity> response);
+	void processGetMapCallBack(List<RatingBackendEntity> response, String searchString);
 }

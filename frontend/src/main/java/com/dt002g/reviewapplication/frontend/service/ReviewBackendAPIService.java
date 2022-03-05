@@ -269,7 +269,7 @@ public void getTop100ReviewsByStringsLargerThanId(GetReviewsCallBack getReviewsC
 			public void onResponse(Call<List<RatingBackendEntity>> call, Response<List<RatingBackendEntity>> response) {
 				if(response.isSuccessful()) {
 					List<RatingBackendEntity> reviews = response.body();
-					getRatingStatsCallBack.processGetMapCallBack(reviews);
+					getRatingStatsCallBack.processGetMapCallBack(reviews, searchString);
 				}
 				else {
 					Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
@@ -291,4 +291,6 @@ public void getTop100ReviewsByStringsLargerThanId(GetReviewsCallBack getReviewsC
 			}
 		});
 	}
+	
+	
 }

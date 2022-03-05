@@ -2,6 +2,8 @@ package com.dt002g.reviewapplication.frontend.service;
 
 
 
+import java.util.concurrent.TimeUnit;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -28,7 +30,8 @@ public class ServiceBuilder {
 		return instance;
 	}
 	
-	private static OkHttpClient.Builder okHttp = new OkHttpClient.Builder();
+	private static OkHttpClient.Builder okHttp = new OkHttpClient.Builder()
+			.readTimeout(300, TimeUnit.SECONDS);
 	
 	private static Gson gson = new GsonBuilder()
 			.create();

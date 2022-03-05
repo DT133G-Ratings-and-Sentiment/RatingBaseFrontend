@@ -65,11 +65,11 @@ public class SearchHandler {
 		
 		for(int i = 0; i < stringList.size(); i++) {
 			params.put("searchString" + (i+1), stringList.get(i));
+			ReviewBackendAPIService.getInstance().getRatingByComment(getRatingStatsCallBack, stringList.get(i));
 		}
 		
 		//ReviewBackendAPIService.getInstance().getByStrings(getReviewsCallBack, params);
 		ReviewBackendAPIService.getInstance().getTop100ReviewsByStringsLargerThanId(getReviewsCallBack, params, id);
-		ReviewBackendAPIService.getInstance().getRatingByComment(getRatingStatsCallBack, searchString);
 	}
 	
 	public void getTopReviewsLargerThanId(GetReviewsCallBack getReviewsCallBack, Long id){
