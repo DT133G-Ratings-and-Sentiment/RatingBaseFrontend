@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dt002g.reviewapplication.frontend.service.GetRatingStatsCallBack;
 import com.dt002g.reviewapplication.frontend.service.GetReviewsCallBack;
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendAPIService;
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendEntity;
@@ -57,7 +58,7 @@ public class SearchHandler {
 
 	}
 	
-	public void getByStrings(GetReviewsCallBack getReviewsCallBack, String searchString, long id) {
+	public void getByStrings(GetReviewsCallBack getReviewsCallBack, GetRatingStatsCallBack getRatingStatsCallBack, String searchString, long id) {
 		System.out.println("Search by string");
 		List<String> stringList = new ArrayList<String>(Arrays.asList( searchString.split("\\s+")));
 		Map<String, String> params = new HashMap<String, String>();
@@ -68,6 +69,7 @@ public class SearchHandler {
 		
 		//ReviewBackendAPIService.getInstance().getByStrings(getReviewsCallBack, params);
 		ReviewBackendAPIService.getInstance().getTop100ReviewsByStringsLargerThanId(getReviewsCallBack, params, id);
+		ReviewBackendAPIService.getInstance().getRatingByComment(getRatingStatsCallBack, searchString);
 	}
 	
 	public void getTopReviewsLargerThanId(GetReviewsCallBack getReviewsCallBack, Long id){

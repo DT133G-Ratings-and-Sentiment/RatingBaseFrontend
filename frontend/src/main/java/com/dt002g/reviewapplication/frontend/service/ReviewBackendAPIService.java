@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.dt002g.reviewapplication.frontend.Review;
 
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import retrofit2.Call;
@@ -255,6 +256,39 @@ public void getTop100ReviewsByStringsLargerThanId(GetReviewsCallBack getReviewsC
 				
 			}
 			
+		});
+	}
+	
+	public void getRatingByComment(GetRatingStatsCallBack getRatingStatsCallBack, String searchString) {
+		
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<RatingBackendEntity>> reviewRequest = reviewService.getRatingByComment(searchString);
+		reviewRequest.enqueue(new Callback<List<RatingBackendEntity>>() {
+
+			@Override
+			public void onResponse(Call<List<RatingBackendEntity>> call, Response<List<RatingBackendEntity>> response) {
+				if(response.isSuccessful()) {
+					List<RatingBackendEntity> reviews = response.body();
+					getRatingStatsCallBack.processGetMapCallBack(reviews);
+				}
+				else {
+					Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+					alert.show();
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<RatingBackendEntity>> call, Throwable t) {
+			
+				Platform.runLater(new Runnable() {					
+					@Override
+					public void run() {
+						System.out.println(t);
+						Alert alert = new Alert(AlertType.WARNING ,t.getMessage());
+						alert.show();	
+					}
+				});
+			}
 		});
 	}
 }

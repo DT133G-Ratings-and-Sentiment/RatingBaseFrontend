@@ -1,52 +1,45 @@
 package com.dt002g.reviewapplication.frontend;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
+import com.dt002g.reviewapplication.frontend.service.GetRatingStatsCallBack;
 import com.dt002g.reviewapplication.frontend.service.GetReviewsCallBack;
+import com.dt002g.reviewapplication.frontend.service.RatingBackendEntity;
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendAPIService;
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendEntity;
 import com.dt002g.reviewapplication.frontend.util.SearchHandler;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.text.Text;
-import javafx.stage.Popup;
-import javafx.stage.Stage;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.control.TableColumn;
 
-public class Controller  implements Initializable, GetReviewsCallBack {
+public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack {
 	@FXML private RadioButton getAllRadioButton = new RadioButton();
 	@FXML private RadioButton getByStringRadioButton = new RadioButton();
 	@FXML private RadioButton getByRatingRadioButton = new RadioButton();
@@ -58,7 +51,7 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 	@FXML private TextField searchField;
 	@FXML final CategoryAxis xAxis = new CategoryAxis();
 	@FXML final NumberAxis yAxis = new NumberAxis();
-	@FXML final BarChart<String, Number> barChart = new BarChart<String, Number>(xAxis, yAxis);
+	@FXML BarChart<String, Number> barChart = new BarChart<String, Number>(xAxis, yAxis);
 	@FXML final HBox barChartBox = new HBox();
 	@FXML final Pane barChartPane = new Pane();
 	@FXML final ToggleGroup group = new ToggleGroup();
@@ -69,6 +62,7 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 
 	private final ObservableList<Review> reviewsInTable = FXCollections.observableArrayList();
 	private ArrayList<Review> reviews = new ArrayList<>();
+	private ArrayList<RatingStats> ratingsByComment = new ArrayList<>();
 	
 	private final HashMap<Integer, Review> referenceMap = new HashMap<>();
 
@@ -88,8 +82,23 @@ public class Controller  implements Initializable, GetReviewsCallBack {
     @FXML
     private TableColumn<Review, String> freeTextColumn;
     
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		
+		for(int i = 0; i < grid.getChildren().size(); i++) {
+			try {
+				if(grid.getChildren().get(i).getId().equals("barChart")){
+					barChart = (BarChart<String, Number>) grid.getChildren().get(i);
+					break;
+				}
+			}
+			catch(NullPointerException e) {
+				// continue to next
+			}
+					
+		}
+		barChart.setAnimated(false);
 		referenceTable.setItems(reviewsInTable);
 		idColumn.setCellValueFactory(rowData -> rowData.getValue().idProperty());
 		ratingColumn.setCellValueFactory(rowData -> rowData.getValue().ratingProperty());
@@ -147,7 +156,7 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 		            		ReviewBackendAPIService.getInstance().getTopReviewsLargerThanId(this, fetchId);
 		            	}
 		            	else if(selection.equals("Get by strings")) {
-		            		SearchHandler.getInstance().getByStrings(this, searchField.getText(), fetchId);
+	            		SearchHandler.getInstance().getByStrings(this, this, searchField.getText(), fetchId);
 		            	}
 		            	else if(selection.equals("Get by rating")) {
 		            		int rating = Integer.parseInt(searchField.getText());
@@ -177,7 +186,71 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 			tempReviews.add(new Review(rev));
 		}
 		setReviews(tempReviews, 0);
+	}
+	
+	@Override
+	public void processGetMapCallBack(List<RatingBackendEntity> response) {
 		
+		ArrayList<RatingStats> tempRatings = new ArrayList<>();
+		for(RatingBackendEntity rev: response) {
+			ratingsByComment.add(new RatingStats(rev.getRating(), rev.getAmount()));
+			tempRatings.add(new RatingStats(rev.getRating(), rev.getAmount()));
+		}
+		setBarChart(tempRatings);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void setBarChart(ArrayList<RatingStats> ratingsByComment) {
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+				try{
+					barChart.getData().remove(0);
+				}
+				catch(IndexOutOfBoundsException e) {
+					// do nothing
+				}
+				int rating1 = 0, rating2 = 0, rating3 = 0, rating4 = 0, rating5 = 0;
+				
+				
+				
+				System.out.println(ratingsByComment.size());
+				xAxis.setLabel("Rating");
+				yAxis.setLabel("Number of reviews");
+
+				
+				XYChart.Series series1 = new XYChart.Series<>();
+				for(RatingStats rating : ratingsByComment) {
+					if(rating.getRating() == 1) {
+						rating1 = rating.getAmount();
+					}
+					else if(rating.getRating() == 2) {
+						rating2 = rating.getAmount();
+					}
+					else if(rating.getRating() == 3) {
+						rating3 = rating.getAmount();
+					}
+					else if(rating.getRating() == 4) {
+						rating4 = rating.getAmount();
+					}
+					else if(rating.getRating() == 5) {
+						rating5 = rating.getAmount();
+					}
+				}
+				series1.getData().add(new XYChart.Data<>("1", rating1));
+				series1.getData().add(new XYChart.Data<>("2", rating2));
+				series1.getData().add(new XYChart.Data<>("3", rating3));
+				series1.getData().add(new XYChart.Data<>("4", rating4));
+				series1.getData().add(new XYChart.Data<>("5", rating5));
+				series1.setName("Ratings");
+		
+				barChart.getData().add(series1);
+				barChart.getData().get(0).getData().forEach((item) ->{
+					item.getNode().setStyle("-fx-background-color: blue");
+				});
+			}
+		});
 	}
 
 	@FXML protected void searchAction(ActionEvent event) {
@@ -193,7 +266,7 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 		}
 		
 		if(selection.equals("Get by strings")){	
-			SearchHandler.getInstance().getByStrings(this, searchField.getText(), 0L);
+			SearchHandler.getInstance().getByStrings(this,this, searchField.getText(), 0L);
 		}
 		else if(selection.equals("Get by rating")) {
 			System.out.println("Get by rating");
@@ -219,9 +292,6 @@ public class Controller  implements Initializable, GetReviewsCallBack {
 				Alert alert = new Alert(AlertType.WARNING, "Could not parse integer");
 				alert.show();
 			}
-		}
-		else if(selection.equals("Get by strings")){
-			SearchHandler.getInstance().getByStrings(this, searchField.getText(), 0L);
 		}
     }
 }
