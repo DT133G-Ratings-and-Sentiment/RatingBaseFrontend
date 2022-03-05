@@ -49,9 +49,17 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	
 	@FXML private GridPane grid = new GridPane();
 	@FXML private TextField searchField;
-	@FXML final CategoryAxis xAxis = new CategoryAxis();
-	@FXML final NumberAxis yAxis = new NumberAxis();
-	@FXML BarChart<String, Number> barChart = new BarChart<String, Number>(xAxis, yAxis);
+	//@FXML final CategoryAxis xAxis = new CategoryAxis();
+	//@FXML final NumberAxis yAxis = new NumberAxis();
+	//@FXML BarChart<String, Number> barChart = new BarChart<String, Number>(xAxis, yAxis);
+	@FXML
+    private BarChart<String, Number> barChart;
+
+    @FXML
+    private CategoryAxis barChartYAxis;
+
+    @FXML
+    private NumberAxis barChartXAxis;
 	@FXML final HBox barChartBox = new HBox();
 	@FXML final Pane barChartPane = new Pane();
 	@FXML final ToggleGroup group = new ToggleGroup();
@@ -86,7 +94,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		
-		for(int i = 0; i < grid.getChildren().size(); i++) {
+		/*for(int i = 0; i < grid.getChildren().size(); i++) {
 			try {
 				if(grid.getChildren().get(i).getId().equals("barChart")){
 					barChart = (BarChart<String, Number>) grid.getChildren().get(i);
@@ -97,7 +105,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				// continue to next
 			}
 					
-		}
+		}*/
 		barChart.setAnimated(false);
 		referenceTable.setItems(reviewsInTable);
 		idColumn.setCellValueFactory(rowData -> rowData.getValue().idProperty());
@@ -190,7 +198,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	
 	@Override
 	public void processGetMapCallBack(List<RatingBackendEntity> response) {
-		
+		System.out.println("processGetMapCallBack");
 		ArrayList<RatingStats> tempRatings = new ArrayList<>();
 		for(RatingBackendEntity rev: response) {
 			ratingsByComment.add(new RatingStats(rev.getRating(), rev.getAmount()));
@@ -216,8 +224,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				
 				
 				System.out.println(ratingsByComment.size());
-				xAxis.setLabel("Rating");
-				yAxis.setLabel("Number of reviews");
+				barChartXAxis.setLabel("Rating");
+				barChartYAxis.setLabel("Number of reviews");
 
 				
 				XYChart.Series series1 = new XYChart.Series<>();
