@@ -22,12 +22,16 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TableColumn;
@@ -46,6 +50,13 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private RadioButton getByStringsRadioButton = new RadioButton();
 	@FXML private RadioButton getByRatingAndStringsRadioButton = new RadioButton();
 	@FXML private HBox radioHBox = new HBox();
+	@FXML private MenuButton ratingDropDown;
+	@FXML private MenuItem rating1;
+	@FXML private MenuItem rating2;
+	@FXML private MenuItem rating3;
+	@FXML private MenuItem rating4;
+	@FXML private MenuItem rating5;
+	@FXML private ComboBox comboBox;
 	
 	@FXML private GridPane grid = new GridPane();
 	@FXML private TextField searchField;
@@ -106,6 +117,12 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			}
 					
 		}*/
+		
+		// Vet inte om denna var till för integers? kan ta bort den helt isåfall
+		comboBox.setVisible(false);
+		comboBox.setManaged(false);
+		
+		
 		barChart.setAnimated(false);
 		referenceTable.setItems(reviewsInTable);
 		idColumn.setCellValueFactory(rowData -> rowData.getValue().idProperty());
@@ -118,6 +135,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		getByStringsRadioButton.setToggleGroup(group);
 		getByRatingAndStringsRadioButton.setToggleGroup(group);
 		getAllRadioButton.setSelected(true);
+		searchField.setVisible(false);
+		searchField.setManaged(false);
+		ratingDropDown.setVisible(false);
+		ratingDropDown.setManaged(false);
 
 		group.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
 			public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
@@ -129,14 +150,33 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				if(group.getSelectedToggle().getUserData() != null) {
 					selection = group.getSelectedToggle().getUserData().toString();
 				}
+				
 				if(selection.equals("Get all")) {
 					searchField.setVisible(false);
 					searchField.setManaged(false);
+					ratingDropDown.setVisible(false);
+					ratingDropDown.setManaged(false);
 				}
-				else {
+				else if(selection.equals("Get by rating")) {
+					searchField.setVisible(false);
+					searchField.setManaged(false);
+					ratingDropDown.setVisible(true);
+					ratingDropDown.setManaged(true);
+					ratingDropDown.setText("Rating");
+				}
+				else if(selection.equals("Get by strings")){
 					searchField.setVisible(true);
 					searchField.setManaged(true);
+					ratingDropDown.setVisible(false);
+					ratingDropDown.setManaged(false);
 				}
+				else if(selection.equals("Get by rating and string")) {
+					searchField.setVisible(true);
+					searchField.setManaged(true);
+					ratingDropDown.setVisible(true);
+					ratingDropDown.setManaged(true);
+					ratingDropDown.setText("Rating");
+				}		
 			}
 		});
 		System.out.println("Selection: " + selection);
@@ -167,11 +207,12 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	            		SearchHandler.getInstance().getByStrings(this, this, searchField.getText(), fetchId);
 		            	}
 		            	else if(selection.equals("Get by rating")) {
-		            		int rating = Integer.parseInt(searchField.getText());
+		            		int rating = Integer.parseInt(ratingDropDown.getText());
 		    				SearchHandler.getInstance().getByRating(this, rating, fetchId);
 		            		
 		            	}else if(selection.equals("Get by rating and string")){
-		            		SearchHandler.getInstance().getByRatingAndStrings(this, 1, searchField.getText(), fetchId);
+		            		int rating = Integer.parseInt(ratingDropDown.getText());
+		            		SearchHandler.getInstance().getByRatingAndStrings(this, rating, searchField.getText(), fetchId);
 		            	}
 		            }
 		        };
@@ -255,7 +296,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			return;
 		}
 		
-		if(searchField.getText().isEmpty() || searchField == null) {
+		if(searchField.getText().isEmpty() && !selection.equals("Get by rating")) {
 			Alert alert = new Alert(AlertType.WARNING, "Empty search string");
 			alert.show();
 			return;
@@ -267,7 +308,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		else if(selection.equals("Get by rating")) {
 			System.out.println("Get by rating");
 			try {
-				int rating = Integer.parseInt(searchField.getText());
+				int rating = Integer.parseInt(ratingDropDown.getText());
 				SearchHandler.getInstance().getByRating(this, rating, 0);
 			}
 			catch(NumberFormatException e) {
@@ -278,11 +319,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		else if(selection.equals("Get by rating and string")){
 			System.out.println("Get by rating and string");
 			try {
-				// Här under ska den hämta från en annan sökruta
-				//int rating = Integer.parseInt(INTEGERSÖKRUTA.getText());
-				int temp = 1;
-				//SearchHandler.getInstance().getByRatingAndString(this, temp, searchField.getText());
-				SearchHandler.getInstance().getByRatingAndStrings(this, temp, searchField.getText(), 0L);
+				
+				int rating = Integer.parseInt(ratingDropDown.getText());
+			
+				SearchHandler.getInstance().getByRatingAndStrings(this, rating, searchField.getText(), 0L);
 			}
 			catch(NumberFormatException e) {
 				Alert alert = new Alert(AlertType.WARNING, "Could not parse integer");
@@ -297,6 +337,17 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			public void run() {
 				searchField.clear();
 				barChart.getData().clear();
+			}
+		});
+	}
+	
+	public void ratingDropDownChange(ActionEvent event) {
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+				   final MenuItem source = (MenuItem) event.getSource();
+				   ratingDropDown.setText(source.getText());
 			}
 		});
 	}

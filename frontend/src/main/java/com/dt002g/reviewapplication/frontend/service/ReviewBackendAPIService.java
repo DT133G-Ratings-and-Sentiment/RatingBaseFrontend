@@ -123,8 +123,14 @@ public class ReviewBackendAPIService {
 
 			@Override
 			public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
-				Alert alert = new Alert(AlertType.WARNING ,"Request failed");
-				alert.show();
+				Platform.runLater(new Runnable() {					
+					@Override
+					public void run() {
+						System.out.println(t);
+						Alert alert = new Alert(AlertType.WARNING ,t.getMessage());
+						alert.show();	
+					}
+				});
 			}
 		});
 	}
@@ -149,8 +155,14 @@ public class ReviewBackendAPIService {
 
 			@Override
 			public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
-				Alert alert = new Alert(AlertType.WARNING ,"Request failed");
-				alert.show();
+				Platform.runLater(new Runnable() {					
+					@Override
+					public void run() {
+						System.out.println(t);
+						Alert alert = new Alert(AlertType.WARNING ,t.getMessage());
+						alert.show();	
+					}
+				});
 			}
 		});
 	}

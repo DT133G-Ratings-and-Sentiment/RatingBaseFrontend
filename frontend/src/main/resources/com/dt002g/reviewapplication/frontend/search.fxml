@@ -6,6 +6,8 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -58,8 +60,17 @@
       </HBox>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="400.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
          <children>
+            <MenuButton fx:id="ratingDropDown" mnemonicParsing="false" onAction="#ratingDropDownChange" text="Rating">
+              <items>
+                <MenuItem fx:id="rating1" mnemonicParsing="false" onAction="#ratingDropDownChange" text="1" />
+                <MenuItem fx:id="rating2" mnemonicParsing="false" onAction="#ratingDropDownChange" text="2" />
+                  <MenuItem fx:id="rating3" mnemonicParsing="false" onAction="#ratingDropDownChange" text="3" />
+                  <MenuItem fx:id="rating4" mnemonicParsing="false" onAction="#ratingDropDownChange" text="4" />
+                  <MenuItem fx:id="rating5" mnemonicParsing="false" onAction="#ratingDropDownChange" text="5" />
+              </items>
+            </MenuButton>
             <TextField fx:id="searchField" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="1" />
-            <ComboBox fx:id="rating" prefWidth="150.0" />
+            <ComboBox fx:id="comboBox" prefWidth="150.0" visibleRowCount="5" />
             <Button onAction="#searchAction" text="Search" />
             <Button fx:id="clearBar" mnemonicParsing="false" onAction="#clearChartAndSearchBar" text="Clear" />
          </children>
