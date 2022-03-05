@@ -41,8 +41,8 @@ public class App extends Application {
 	    	GridPane grid = loader.load();
 			
 			controller = loader.getController();
-		
-			
+
+
 	        Scene scene = new Scene(grid);
 	    
 	
