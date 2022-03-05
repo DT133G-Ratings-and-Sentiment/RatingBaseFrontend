@@ -52,6 +52,7 @@ dist/
 # Maven
 target/
 dist/
+frontend/target
 
 # JetBrains IDE
 .idea/
