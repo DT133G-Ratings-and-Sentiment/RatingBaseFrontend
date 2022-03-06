@@ -49,6 +49,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private RadioButton getByRatingRadioButton = new RadioButton();
 	@FXML private RadioButton getByStringsRadioButton = new RadioButton();
 	@FXML private RadioButton getByRatingAndStringsRadioButton = new RadioButton();
+	@FXML private RadioButton getByStringsInclusiveRadioButton;
 	@FXML private HBox radioHBox = new HBox();
 	@FXML private MenuButton ratingDropDown;
 	@FXML private MenuItem rating1;
@@ -134,6 +135,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		getByRatingRadioButton.setToggleGroup(group);
 		getByStringsRadioButton.setToggleGroup(group);
 		getByRatingAndStringsRadioButton.setToggleGroup(group);
+		getByStringsInclusiveRadioButton.setToggleGroup(group);
 		getAllRadioButton.setSelected(true);
 		searchField.setVisible(false);
 		searchField.setManaged(false);
@@ -176,10 +178,14 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 					ratingDropDown.setVisible(true);
 					ratingDropDown.setManaged(true);
 					ratingDropDown.setText("Rating");
-				}		
+				}else if(selection.equals("Get by including words")) {
+					searchField.setVisible(true);
+					searchField.setManaged(true);
+					ratingDropDown.setVisible(false);
+					ratingDropDown.setManaged(false);
+				}			
 			}
 		});
-		System.out.println("Selection: " + selection);
 	}
 	
 	public void setReviews(List<Review> pReviews, int page) {
@@ -213,7 +219,11 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		            	}else if(selection.equals("Get by rating and string")){
 		            		int rating = Integer.parseInt(ratingDropDown.getText());
 		            		SearchHandler.getInstance().getByRatingAndStrings(this, rating, searchField.getText(), fetchId);
-		            	}
+		            	}else if(selection.equals("Get by including words")) {
+		            		SearchHandler.getInstance().getByStringsInclusive(this, searchField.getText(), fetchId);
+			            }
+		            	
+		            	
 		            }
 		        };
 		        Platform.runLater(() -> {reviewTableScrollBar.valueProperty().addListener(scrollListener);});
@@ -330,6 +340,9 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				Alert alert = new Alert(AlertType.WARNING, "Could not parse integer");
 				alert.show();
 			}
+		}else if(selection.equals("Get by including words")){	
+			
+			SearchHandler.getInstance().getByStringsInclusive(this, searchField.getText(), 0L);
 		}
     }
 	

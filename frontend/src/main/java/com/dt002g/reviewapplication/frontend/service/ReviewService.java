@@ -50,4 +50,7 @@ public interface ReviewService {
 	
 	@GET("getRatingByString/{searchString}")
 	Call<List<RatingBackendEntity>> getRatingByComment(@Path("searchString") String searchString);
+	
+	@GET("getTopReviewsByInclusiveStringsLargerThanId/{id}/search")
+	Call<List<ReviewBackendEntity>> getTop100ReviewsByStringsInclusiveLargerThanId(@Path("id")long minId, @QueryMap Map<String, String> params);
 }

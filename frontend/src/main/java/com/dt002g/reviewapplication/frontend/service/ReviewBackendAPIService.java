@@ -244,6 +244,32 @@ public void getTop100ReviewsByStringsLargerThanId(GetReviewsCallBack getReviewsC
 		}
 	});
 }
+
+public void getTop100ReviewsByStringsInclusiveLargerThanId(GetReviewsCallBack getReviewsCallBack, Map<String, String> searchString, long id) {
+	
+	ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+	Call<List<ReviewBackendEntity>> reviewRequest = reviewService.getTop100ReviewsByStringsInclusiveLargerThanId(id, searchString);
+	reviewRequest.enqueue(new Callback<List<ReviewBackendEntity>>() {
+
+		@Override
+		public void onResponse(Call<List<ReviewBackendEntity>> call, Response<List<ReviewBackendEntity>> response) {
+			if(response.isSuccessful()) {
+				List<ReviewBackendEntity> reviews = response.body();
+				getReviewsCallBack.processGetReviewsCallBack(reviews);
+			}
+			else {
+				Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+				alert.show();
+			}
+		}
+
+		@Override
+		public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
+			Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+			alert.show();
+		}
+	});
+}
 	
 	public void getTopReviewsLargerThanId(GetReviewsCallBack getReviewsCallBack, Long id) {
 		

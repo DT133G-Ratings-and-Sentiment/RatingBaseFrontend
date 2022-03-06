@@ -56,6 +56,11 @@
                   <Insets right="20.0" />
                </HBox.margin>
             </RadioButton>
+                        <RadioButton fx:id="getByStringsInclusiveRadioButton" text="Get by including words" userData="Get by including words">
+               <HBox.margin>
+                  <Insets right="20.0" />
+               </HBox.margin>
+            </RadioButton>
          </children>
       </HBox>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="400.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
