@@ -291,6 +291,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	}
 
 	@FXML protected void searchAction(ActionEvent event) {
+		reviewsInTable.clear();
+		reviews.clear();
 		if(selection.equals("Get all")) {
 			SearchHandler.getInstance().getTopReviewsLargerThanId(this, 0L);
 			return;
