@@ -9,10 +9,6 @@ import java.util.Map;
 import com.dt002g.reviewapplication.frontend.service.GetRatingStatsCallBack;
 import com.dt002g.reviewapplication.frontend.service.GetReviewsCallBack;
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendAPIService;
-import com.dt002g.reviewapplication.frontend.service.ReviewBackendEntity;
-
-import retrofit2.Call;
-import retrofit2.http.Path;
 
 public class SearchHandler {
 	
@@ -65,7 +61,9 @@ public class SearchHandler {
 		
 		for(int i = 0; i < stringList.size(); i++) {
 			params.put("searchString" + (i+1), stringList.get(i));
-			ReviewBackendAPIService.getInstance().getRatingByComment(getRatingStatsCallBack, stringList.get(i));
+			if(id <= 0) {
+				ReviewBackendAPIService.getInstance().getRatingByComment(getRatingStatsCallBack, stringList.get(i));
+			}
 		}
 		
 		//ReviewBackendAPIService.getInstance().getByStrings(getReviewsCallBack, params);

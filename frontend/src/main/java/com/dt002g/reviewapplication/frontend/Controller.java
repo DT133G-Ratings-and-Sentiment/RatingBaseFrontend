@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.dt002g.reviewapplication.frontend.service.GetRatingStatsCallBack;
@@ -22,7 +21,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -200,6 +198,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				reviewsInTable.add(pReviews.get(i));
 			}*/
 			Platform.runLater(() -> {
+				
 				if(reviewTableScrollBar != null && scrollListener != null) {
 					reviewTableScrollBar.valueProperty().removeListener(scrollListener);
 				}
@@ -305,6 +304,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		reviews.clear();
 		if(selection.equals("Get all")) {
 			SearchHandler.getInstance().getTopReviewsLargerThanId(this, 0L);
+			clearChart();
 			return;
 		}
 		
@@ -316,12 +316,13 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		
 		if(selection.equals("Get by strings")){	
 			SearchHandler.getInstance().getByStrings(this,this, searchField.getText(), 0L);
+			clearChart();
 		}
 		else if(selection.equals("Get by rating")) {
-			System.out.println("Get by rating");
 			try {
 				int rating = Integer.parseInt(ratingDropDown.getText());
 				SearchHandler.getInstance().getByRating(this, rating, 0);
+				clearChart();
 			}
 			catch(NumberFormatException e) {
 				Alert alert = new Alert(AlertType.WARNING, "Could not parse integer");
@@ -329,20 +330,19 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			}
 		}
 		else if(selection.equals("Get by rating and string")){
-			System.out.println("Get by rating and string");
 			try {
-				
 				int rating = Integer.parseInt(ratingDropDown.getText());
-			
 				SearchHandler.getInstance().getByRatingAndStrings(this, rating, searchField.getText(), 0L);
+				clearChart();
 			}
 			catch(NumberFormatException e) {
 				Alert alert = new Alert(AlertType.WARNING, "Could not parse integer");
 				alert.show();
 			}
-		}else if(selection.equals("Get by including words")){	
-			
+		}
+		else if(selection.equals("Get by including words")){	
 			SearchHandler.getInstance().getByStringsInclusive(this, searchField.getText(), 0L);
+			clearChart();
 		}
     }
 	
@@ -355,10 +355,17 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			}
 		});
 	}
+	public void clearChart() {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				barChart.getData().clear();
+			}
+		});
+	}
 	
 	public void ratingDropDownChange(ActionEvent event) {
 		Platform.runLater(new Runnable() {
-
 			@Override
 			public void run() {
 				   final MenuItem source = (MenuItem) event.getSource();

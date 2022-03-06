@@ -1,7 +1,6 @@
 package com.dt002g.reviewapplication.frontend.service;
 
 import com.dt002g.reviewapplication.frontend.RatingStats;
-import com.dt002g.reviewapplication.frontend.Review;
 
 public class RatingBackendEntity {
 	public int amount;

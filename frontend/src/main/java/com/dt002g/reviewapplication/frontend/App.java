@@ -1,22 +1,15 @@
 package com.dt002g.reviewapplication.frontend;
 
+import java.io.IOException;
+
+import com.dt002g.reviewapplication.frontend.service.ReviewBackendAPIService;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Data;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-
-import java.io.IOException;
-
-import com.dt002g.reviewapplication.frontend.App;
-import com.dt002g.reviewapplication.frontend.Controller;
-import com.dt002g.reviewapplication.frontend.service.ReviewBackendAPIService;
 
 
 /**
