@@ -27,6 +27,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
@@ -56,6 +57,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private MenuItem rating4;
 	@FXML private MenuItem rating5;
 	@FXML private ComboBox comboBox;
+	@FXML private CheckBox keepChartCheckBox;
 	
 	@FXML private GridPane grid = new GridPane();
 	@FXML private TextField searchField;
@@ -209,20 +211,17 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		            		ReviewBackendAPIService.getInstance().getTopReviewsLargerThanId(this, fetchId);
 		            	}
 		            	else if(selection.equals("Get by strings")) {
-	            		SearchHandler.getInstance().getByStrings(this, this, searchField.getText(), fetchId);
+		            		SearchHandler.getInstance().getByStrings(this, this, searchField.getText(), fetchId);
 		            	}
 		            	else if(selection.equals("Get by rating")) {
 		            		int rating = Integer.parseInt(ratingDropDown.getText());
-		    				SearchHandler.getInstance().getByRating(this, rating, fetchId);
-		            		
+		    				SearchHandler.getInstance().getByRating(this, rating, fetchId);         		
 		            	}else if(selection.equals("Get by rating and string")){
 		            		int rating = Integer.parseInt(ratingDropDown.getText());
 		            		SearchHandler.getInstance().getByRatingAndStrings(this, rating, searchField.getText(), fetchId);
 		            	}else if(selection.equals("Get by including words")) {
 		            		SearchHandler.getInstance().getByStringsInclusive(this, searchField.getText(), fetchId);
-			            }
-		            	
-		            	
+			            }	
 		            }
 		        };
 		        Platform.runLater(() -> {reviewTableScrollBar.valueProperty().addListener(scrollListener);});
@@ -304,7 +303,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		reviews.clear();
 		if(selection.equals("Get all")) {
 			SearchHandler.getInstance().getTopReviewsLargerThanId(this, 0L);
-			clearChart();
+			if(!keepChartCheckBox.isSelected()) {
+				clearChart();
+			}
+				
 			return;
 		}
 		
@@ -316,13 +318,17 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		
 		if(selection.equals("Get by strings")){	
 			SearchHandler.getInstance().getByStrings(this,this, searchField.getText(), 0L);
-			clearChart();
+			if(!keepChartCheckBox.isSelected()) {
+				clearChart();
+			}
 		}
 		else if(selection.equals("Get by rating")) {
 			try {
 				int rating = Integer.parseInt(ratingDropDown.getText());
 				SearchHandler.getInstance().getByRating(this, rating, 0);
-				clearChart();
+				if(!keepChartCheckBox.isSelected()) {
+					clearChart();
+				}
 			}
 			catch(NumberFormatException e) {
 				Alert alert = new Alert(AlertType.WARNING, "Could not parse integer");
@@ -333,7 +339,9 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			try {
 				int rating = Integer.parseInt(ratingDropDown.getText());
 				SearchHandler.getInstance().getByRatingAndStrings(this, rating, searchField.getText(), 0L);
-				clearChart();
+				if(!keepChartCheckBox.isSelected()) {
+					clearChart();
+				}
 			}
 			catch(NumberFormatException e) {
 				Alert alert = new Alert(AlertType.WARNING, "Could not parse integer");
@@ -342,7 +350,9 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		}
 		else if(selection.equals("Get by including words")){	
 			SearchHandler.getInstance().getByStringsInclusive(this, searchField.getText(), 0L);
-			clearChart();
+			if(!keepChartCheckBox.isSelected()) {
+				clearChart();
+			}
 		}
     }
 	
