@@ -52,4 +52,7 @@ public interface ReviewService {
 	
 	@GET("getTopReviewsByInclusiveStringsLargerThanId/{id}/search")
 	Call<List<ReviewBackendEntity>> getTop100ReviewsByStringsInclusiveLargerThanId(@Path("id")long minId, @QueryMap Map<String, String> params);
+	
+	@GET("getNumberOfReviewsByInclusiveStrings/search")
+	Call<Integer> getNumberOfReviewsByInclusiveStrings(@QueryMap Map<String, String> params);
 }

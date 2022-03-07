@@ -109,6 +109,33 @@ public class ReviewBackendAPIService {
 		reviewRequest.enqueue(reviewCallback);
 	}
 	
+public void getNumberOfReviewsByStrings(GetNumberOfReviewsCallBack getNumberOfReviewsCallBack, Map<String, String> searchString) {
+	
+	ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+	Call<Integer> reviewRequest = reviewService.getNumberOfReviewsByInclusiveStrings(searchString);
+	reviewRequest.enqueue(new Callback<Integer>() {
+
+		@Override
+		public void onResponse(Call<Integer> call, Response<Integer> response) {
+			if(response.isSuccessful()) {
+				Integer numberOfReviews = response.body();
+				getNumberOfReviewsCallBack.processGetNumberOfReviewsCallBack(numberOfReviews);
+			}
+			else {
+				Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+				alert.show();
+			}
+		}
+
+		@Override
+		public void onFailure(Call<Integer> call, Throwable t) {
+			Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+			alert.show();
+			
+		}
+	});
+}
+	
 	public void getTopReviewsLargerThanId(GetReviewsCallBack getReviewsCallBack, Long id) {
 		this.getReviewsCallBack = getReviewsCallBack;
 		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);

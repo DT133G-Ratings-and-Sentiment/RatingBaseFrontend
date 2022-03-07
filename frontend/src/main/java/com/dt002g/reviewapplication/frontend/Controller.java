@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import com.dt002g.reviewapplication.frontend.service.GetNumberOfReviewsCallBack;
 import com.dt002g.reviewapplication.frontend.service.GetRatingStatsCallBack;
 import com.dt002g.reviewapplication.frontend.service.GetReviewsCallBack;
 import com.dt002g.reviewapplication.frontend.service.RatingBackendEntity;
@@ -42,7 +43,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 
-public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack {
+public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack {
 	@FXML private RadioButton getAllRadioButton = new RadioButton();
 	@FXML private RadioButton getByStringRadioButton = new RadioButton();
 	@FXML private RadioButton getByRatingRadioButton = new RadioButton();
@@ -298,6 +299,37 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		});
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void setBarChartByStringLabel(Map<String, Integer> results) {
+		System.out.println("setBarChartByStringLabel");
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+				String legend = "";
+				barChartXAxis.setLabel("Number of Reviews");
+				barChartYAxis.setLabel("Search words");
+
+				XYChart.Series series1 = new XYChart.Series<>();
+
+				for (Map.Entry<String, Integer> entry : results.entrySet()) {
+					legend += entry.getKey() + " ";
+					series1.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
+				}
+
+			
+				series1.setName(legend);
+		
+				barChart.getData().add(series1);
+				
+				//  Ändra färger om vi vill sen
+				/*barChart.getData().get(0).getData().forEach((item) ->{
+					item.getNode().setStyle("-fx-background-color: blue");
+				});
+				*/
+			}
+		});
+	}
 	@FXML protected void searchAction(ActionEvent event) {
 		reviewsInTable.clear();
 		reviews.clear();
@@ -350,6 +382,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		}
 		else if(selection.equals("Get by including words")){	
 			SearchHandler.getInstance().getByStringsInclusive(this, searchField.getText(), 0L);
+			SearchHandler.getInstance().getNumberOfReviewsByInclusiveStrings(this, searchField.getText());
 			if(!keepChartCheckBox.isSelected()) {
 				clearChart();
 			}
@@ -382,5 +415,14 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				   ratingDropDown.setText(source.getText());
 			}
 		});
+	}
+
+	@Override
+	public void processGetNumberOfReviewsCallBack(Integer response) {
+		System.out.println("processGetNumberOfReviewsCallBack");
+		Map<String, Integer> results = new HashMap<>();
+		results.put(searchField.getText(), response);
+		setBarChartByStringLabel(results);
+		
 	}
 }
