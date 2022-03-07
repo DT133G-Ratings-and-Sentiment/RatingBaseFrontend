@@ -166,6 +166,32 @@ public void getNumberOfReviewsByStrings(GetNumberOfReviewsCallBack getNumberOfRe
 			}
 		});
 	}
+	public void getRatingByCommentsInclusive(GetRatingStatsCallBack getRatingStatsCallBack, Map<String, String> params, final String searchString) {
+		this.getRatingStatsCallBack = getRatingStatsCallBack;
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<RatingBackendEntity>> reviewRequest = reviewService.getRatingByInclusiveSearchString(params);
+		
+		reviewRequest.enqueue(new Callback<List<RatingBackendEntity>>() {
+
+			@Override
+			public void onResponse(Call<List<RatingBackendEntity>> call, Response<List<RatingBackendEntity>> response) {
+				if(response.isSuccessful()) {
+					List<RatingBackendEntity> reviews = response.body();
+					
+					
+					getRatingStatsCallBack.processGetMapCallBack(reviews, searchString);
+				}
+				else {
+					showErrorAlert(response);
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<RatingBackendEntity>> call, Throwable t) {
+				showErrorAlert(t);
+			}
+		});
+	}
 	
 	private void showErrorAlert(Throwable t) {
 		Platform.runLater(new Runnable() {					

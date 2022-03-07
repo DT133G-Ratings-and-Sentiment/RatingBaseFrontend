@@ -66,10 +66,4 @@ public class App extends Application {
 	    	//ReviewBackendAPIService.getInstance().getTop100Reviews(controller);
 	    	ReviewBackendAPIService.getInstance().getTopReviewsLargerThanId(controller, 0L);
 	    }
-	    
-	    private void showGraph(Stage stage) {
-	    	
-	    }
-
-
 }

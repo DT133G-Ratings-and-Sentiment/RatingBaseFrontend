@@ -84,15 +84,17 @@ public class SearchHandler {
 		ReviewBackendAPIService.getInstance().getTop100ReviewsByStringsInclusiveLargerThanId(getReviewsCallBack, params, id);
 	}
 	
-	public void getNumberOfReviewsByInclusiveStrings(GetNumberOfReviewsCallBack getNumberOfReviewsCallBack, String searchString) {
+	public void getNumberOfReviewsByInclusiveStrings(GetNumberOfReviewsCallBack getNumberOfReviewsCallBack, GetRatingStatsCallBack getRatingStatsCallBack, String searchString) {
 		System.out.println("Search by string inclusive");
 		List<String> stringList = new ArrayList<String>(Arrays.asList( searchString.split("\\s+")));
 		Map<String, String> params = new HashMap<String, String>();
-		
+		  
 		for(int i = 0; i < stringList.size(); i++) {
+		
 			params.put("searchString" + (i+1), stringList.get(i));
 		}
 		
+		ReviewBackendAPIService.getInstance().getRatingByCommentsInclusive(getRatingStatsCallBack, params, searchString);
 		ReviewBackendAPIService.getInstance().getNumberOfReviewsByStrings(getNumberOfReviewsCallBack, params);
 	}
 	
