@@ -91,7 +91,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private Button searchButton;
 	@FXML private TextField searchField;
 	
-	@FXML private BarChart<String, Number> barChart;
+	@FXML private BarChart<Number, Number> barChart;
     @FXML private CategoryAxis barChartYAxis;
     @FXML private NumberAxis barChartXAxis;
 	@FXML final private HBox barChartBox = new HBox();
@@ -289,21 +289,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				XYChart.Series series1 = new XYChart.Series<>();
 				for(RatingStats rating : ratingsByComment) {
 					totalCount += rating.getAmount();
-					if(rating.getRating() == 1) {
-						series1.getData().add(new XYChart.Data<>("1", rating.getAmount()));
-					}
-					else if(rating.getRating() == 2) {
-						series1.getData().add(new XYChart.Data<>("2", rating.getAmount()));
-					}
-					else if(rating.getRating() == 3) {
-						series1.getData().add(new XYChart.Data<>("3", rating.getAmount()));
-					}
-					else if(rating.getRating() == 4) {
-						series1.getData().add(new XYChart.Data<>("4", rating.getAmount()));
-					}
-					else if(rating.getRating() == 5) {
-						series1.getData().add(new XYChart.Data<>("5", rating.getAmount()));
-					}
+					series1.getData().add(new XYChart.Data<>(String.valueOf(rating.getRating()), rating.getAmount()));
 				}
 			
 				series1.setName(legend + ", Total count: " + totalCount);
@@ -331,21 +317,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				
 				for(RatingStats rating : ratingsByComment) {
 					totalCount += rating.getAmount();
-					if(rating.getRating() == 1) {
-						pieChartData.add((new PieChart.Data("1: " + rating.getAmount(), rating.getAmount())));
-					}
-					else if(rating.getRating() == 2) {
-						pieChartData.add((new PieChart.Data("2: " + rating.getAmount(), rating.getAmount())));
-					}
-					else if(rating.getRating() == 3) {
-						pieChartData.add((new PieChart.Data("3: " + rating.getAmount(), rating.getAmount())));
-					}
-					else if(rating.getRating() == 4) {
-						pieChartData.add((new PieChart.Data("4: " + rating.getAmount(), rating.getAmount())));
-					}
-					else if(rating.getRating() == 5) {
-						pieChartData.add((new PieChart.Data("5: " + rating.getAmount(), rating.getAmount())));
-					}
+					pieChartData.add((new PieChart.Data(rating.getRating() + ": " + rating.getAmount(), rating.getAmount())));
 				}
 				ObservableList<PieChart.Data> pieChartDataObservable = FXCollections.observableArrayList(pieChartData); 
 				pieChart.getPieChart().setData(pieChartDataObservable);
