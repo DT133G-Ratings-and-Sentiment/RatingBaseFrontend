@@ -363,7 +363,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 						@Override
 						public void handle(MouseEvent e){
 							pieChart.getLabel().setTranslateX(e.getSceneX());
-							pieChart.getLabel().setTranslateY(e.getSceneY()- 800);
+							pieChart.getLabel().setTranslateY(e.getSceneY()- root.getHeight());
 							pieChart.getLabel().setText(showOnHoverString);
 							pieChart.getLabel().setVisible(true);
 						}
