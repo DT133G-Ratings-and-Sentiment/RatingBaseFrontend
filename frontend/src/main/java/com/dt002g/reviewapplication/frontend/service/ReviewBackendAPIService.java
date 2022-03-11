@@ -1,11 +1,16 @@
 package com.dt002g.reviewapplication.frontend.service;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -40,8 +45,16 @@ public class ReviewBackendAPIService {
 
 		@Override
 		public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
-			Alert alert = new Alert(AlertType.WARNING ,"Request failed");
-			alert.show();
+			Platform.runLater(new Runnable() {					
+				@Override
+				public void run() {
+					System.out.println(t);
+					Alert alert = new Alert(AlertType.WARNING ,"Request failed" + t.getMessage());
+					alert.show();	
+				}
+			});
+			//Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+			//alert.show();
 		}
 	};
 	
@@ -193,6 +206,39 @@ public void getNumberOfReviewsByStrings(GetNumberOfReviewsCallBack getNumberOfRe
 		});
 	}
 	
+	public void uploadCSVFile(File file) {
+		System.out.println("uploading SCV file from frontend");
+		RequestBody descriptionPart = RequestBody.create(okhttp3.MultipartBody.FORM, "csvFile");
+		RequestBody filePart = RequestBody.create(MediaType.parse("text/plain"), file);
+		MultipartBody.Part fileMultiPart = MultipartBody.Part.createFormData("csvFile", file.getName(), filePart);
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<ResponseBody> uploadCSVFileRequest = reviewService.uploadCSVFile(descriptionPart, fileMultiPart);
+		
+		uploadCSVFileRequest.enqueue(new Callback<ResponseBody>() {
+
+			@Override
+			public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+				if(response.isSuccessful()) {
+					System.out.println("Successfully uploaded SCV file from frontend");
+					file.delete();
+				}
+				else {
+					System.out.println("Failed to  upload SCV file from frontend");
+					showErrorAlert(response);
+					file.delete();
+				}
+			}
+
+			@Override
+			public void onFailure(Call<ResponseBody> call, Throwable t) {
+				System.out.println("Failed to  upload SCV file from frontend");
+				showErrorAlert(t);
+				file.delete();
+			}
+		});
+		
+	}
+	
 	private void showErrorAlert(Throwable t) {
 		Platform.runLater(new Runnable() {					
 			@Override
@@ -214,5 +260,6 @@ public void getNumberOfReviewsByStrings(GetNumberOfReviewsCallBack getNumberOfRe
 			}
 		});
 	}
+	
 	
 }

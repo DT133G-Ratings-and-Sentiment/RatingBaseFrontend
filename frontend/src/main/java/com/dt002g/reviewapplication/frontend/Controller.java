@@ -1,5 +1,9 @@
 package com.dt002g.reviewapplication.frontend;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +49,8 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollBar;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
@@ -62,6 +68,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 
 public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack {
 	@FXML private GridPane root;
@@ -97,7 +104,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML final private HBox barChartBox = new HBox();
 	@FXML final private Pane barChartPane = new Pane();
 	
-	
+	private File csvFile;
 	private ScrollBar reviewTableScrollBar;
 	private ChangeListener<Number> scrollListener;
 	private String selection = "Get all";
@@ -122,9 +129,122 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
     @FXML
     private TableColumn<Review, String> freeTextColumn;
     
+    @FXML
+    private Tab importTab;
+
+    @FXML
+    private ComboBox<String> selectRating;
+
+    @FXML
+    private ComboBox<String> selectFreeText;
+
+    @FXML
+    private Button chooseFileButton;
+
+    @FXML
+    private Button storeDataButton;
+    
+
+    @FXML
+    private Spinner<Integer> minRating;
+
+    @FXML
+    private Spinner<Integer> maxRating;
+    
+    @FXML
+    void chooseFileButtonClicked(ActionEvent event) {
+    	FileChooser fileChooser = new FileChooser();
+    	fileChooser.setTitle("Open Resource File");
+    	csvFile = fileChooser.showOpenDialog(((Node)event.getSource()).getScene().getWindow());
+    	if(csvFile == null || !(csvFile.getName().endsWith(".csv") || csvFile.getName().endsWith(".CSV"))) {
+    		showInvalidCSVFileAlertDialog((Node)event.getSource());
+    		csvFile = null;
+    	}
+    	else {
+	    	ArrayList<String> headers = CSVHandler.getInstance().getHeades(csvFile);
+	    	if(headers.size() < 2) {
+	    		showInvalidCSVFileAlertDialog((Node)event.getSource());
+	    	}
+	    	else {
+		    	selectRating.getItems().addAll(headers);
+		    	selectFreeText.getItems().addAll(headers);
+		    	
+			    selectRating.setDisable(false);
+			    selectFreeText.setDisable(false);
+			    storeDataButton.setDisable(false);
+			    minRating.setDisable(false);
+			    maxRating.setDisable(false);
+
+	    	}
+    	}
+    }
+    
+    @FXML 
+    void storeDataButtonClicked(ActionEvent event){
+    	System.out.println("minRatnig |" + minRating.getValue() + "|");
+    	if(selectRating.getValue() == null || selectRating.getValue().equals("") || selectFreeText.getValue() == null || selectFreeText.getValue().equals("") || minRating.getValue() == null || maxRating.getValue() == null || minRating.getValue() >= maxRating.getValue()) {
+    		
+    		if(selectRating.getValue() == null || selectRating.getValue().equals("") || selectFreeText.getValue() == null || selectFreeText.getValue().equals("") ) {
+    			missingHeaderMappingsCSVFileAlertDialog((Node)event.getSource());
+    		}
+    		else {
+    			
+    		}
+    	}
+    	else {
+	    	System.out.println("Reading scv file");
+			ArrayList<String> neededHeaders = new ArrayList<>();
+			neededHeaders.add(selectRating.getValue());
+			neededHeaders.add(selectFreeText.getValue());
+			ArrayList<String> data = CSVHandler.getInstance().parseCSVFile(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
+			if(data == null) {
+				System.out.println("SCV file is null");
+			}
+			else {
+				for(String s: data) {
+					System.out.println("Finale: " + s);
+				}
+		        File myObj = new File("test.csv");
+		        try {
+					if (myObj.createNewFile()) {
+						System.out.println("Writing to file " + myObj.getName());
+						BufferedWriter writer = new BufferedWriter(new FileWriter("test.csv"));
+						for(String s: data) {
+							 writer.write(s + "\n");
+						}
+						writer.close();
+						ReviewBackendAPIService.getInstance().uploadCSVFile(myObj);
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+    	}
+	    selectRating.setDisable(true);
+	    selectFreeText.setDisable(true);
+	    storeDataButton.setDisable(true);
+	    minRating.setDisable(true);
+	    maxRating.setDisable(true);
+
+	    csvFile = null;
+    }
+    
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		minRating.setValueFactory(
+				new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
+		maxRating.setValueFactory(
+				new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
+	    //selectRating.setEditable(false);
+	    //selectFreeText.setEditable(false);
+	    selectRating.setDisable(true);
+	    selectFreeText.setDisable(true);
+	    storeDataButton.setDisable(true);
+	    minRating.setDisable(true);
+	    maxRating.setDisable(true);
+
 
 		root.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
@@ -202,6 +322,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				}			
 			}
 		});
+		
 	}
 	
 	public void setReviews(List<Review> pReviews, int page) {
@@ -488,5 +609,41 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		Map<String, Integer> results = new HashMap<>();
 		results.put(searchField.getText(), response);
 		setBarChartByStringLabel(results);
+	}
+	
+	private void showInvalidCSVFileAlertDialog(Node node) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.initOwner(node.getScene().getWindow());
+		alert.setTitle("Not a valid CSV file");
+		alert.setHeaderText("Error: Cant fetch SCV header row");
+		alert.setContentText("SCV file dont end with \".csv\" or dont have a valid header row. Check the SCV file for errors and also that the seperator is a \",\"");
+		alert.showAndWait();
+	}
+	
+	private void missingHeaderMappingsCSVFileAlertDialog(Node node) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.initOwner(node.getScene().getWindow());
+		alert.setTitle("missing values mapping to header");
+		alert.setHeaderText("There is values missing to the csv header mappings");
+		alert.setContentText("Select CSV header values mapping to rating and freetext in the comboboxes.");
+		alert.showAndWait();
+	}
+	
+	private void missingRatingMappingsForCSVFileAlertDialog(Node node) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.initOwner(node.getScene().getWindow());
+		alert.setTitle("missing csvFile min and maxRating");
+		alert.setHeaderText("There is values missing to the csv rating mappings for min and max value.");
+		alert.setContentText("To be able to pars the CSV rating data to a common format, the csv rating scale need to be known. Please fill in the scales min and max value");
+		alert.showAndWait();
+	}
+	
+	private void couldNotParseCSVFileAlertDialog(Node node) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.initOwner(node.getScene().getWindow());
+		alert.setTitle("Could not parse CSV file");
+		alert.setHeaderText("There was an error parsing the CSV file");
+		alert.setContentText("The CSV file could not be parsed. Check the SCV file for errors and also that the seperator is a \",\" ");
+		alert.showAndWait();
 	}
 }
