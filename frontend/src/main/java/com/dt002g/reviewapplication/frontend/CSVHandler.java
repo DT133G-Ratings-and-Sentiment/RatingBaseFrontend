@@ -104,10 +104,10 @@ public class CSVHandler {
 				    		int result = divider * (temp-minRating);
 				    		if(temp == maxRating)
 				    			result = 100;
-				    		tempRow += result + ";|";
+				    		tempRow += result + ";#";
 				    	}
 				    	else {
-				    		tempRow += rowData.get(headerIndexes.get(i)) + ";|";
+				    		tempRow += rowData.get(headerIndexes.get(i)) + ";#";
 				    	}
 				    }
 				    data.add(tempRow.substring(0, tempRow.length() -2));
