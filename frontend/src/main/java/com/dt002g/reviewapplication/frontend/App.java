@@ -1,5 +1,6 @@
 package com.dt002g.reviewapplication.frontend;
 
+import java.io.File;
 import java.io.IOException;
 
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendAPIService;
@@ -37,6 +38,7 @@ public class App extends Application {
 
 
 	        Scene scene = new Scene(grid);
+
 	    
 	
 	        stage.setScene(scene);

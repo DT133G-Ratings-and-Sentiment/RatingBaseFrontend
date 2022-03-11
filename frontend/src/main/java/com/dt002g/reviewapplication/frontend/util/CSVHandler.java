@@ -1,4 +1,4 @@
-package com.dt002g.reviewapplication.frontend;
+package com.dt002g.reviewapplication.frontend.util;
 
 import java.io.BufferedReader;
 import java.io.File;
