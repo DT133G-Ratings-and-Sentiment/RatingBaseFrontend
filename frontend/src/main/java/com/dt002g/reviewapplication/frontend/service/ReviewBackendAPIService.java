@@ -208,9 +208,14 @@ public void getNumberOfReviewsByStrings(GetNumberOfReviewsCallBack getNumberOfRe
 		Platform.runLater(new Runnable() {					
 			@Override
 			public void run() {
-				System.out.println(res.body());
-				Alert alert = new Alert(AlertType.WARNING ,res.body().toString());
-				alert.show();	
+				try {
+					System.out.println(res.body());
+					Alert alert = new Alert(AlertType.WARNING ,res.body().toString());
+					alert.show();	
+				}
+				catch(NullPointerException e) {
+					System.out.println(e.getMessage());
+				}
 			}
 		});
 	}
