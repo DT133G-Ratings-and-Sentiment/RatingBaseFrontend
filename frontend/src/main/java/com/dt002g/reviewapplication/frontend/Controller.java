@@ -181,33 +181,27 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
     
     @FXML 
     void storeDataButtonClicked(ActionEvent event){
-    	System.out.println("minRatnig |" + minRating.getValue() + "|");
     	if(selectRating.getValue() == null || selectRating.getValue().equals("") || selectFreeText.getValue() == null || selectFreeText.getValue().equals("") || minRating.getValue() == null || maxRating.getValue() == null || minRating.getValue() >= maxRating.getValue()) {
     		
     		if(selectRating.getValue() == null || selectRating.getValue().equals("") || selectFreeText.getValue() == null || selectFreeText.getValue().equals("") ) {
     			missingHeaderMappingsCSVFileAlertDialog((Node)event.getSource());
     		}
     		else {
-    			
+    			missingRatingMappingsForCSVFileAlertDialog((Node)event.getSource());
     		}
     	}
     	else {
-	    	System.out.println("Reading scv file");
 			ArrayList<String> neededHeaders = new ArrayList<>();
 			neededHeaders.add(selectRating.getValue());
 			neededHeaders.add(selectFreeText.getValue());
 			ArrayList<String> data = CSVHandler.getInstance().parseCSVFile(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
 			if(data == null) {
-				System.out.println("SCV file is null");
+				couldNotParseCSVFileAlertDialog((Node)event.getSource());
 			}
 			else {
-				for(String s: data) {
-					System.out.println("Finale: " + s);
-				}
 		        File myObj = new File("test.csv");
 		        try {
 					if (myObj.createNewFile()) {
-						System.out.println("Writing to file " + myObj.getName());
 						BufferedWriter writer = new BufferedWriter(new FileWriter("test.csv"));
 						for(String s: data) {
 							 writer.write(s + "\n");
@@ -237,8 +231,6 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
 		maxRating.setValueFactory(
 				new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
-	    //selectRating.setEditable(false);
-	    //selectFreeText.setEditable(false);
 	    selectRating.setDisable(true);
 	    selectFreeText.setDisable(true);
 	    storeDataButton.setDisable(true);

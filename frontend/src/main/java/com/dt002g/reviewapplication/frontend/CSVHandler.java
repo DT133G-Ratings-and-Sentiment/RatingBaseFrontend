@@ -58,7 +58,6 @@ public class CSVHandler {
 	    		}
 	    	}
 		    if(headerIndexes.size() != neededHeaders.size()) {
-		    	System.out.println("Not all needed Headers available");
 		    	return null;
 		    }
 		    String line; 
@@ -70,11 +69,9 @@ public class CSVHandler {
 			    ArrayList<String> rowData = new ArrayList<>();
 			    while(line.length() > 0) {
 				    if(line.charAt(0) == '\"') {
-				    	System.out.println("Fond symbol");
 				    	while(line.charAt(0) == '\"') {
 				    		line = line.substring(line.indexOf("\"") +1);
 				    	}
-				    	System.out.println("Full line" + line);
 				    	row = line.substring(0, line.indexOf("\""));
 				    	line = line.substring(line.indexOf("\""));
 				    	while(line.charAt(0) == '\"') {
@@ -98,14 +95,12 @@ public class CSVHandler {
 				    		line = line.substring(1);
 				    	rowData.add(row);				    	
 				    }
-			    	System.out.println("Row: " + row);
 			    }
 			    	String tempRow = "";
 				    for(int i = 0; i < headerIndexes.size(); i++) {
 				    	if(i == 0) {
 				    		int temp = Integer.parseInt(rowData.get(headerIndexes.get(i)))%(maxRating+1);
 				    		int divider = 100/(maxRating -minRating);
-				    		System.out.println("Divider: " +divider);
 				    		int result = divider * (temp-minRating);
 				    		if(temp == maxRating)
 				    			result = 100;
@@ -115,7 +110,6 @@ public class CSVHandler {
 				    		tempRow += rowData.get(headerIndexes.get(i)) + ";|";
 				    	}
 				    }
-				    System.out.println("AddingRow: " + tempRow.substring(0, tempRow.length() -2));
 				    data.add(tempRow.substring(0, tempRow.length() -2));
 			    }
 		} catch (IOException e) {
