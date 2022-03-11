@@ -215,12 +215,16 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				}
 			}
     	}
-	    selectRating.setDisable(true);
-	    selectFreeText.setDisable(true);
-	    storeDataButton.setDisable(true);
-	    minRating.setDisable(true);
-	    maxRating.setDisable(true);
-
+    	Platform.runLater(new Runnable() {
+    		@Override
+    		public void run() {
+    			selectRating.setDisable(true);
+    			selectFreeText.setDisable(true);
+    			storeDataButton.setDisable(true);
+    			minRating.setDisable(true);
+    			maxRating.setDisable(true);
+    			}
+    		});
 	    csvFile = null;
     }
     
@@ -251,6 +255,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		
 		tableDataTab.setClosable(false);
 		barChartTab.setClosable(false);
+		importTab.setClosable(false);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.SELECTED_TAB);
 		barChart.setAnimated(false);
 		referenceTable.setItems(reviewsInTable);
