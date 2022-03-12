@@ -61,7 +61,9 @@ public class CSVHandler {
 		    	return null;
 		    }
 		    String line; 
+		    int numberOfLines = 0;
 		    while ((line = br.readLine()) != null) {
+		    	numberOfLines++;
 		    	if(line.charAt(0) == '\"' && line.charAt(line.length()-1) == '\"') {
 		    		line = line.substring(1, line.length()-1);
 		    	}
@@ -69,12 +71,25 @@ public class CSVHandler {
 			    ArrayList<String> rowData = new ArrayList<>();
 			    while(line.length() > 0) {
 				    if(line.charAt(0) == '\"') {
-				    	while(line.charAt(0) == '\"') {
+				    	while(line.charAt(0) == '\"' && line.length() >2) {
 				    		line = line.substring(line.indexOf("\"") +1);
 				    	}
-				    	row = line.substring(0, line.indexOf("\""));
-				    	line = line.substring(line.indexOf("\""));
-				    	while(line.charAt(0) == '\"') {
+				    	if(line.indexOf(",") == -1) {
+				    		rowData.add(line);
+				    		line = "";
+				    		break;
+				    	}
+				    	else {
+				    		if(line.indexOf("\",", 0) != -1) {
+				    			row = line.substring(0, line.indexOf("\","));
+						    	line = line.substring(line.indexOf("\","));
+				    		}
+				    		else{
+				    			row = line.substring(0, line.indexOf(","));
+						    	line = line.substring(line.indexOf(","));
+				    		}
+				    	}
+				    	while(line.charAt(0) == '\"' && line.length() > 2) {
 				    		line = line.substring(line.indexOf("\"") +1);
 				    	}
 				    	if(line.indexOf(",") == -1)
@@ -96,6 +111,7 @@ public class CSVHandler {
 				    	rowData.add(row);				    	
 				    }
 			    }
+			    try {
 			    	String tempRow = "";
 				    for(int i = 0; i < headerIndexes.size(); i++) {
 				    	if(i == 0) {
@@ -111,6 +127,13 @@ public class CSVHandler {
 				    	}
 				    }
 				    data.add(tempRow.substring(0, tempRow.length() -2));
+			    }catch(NumberFormatException e) {
+			    	System.out.println("NumberFormatException: " + numberOfLines );
+			    	e.printStackTrace();
+			    }catch(java.lang.IndexOutOfBoundsException e){
+			    	System.out.println("NumberFormatException: " + numberOfLines );
+			    	e.printStackTrace();
+			    }
 			    }
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
