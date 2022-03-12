@@ -17,6 +17,7 @@ import com.dt002g.reviewapplication.frontend.service.GetReviewsCallBack;
 import com.dt002g.reviewapplication.frontend.service.RatingBackendEntity;
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendAPIService;
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendEntity;
+import com.dt002g.reviewapplication.frontend.util.CSVHandler;
 import com.dt002g.reviewapplication.frontend.util.PieChartHolder;
 import com.dt002g.reviewapplication.frontend.util.SearchHandler;
 import com.dt002g.reviewapplication.frontend.util.Utility;
@@ -112,6 +113,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	private ArrayList<Review> reviews = new ArrayList<>();
 	private ArrayList<RatingStats> ratingsByComment = new ArrayList<>();
 	private final HashMap<Integer, Review> revieweMap = new HashMap<>();
+	private double defaultColumnWidth;
 
 	public HashMap<Integer, Review> getReviewMap(){
 		return revieweMap;
@@ -215,12 +217,16 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				}
 			}
     	}
-	    selectRating.setDisable(true);
-	    selectFreeText.setDisable(true);
-	    storeDataButton.setDisable(true);
-	    minRating.setDisable(true);
-	    maxRating.setDisable(true);
-
+    	Platform.runLater(new Runnable() {
+    		@Override
+    		public void run() {
+    			selectRating.setDisable(true);
+    			selectFreeText.setDisable(true);
+    			storeDataButton.setDisable(true);
+    			minRating.setDisable(true);
+    			maxRating.setDisable(true);
+    			}
+    		});
 	    csvFile = null;
     }
     
@@ -236,6 +242,12 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	    storeDataButton.setDisable(true);
 	    minRating.setDisable(true);
 	    maxRating.setDisable(true);
+	   
+	    referenceTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+	    referenceTable.setId("tableStyle");
+
+	    
+
 
 
 		root.setOnKeyPressed(new EventHandler<KeyEvent>() {
@@ -251,6 +263,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		
 		tableDataTab.setClosable(false);
 		barChartTab.setClosable(false);
+		importTab.setClosable(false);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.SELECTED_TAB);
 		barChart.setAnimated(false);
 		referenceTable.setItems(reviewsInTable);
@@ -274,6 +287,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
 				reviewsInTable.clear();
 				reviews.clear();
+
 				if(reviewTableScrollBar != null && scrollListener != null) {
 					reviewTableScrollBar.valueProperty().removeListener(scrollListener);
 				}
@@ -324,6 +338,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				lastId = reviewsInTable.get(reviewsInTable.size()-1).getId();
 			}
 			reviewsInTable.addAll(pReviews);
+			Utility.customResize(referenceTable);
 			long fetchId = pReviews.get(pReviews.size()-1).getId();
 			/*for(int i = (page*25); i < ((page*25) + 25); i++) {
 				reviewsInTable.add(pReviews.get(i));
@@ -350,7 +365,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		            		SearchHandler.getInstance().getByRatingAndStrings(this, rating, searchField.getText(), fetchId);
 		            	}else if(selection.equals("Get by including words")) {
 		            		SearchHandler.getInstance().getByStringsInclusive(this, searchField.getText(), fetchId);
-			            }	
+			            }
+		            	
 		            }
 		        };
 		        Platform.runLater(() -> {reviewTableScrollBar.valueProperty().addListener(scrollListener);});
@@ -359,6 +375,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				if((reviewsInTable.size() - pReviews.size())> 0) {
 					Review temp = reviewsInTable.get(reviewsInTable.size() - pReviews.size());
 			        referenceTable.scrollTo(temp);
+				    
+			       
 				}
 			});
 		}
