@@ -135,15 +135,19 @@ public void getNumberOfReviewsByStrings(GetNumberOfReviewsCallBack getNumberOfRe
 				getNumberOfReviewsCallBack.processGetNumberOfReviewsCallBack(numberOfReviews);
 			}
 			else {
-				Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
-				alert.show();
+				Platform.runLater(() -> {
+					Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+					alert.show();
+				});
 			}
 		}
 
 		@Override
 		public void onFailure(Call<Integer> call, Throwable t) {
-			Alert alert = new Alert(AlertType.WARNING ,"Request failed");
-			alert.show();
+			Platform.runLater(() -> {
+				Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+				alert.show();
+			});
 			
 		}
 	});
