@@ -83,12 +83,6 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private RadioButton getByStringsInclusiveRadioButton;
 	@FXML final private ToggleGroup group = new ToggleGroup();
 	
-	@FXML private MenuButton ratingDropDown;
-	@FXML private MenuItem rating1;
-	@FXML private MenuItem rating2;
-	@FXML private MenuItem rating3;
-	@FXML private MenuItem rating4;
-	@FXML private MenuItem rating5;
 	
 	@FXML private CheckBox keepChartCheckBox;
 
@@ -148,6 +142,9 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
     
 
     @FXML
+    private Spinner<Integer> ratingSpinner;
+
+    @FXML
     private Spinner<Integer> minRating;
 
     @FXML
@@ -168,7 +165,9 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	    		showInvalidCSVFileAlertDialog((Node)event.getSource());
 	    	}
 	    	else {
+	    		selectRating.getItems().clear();
 		    	selectRating.getItems().addAll(headers);
+		    	selectFreeText.getItems().clear();
 		    	selectFreeText.getItems().addAll(headers);
 		    	
 			    selectRating.setDisable(false);
@@ -233,6 +232,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		
+		ratingSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
 		minRating.setValueFactory(
 				new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
 		maxRating.setValueFactory(
@@ -280,9 +281,9 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		getAllRadioButton.setSelected(true);
 		searchField.setVisible(false);
 		searchField.setManaged(false);
-		ratingDropDown.setVisible(false);
-		ratingDropDown.setManaged(false);
-
+		ratingSpinner.setVisible(false);
+		ratingSpinner.setManaged(false);
+		
 		group.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
 			public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
 				reviewsInTable.clear();
@@ -298,33 +299,32 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				if(selection.equals("Get all")) {
 					searchField.setVisible(false);
 					searchField.setManaged(false);
-					ratingDropDown.setVisible(false);
-					ratingDropDown.setManaged(false);
+					ratingSpinner.setVisible(false);
+					ratingSpinner.setManaged(false);
 				}
 				else if(selection.equals("Get by rating")) {
 					searchField.setVisible(false);
 					searchField.setManaged(false);
-					ratingDropDown.setVisible(true);
-					ratingDropDown.setManaged(true);
-					ratingDropDown.setText("Rating");
+					ratingSpinner.setVisible(true);
+					ratingSpinner.setManaged(true);
 				}
 				else if(selection.equals("Get by strings")){
 					searchField.setVisible(true);
 					searchField.setManaged(true);
-					ratingDropDown.setVisible(false);
-					ratingDropDown.setManaged(false);
+					ratingSpinner.setVisible(false);
+					ratingSpinner.setManaged(false);
 				}
 				else if(selection.equals("Get by rating and string")) {
 					searchField.setVisible(true);
 					searchField.setManaged(true);
-					ratingDropDown.setVisible(true);
-					ratingDropDown.setManaged(true);
-					ratingDropDown.setText("Rating");
+					ratingSpinner.setVisible(true);
+					ratingSpinner.setManaged(true);
+
 				}else if(selection.equals("Get by including words")) {
 					searchField.setVisible(true);
 					searchField.setManaged(true);
-					ratingDropDown.setVisible(false);
-					ratingDropDown.setManaged(false);
+					ratingSpinner.setVisible(false);
+					ratingSpinner.setManaged(false);
 				}			
 			}
 		});
@@ -358,10 +358,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		            		SearchHandler.getInstance().getByStrings(this, this, searchField.getText(), fetchId);
 		            	}
 		            	else if(selection.equals("Get by rating")) {
-		            		int rating = Integer.parseInt(ratingDropDown.getText());
+		            		int rating = ratingSpinner.getValue();
 		    				SearchHandler.getInstance().getByRating(this, rating, fetchId);         		
 		            	}else if(selection.equals("Get by rating and string")){
-		            		int rating = Integer.parseInt(ratingDropDown.getText());
+		            		int rating = ratingSpinner.getValue();
 		            		SearchHandler.getInstance().getByRatingAndStrings(this, rating, searchField.getText(), fetchId);
 		            	}else if(selection.equals("Get by including words")) {
 		            		SearchHandler.getInstance().getByStringsInclusive(this, searchField.getText(), fetchId);
@@ -561,7 +561,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		}
 		else if(selection.equals("Get by rating")) {
 			try {
-				int rating = Integer.parseInt(ratingDropDown.getText());
+				int rating = ratingSpinner.getValue();
 				SearchHandler.getInstance().getByRating(this, rating, 0);
 			}
 			catch(NumberFormatException e) {
@@ -571,7 +571,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		}
 		else if(selection.equals("Get by rating and string")){
 			try {
-				int rating = Integer.parseInt(ratingDropDown.getText());
+				int rating = ratingSpinner.getValue();
 				SearchHandler.getInstance().getByRatingAndStrings(this, rating, searchField.getText(), 0L);
 			}
 			catch(NumberFormatException e) {
@@ -603,16 +603,6 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		});
 	}
 	
-	public void ratingDropDownChange(ActionEvent event) {
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				   final MenuItem source = (MenuItem) event.getSource();
-				   ratingDropDown.setText(source.getText());
-			}
-		});
-	}
-
 	@Override
 	public void processGetNumberOfReviewsCallBack(Integer response) {
 		System.out.println("processGetNumberOfReviewsCallBack");
