@@ -98,6 +98,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
     @FXML private NumberAxis barChartXAxis;
 	@FXML final private HBox barChartBox = new HBox();
 	@FXML final private Pane barChartPane = new Pane();
+	@FXML private CheckBox checkBoxOneTen;
 	
 	private File csvFile;
 	private ScrollBar reviewTableScrollBar;
@@ -420,7 +421,11 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				XYChart.Series series1 = new XYChart.Series<>();
 				for(RatingStats rating : ratingsByComment) {
 					totalCount += rating.getAmount();
-					series1.getData().add(new XYChart.Data<>(String.valueOf(rating.getRating()), rating.getAmount()));
+					int ratingN = rating.getRating();
+					if(checkBoxOneTen.isSelected()) {
+						ratingN = Math.round(ratingN/10);
+					}
+					series1.getData().add(new XYChart.Data<>(String.valueOf(ratingN), rating.getAmount()));
 				}
 			
 				series1.setName(legend + ", Total count: " + totalCount);
@@ -445,10 +450,29 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				PieChartHolder pieChart = addNewTabWithPieChart(legend);
 				int totalCount = 0;
 				ArrayList<PieChart.Data> pieChartData = new ArrayList<>();
-				
+
 				for(RatingStats rating : ratingsByComment) {
 					totalCount += rating.getAmount();
-					pieChartData.add((new PieChart.Data(rating.getRating() + ": " + rating.getAmount(), rating.getAmount())));
+					int ratingN = rating.getRating();
+					if(checkBoxOneTen.isSelected()) {
+						ratingN = Math.round(ratingN / 10);
+						boolean added = false;
+						for (Data pieChartDatum : pieChartData) {
+							if (pieChartDatum.getName().equals(ratingN + ": " + pieChartDatum.getPieValue())) {
+								System.out.println(pieChartDatum.getName());
+
+								pieChartDatum.setPieValue(pieChartDatum.getPieValue() + ratingN);
+								added = true;
+								break;
+							}
+						}
+						if(!added){
+							pieChartData.add(new PieChart.Data(ratingN + ": " + rating.getAmount(), rating.getAmount()));
+						}
+					}
+					else {
+						pieChartData.add((new PieChart.Data(ratingN + ": " + rating.getAmount(), rating.getAmount())));
+					}
 				}
 				ObservableList<PieChart.Data> pieChartDataObservable = FXCollections.observableArrayList(pieChartData); 
 				pieChart.getPieChart().setData(pieChartDataObservable);
