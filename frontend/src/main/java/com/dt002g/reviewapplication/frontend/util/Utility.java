@@ -1,25 +1,15 @@
 package com.dt002g.reviewapplication.frontend.util;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import javafx.scene.control.TableView;
+import javafx.scene.text.Text;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.UnaryOperator;
-
-import javafx.collections.ListChangeListener;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.skin.TableViewSkin;
-import javafx.scene.text.Text;
 
 public class Utility {
 
-	
 	public static double round(double value, int places) {
 	    if (places < 0) throw new IllegalArgumentException();
-
 	    BigDecimal bd = BigDecimal.valueOf(value);
 	    bd = bd.setScale(places, RoundingMode.HALF_UP);
 	    return bd.doubleValue();
@@ -41,5 +31,4 @@ public class Utility {
 		}   
 	    view.getColumns().get(2).setMinWidth(largestText.getLayoutBounds().getWidth()+50);
 	}
-	
 }

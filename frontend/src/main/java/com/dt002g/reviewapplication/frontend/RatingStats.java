@@ -8,21 +8,17 @@ public class RatingStats {
 		this.rating = rating;
 		this.amount = amount;
 	}
-	
+
 	public int getRating() {
 		return rating;
 	}
-	
 	public void setRating(int rating) {
 		this.rating = rating;
 	}
-	
 	public int getAmount() {
 		return amount;
 	}
-	
 	public void setAmount(int amount) {
 		this.amount = amount;
 	}
-
 }

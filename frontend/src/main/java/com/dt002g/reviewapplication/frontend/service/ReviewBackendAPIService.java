@@ -20,8 +20,7 @@ public class ReviewBackendAPIService {
 	
 	private static ReviewBackendAPIService instance;
 	private GetReviewsCallBack getReviewsCallBack;
-	private GetRatingStatsCallBack getRatingStatsCallBack;
-	
+
 	private ReviewBackendAPIService() { }
 	
 	public static ReviewBackendAPIService getInstance() {
@@ -31,7 +30,7 @@ public class ReviewBackendAPIService {
 		return instance;
 	}
 	
-	private Callback<List<ReviewBackendEntity>> reviewCallback = new Callback<List<ReviewBackendEntity>>() {
+	private final Callback<List<ReviewBackendEntity>> reviewCallback = new Callback<List<ReviewBackendEntity>>() {
 		@Override
 		public void onResponse(Call<List<ReviewBackendEntity>> call, Response<List<ReviewBackendEntity>> response) {
 			if(response.isSuccessful()) {
@@ -42,24 +41,34 @@ public class ReviewBackendAPIService {
 				showErrorAlert(response);
 			}
 		}
-
 		@Override
 		public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
-			Platform.runLater(new Runnable() {					
-				@Override
-				public void run() {
-					System.out.println(t);
-					Alert alert = new Alert(AlertType.WARNING ,"Request failed" + t.getMessage());
-					alert.show();	
-				}
+			Platform.runLater(() -> {
+				System.out.println(t.getMessage());
+				Alert alert = new Alert(AlertType.WARNING ,"Request failed" + t.getMessage());
+				alert.show();
 			});
-			//Alert alert = new Alert(AlertType.WARNING ,"Request failed");
-			//alert.show();
 		}
 	};
-	
-	
-	
+
+	private void ratingsCallBack(GetRatingStatsCallBack getRatingStatsCallBack, String searchString, Call<List<RatingBackendEntity>> reviewRequest) {
+		reviewRequest.enqueue(new Callback<>() {
+			@Override
+			public void onResponse(Call<List<RatingBackendEntity>> call, Response<List<RatingBackendEntity>> response) {
+				if (response.isSuccessful()) {
+					List<RatingBackendEntity> reviews = response.body();
+					getRatingStatsCallBack.processGetMapCallBack(reviews, searchString);
+				} else {
+					showErrorAlert(response);
+				}
+			}
+			@Override
+			public void onFailure(Call<List<RatingBackendEntity>> call, Throwable t) {
+				showErrorAlert(t);
+			}
+		});
+	}
+
 	public void getReviews(GetReviewsCallBack getReviewsCallBack) {
 		this.getReviewsCallBack = getReviewsCallBack;
 		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
@@ -80,6 +89,7 @@ public class ReviewBackendAPIService {
 		Call<List<ReviewBackendEntity>> reviewRequest = reviewService.getByStrings(searchString);
 		reviewRequest.enqueue(reviewCallback);
 	}
+
 	public void getByRating(GetReviewsCallBack getReviewsCallBack, int rating) {
 		this.getReviewsCallBack = getReviewsCallBack;
 		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
@@ -122,7 +132,7 @@ public class ReviewBackendAPIService {
 		reviewRequest.enqueue(reviewCallback);
 	}
 	
-public void getNumberOfReviewsByStrings(GetNumberOfReviewsCallBack getNumberOfReviewsCallBack, Map<String, String> searchString) {
+	public void getNumberOfReviewsByStrings(GetNumberOfReviewsCallBack getNumberOfReviewsCallBack, Map<String, String> searchString) {
 	
 	ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
 	Call<Integer> reviewRequest = reviewService.getNumberOfReviewsByInclusiveStrings(searchString);
@@ -161,55 +171,17 @@ public void getNumberOfReviewsByStrings(GetNumberOfReviewsCallBack getNumberOfRe
 	}
 	
 	public void getRatingByComment(GetRatingStatsCallBack getRatingStatsCallBack, String searchString) {
-		this.getRatingStatsCallBack = getRatingStatsCallBack;
 		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
 		Call<List<RatingBackendEntity>> reviewRequest = reviewService.getRatingByComment(searchString);
-		reviewRequest.enqueue(new Callback<List<RatingBackendEntity>>() {
-
-			@Override
-			public void onResponse(Call<List<RatingBackendEntity>> call, Response<List<RatingBackendEntity>> response) {
-				if(response.isSuccessful()) {
-					List<RatingBackendEntity> reviews = response.body();
-					getRatingStatsCallBack.processGetMapCallBack(reviews, searchString);
-				}
-				else {
-					showErrorAlert(response);
-				}
-			}
-
-			@Override
-			public void onFailure(Call<List<RatingBackendEntity>> call, Throwable t) {
-				showErrorAlert(t);
-			}
-		});
+		ratingsCallBack(getRatingStatsCallBack, searchString, reviewRequest);
 	}
+
 	public void getRatingByCommentsInclusive(GetRatingStatsCallBack getRatingStatsCallBack, Map<String, String> params, final String searchString) {
-		this.getRatingStatsCallBack = getRatingStatsCallBack;
 		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
 		Call<List<RatingBackendEntity>> reviewRequest = reviewService.getRatingByInclusiveSearchString(params);
-		
-		reviewRequest.enqueue(new Callback<List<RatingBackendEntity>>() {
-
-			@Override
-			public void onResponse(Call<List<RatingBackendEntity>> call, Response<List<RatingBackendEntity>> response) {
-				if(response.isSuccessful()) {
-					List<RatingBackendEntity> reviews = response.body();
-					
-					
-					getRatingStatsCallBack.processGetMapCallBack(reviews, searchString);
-				}
-				else {
-					showErrorAlert(response);
-				}
-			}
-
-			@Override
-			public void onFailure(Call<List<RatingBackendEntity>> call, Throwable t) {
-				showErrorAlert(t);
-			}
-		});
+		ratingsCallBack(getRatingStatsCallBack, searchString, reviewRequest);
 	}
-	
+
 	public void uploadCSVFile(File file) {
 		System.out.println("uploading SCV file from frontend");
 		RequestBody descriptionPart = RequestBody.create(okhttp3.MultipartBody.FORM, "csvFile");
@@ -217,7 +189,7 @@ public void getNumberOfReviewsByStrings(GetNumberOfReviewsCallBack getNumberOfRe
 		MultipartBody.Part fileMultiPart = MultipartBody.Part.createFormData("csvFile", file.getName(), filePart);
 		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
 		Call<ResponseBody> uploadCSVFileRequest = reviewService.uploadCSVFile(descriptionPart, fileMultiPart);
-		
+		System.out.println("HERE");
 		uploadCSVFileRequest.enqueue(new Callback<ResponseBody>() {
 
 			@Override
@@ -244,31 +216,23 @@ public void getNumberOfReviewsByStrings(GetNumberOfReviewsCallBack getNumberOfRe
 	}
 	
 	private void showErrorAlert(Throwable t) {
-		Platform.runLater(new Runnable() {					
-			@Override
-			public void run() {
-				System.out.println(t);
-				Alert alert = new Alert(AlertType.WARNING ,t.getMessage());
-				alert.show();	
-			}
+		Platform.runLater(() -> {
+			System.out.println(t);
+			Alert alert = new Alert(AlertType.WARNING ,t.getMessage());
+			alert.show();
 		});
 	}
 	
 	private void showErrorAlert(Response<?> res) {
-		Platform.runLater(new Runnable() {					
-			@Override
-			public void run() {
-				try {
-					System.out.println(res.body());
-					Alert alert = new Alert(AlertType.WARNING ,res.body().toString());
-					alert.show();	
-				}
-				catch(NullPointerException e) {
-					System.out.println(e.getMessage());
-				}
+		Platform.runLater(() -> {
+			try {
+				System.out.println(res.body());
+				Alert alert = new Alert(AlertType.WARNING ,res.body().toString());
+				alert.show();
+			}
+			catch(NullPointerException e) {
+				System.out.println(e.getMessage());
 			}
 		});
 	}
-	
-	
 }

@@ -1,12 +1,10 @@
 package com.dt002g.reviewapplication.frontend;
 
+import com.dt002g.reviewapplication.frontend.service.ReviewBackendEntity;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import com.dt002g.reviewapplication.frontend.service.ReviewBackendEntity;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 
 public class Review {
 	//IntegerProperty id = new SimpleIntegerProperty(0);
@@ -33,16 +31,12 @@ public class Review {
 	public void setId(Long value) {
 		this.id.set(value);
 	}
-	
 	public Long getId() {
 		return this.id.get();
 	}
-	
 	public ObjectProperty<Long> idProperty(){
 		return id;
 	}
-	
-
 	public StringProperty freeTextProperty() {
 		return freeText;
 	}
@@ -55,11 +49,9 @@ public class Review {
 	public void setRating(Integer value) {
 		this.rating.set(value);
 	}
-	
 	public Integer getRating() {
 		return this.rating.get();
 	}
-	
 	public ObjectProperty<Integer> ratingProperty(){
 		return rating;
 	}
@@ -68,5 +60,4 @@ public class Review {
 	public String toString(){
 		return "Id: " +id.toString() + ", Freetext: " + this.getFreeText() + " Rating: " + this.getRating();
 	}
-	
 }

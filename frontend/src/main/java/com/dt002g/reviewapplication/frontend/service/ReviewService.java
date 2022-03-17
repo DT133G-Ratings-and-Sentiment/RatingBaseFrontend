@@ -30,8 +30,7 @@ public interface ReviewService {
 	
 	@GET("getByString/{comment}")
 	Call<List<ReviewBackendEntity>> getByString(@Path("comment") String comment);
-	
-	
+
 	@GET("getByRating/{rating}")
 	Call<List<ReviewBackendEntity>> getByRating(@Path("rating") int rating);
 	

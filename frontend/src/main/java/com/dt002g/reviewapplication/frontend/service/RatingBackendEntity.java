@@ -6,9 +6,7 @@ public class RatingBackendEntity {
 	public int amount;
 	public int rating;
 	
-	public RatingBackendEntity(){
-		
-	}
+	public RatingBackendEntity(){}
 	
 	public RatingBackendEntity(int rating, int amount){
 		this.rating = rating;
@@ -26,11 +24,9 @@ public class RatingBackendEntity {
 	public void setRating(int rating) {
 		this.rating = rating;
 	}
-	
 	public int getAmount() {
 		return amount;
 	}
-	
 	public void setAmount(int amount) {
 		this.amount = amount;
 	}
