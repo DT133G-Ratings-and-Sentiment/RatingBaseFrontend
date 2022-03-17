@@ -12,35 +12,18 @@ import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
-
-/**
- * JavaFX App
- */
 public class App extends Application {
-
  	private static Scene scene;
     private Controller controller;
-    
 
 	    @Override
 	    public void start(Stage stage) throws IOException {
 	    	System.out.println("Running app");
-	    
-	    	
-	    
-	    	
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("search.fxml"));
-			
-			
 	    	GridPane grid = loader.load();
-			
 			controller = loader.getController();
-
-
 	        Scene scene = new Scene(grid);
 
-	    
-	
 	        stage.setScene(scene);
 	        stage.setTitle("Review Search");
 	        stage.setAlwaysOnTop(false);
@@ -60,12 +43,11 @@ public class App extends Application {
 	    }
 
 	    public static void main(String[] args) {
-	        launch();
+			launch();
 	    }
 	    
 	    public void readReviews() {
 	    	System.out.println("App readReviews");
-	    	//ReviewBackendAPIService.getInstance().getTop100Reviews(controller);
 	    	ReviewBackendAPIService.getInstance().getTopReviewsLargerThanId(controller, 0L);
 	    }
 }
