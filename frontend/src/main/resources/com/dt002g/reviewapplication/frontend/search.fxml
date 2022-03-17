@@ -70,8 +70,8 @@
             <TextField fx:id="searchField" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="1" />
             <Button fx:id="searchButton" onAction="#searchAction" text="Search" />
             <Button fx:id="clearBar" mnemonicParsing="false" onAction="#clearChartAndSearchBar" text="Clear" />
-            <CheckBox fx:id="keepChartCheckBox" mnemonicParsing="false" prefHeight="18.0" prefWidth="108.0" text="Keep chart" />
-            <CheckBox fx:id="checkBoxOneTen" mnemonicParsing="false" text="1-10 Ratings" />
+            <CheckBox fx:id="keepChartCheckBox" mnemonicParsing="false" prefHeight="18.0" prefWidth="83.0" text="Keep chart" />
+            <CheckBox fx:id="checkBoxOneTen" mnemonicParsing="false" prefHeight="17.0" prefWidth="100.0" text="1-10 Ratings" />
          </children>
       </HBox>
       <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowIndex="3">
