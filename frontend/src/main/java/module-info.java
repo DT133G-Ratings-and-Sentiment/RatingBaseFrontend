@@ -10,6 +10,7 @@ module com.dt002g.reviewapplication.frontend {
 	requires javafx.graphics;
 	requires java.sql;
 	requires retrofit2.converter.jackson;
+
     opens com.dt002g.reviewapplication.frontend to javafx.fxml;
     exports com.dt002g.reviewapplication.frontend;
     exports com.dt002g.reviewapplication.frontend.service;
