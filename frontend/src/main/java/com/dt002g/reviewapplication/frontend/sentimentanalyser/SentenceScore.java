@@ -1,4 +1,4 @@
-package com.dt002g.reviewapplication.frontend.sentimentanalyser;
+/*package com.dt002g.reviewapplication.frontend.sentimentanalyser;
 
 public class SentenceScore {
 	private String sentence = "";
@@ -38,3 +38,4 @@ public class SentenceScore {
 	}
 
 }
+*/

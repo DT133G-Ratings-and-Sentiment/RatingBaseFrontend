@@ -1,27 +1,16 @@
-package com.dt002g.reviewapplication.frontend.sentimentanalyser;
+/*package com.dt002g.reviewapplication.frontend.sentimentanalyser;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.ejml.simple.SimpleMatrix;
-
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.CoreDocument;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.CoreMap;
 
 public class SentimentAnalyser {
 
 	/*
 	 * "Very negative" = 0 "Negative" = 1 "Neutral" = 2 "Positive" = 3
 	 * "Very positive" = 4
-	 */
+
 
 
 	static Properties props;
@@ -89,3 +78,4 @@ public class SentimentAnalyser {
 	
 	}
 }
+*/

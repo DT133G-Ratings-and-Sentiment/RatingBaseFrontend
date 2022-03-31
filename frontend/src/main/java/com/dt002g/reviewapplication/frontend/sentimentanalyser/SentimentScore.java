@@ -1,4 +1,4 @@
-package com.dt002g.reviewapplication.frontend.sentimentanalyser;
+/*package com.dt002g.reviewapplication.frontend.sentimentanalyser;
 
 
 
@@ -54,3 +54,4 @@ public class SentimentScore {
 	}
 
 }
+*/

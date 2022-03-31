@@ -64,30 +64,43 @@
 		    <version>2.1</version>
 		    <scope>test</scope>
 		</dependency>
-		<dependency>
-		    <groupId>org.ejml</groupId>
-		    <artifactId>ejml-core</artifactId>
-		    <version>0.39</version>
-		</dependency>
+        <dependency>
+            <groupId>org.ejml</groupId>
+            <artifactId>ejml-core</artifactId>
+            <version>0.39</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ejml</groupId>
+            <artifactId>ejml-simple</artifactId>
+            <version>0.39</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <version>4.4.0</version>
+            <classifier>models</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.stanford_nlp</groupId>
+            <artifactId>Sentiment-Analysis</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
-		<dependency>
-		    <groupId>org.ejml</groupId>
-		    <artifactId>ejml-simple</artifactId>
-		    <version>0.39</version>
-		</dependency>
 
-		<dependency>
-		    <groupId>edu.stanford.nlp</groupId>
-		    <artifactId>stanford-corenlp</artifactId>
-		    <version>4.4.0</version>
-		</dependency>
-				<dependency>
-		    <groupId>edu.stanford.nlp</groupId>
-		    <artifactId>stanford-corenlp</artifactId>
-		    <version>4.4.0</version>
-		    <classifier>models</classifier> 
-		</dependency>
+
+
     </dependencies>
+    <repositories>
+        <repository>
+            <id>lib</id>
+            <url>file:///${project.basedir}/lib</url>
+        </repository>
+    </repositories>
     <build>
         <plugins>
             <plugin>
@@ -98,6 +111,11 @@
                     <release>11</release>
                 </configuration>
             </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>3.0.0-M1</version>
+			</plugin>
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>

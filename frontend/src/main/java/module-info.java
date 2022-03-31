@@ -1,5 +1,6 @@
 module com.dt002g.reviewapplication.frontend {
 
+
     requires javafx.controls;
     requires javafx.fxml;
 	requires javafx.base;
@@ -10,11 +11,12 @@ module com.dt002g.reviewapplication.frontend {
 	requires javafx.graphics;
 	requires java.sql;
 	requires retrofit2.converter.jackson;
-	requires stanford.corenlp;
-	requires ejml.simple;
-    opens com.dt002g.reviewapplication.frontend to javafx.fxml;
+	requires Sentiment.Analysis;
+
+
+	opens com.dt002g.reviewapplication.frontend to javafx.fxml;
     exports com.dt002g.reviewapplication.frontend;
     exports com.dt002g.reviewapplication.frontend.service;
-    exports com.dt002g.reviewapplication.frontend.sentimentanalyser;
+
     
 }

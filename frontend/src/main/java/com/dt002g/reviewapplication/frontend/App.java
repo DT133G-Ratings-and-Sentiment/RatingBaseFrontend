@@ -1,9 +1,10 @@
 package com.dt002g.reviewapplication.frontend;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendAPIService;
+import com.stanford_nlp.SentimentAnalyser.SentimentAnalyser;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -11,13 +12,19 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-
 public class App extends Application {
  	private static Scene scene;
     private Controller controller;
 
 	    @Override
 	    public void start(Stage stage) throws IOException {
+			SentimentAnalyser s = new SentimentAnalyser();
+			s.initialize();
+			List<String> test = s.getAdjectives("VERY NICE DOG");
+			for(String t : test){
+				System.out.println(t);
+			}
+
 	    	System.out.println("Running app");
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("search.fxml"));
 	    	GridPane grid = loader.load();
