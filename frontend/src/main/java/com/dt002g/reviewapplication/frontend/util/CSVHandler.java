@@ -1,10 +1,14 @@
 package com.dt002g.reviewapplication.frontend.util;
 
+import com.stanford_nlp.SentimentAnalyser.SentenceScore;
+import com.stanford_nlp.SentimentAnalyser.SentimentAnalyser;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class CSVHandler {
@@ -40,6 +44,8 @@ public class CSVHandler {
 	
 	public ArrayList<String> parseCSVFile(ArrayList<String> neededHeaders, File file, int minRating, int maxRating){
 		ArrayList<String> data = new ArrayList<String>();
+		SentimentAnalyser senti = new SentimentAnalyser();
+
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(file));
 		    String headersRow = br.readLine();
@@ -117,11 +123,13 @@ public class CSVHandler {
 				    			result = 100;
 				    		tempRow += result + ";#";
 				    	}
-				    	else {
-				    		tempRow += rowData.get(headerIndexes.get(i)) + ";#";
+				    	else if(i ==1){
+				    		//tempRow += rowData.get(headerIndexes.get(i)) + ";#";
+							tempRow += handleFreeText(rowData.get(headerIndexes.get(i)));
 				    	}
 				    }
-				    data.add(tempRow.substring(0, tempRow.length() -2));
+				    //data.add(tempRow.substring(0, tempRow.length() -2));
+					data.add(tempRow);
 			    }catch(NumberFormatException e) {
 			    	System.out.println("NumberFormatException: " + numberOfLines );
 			    	e.printStackTrace();
@@ -136,5 +144,42 @@ public class CSVHandler {
 		}
 	    return data;
 	}
-	
+
+	private String handleFreeText(String freeText){
+		String result = freeText + ";#";
+		SentimentAnalyser senti = new SentimentAnalyser();
+		List<SentenceScore> sentenceScore =  senti.getSentimentResult(freeText);
+		//String[] sentences =freeText.split(".");
+
+		//3;#okay. You are fine and good and fine. Great for you.;#okay.;£0.0;¤10.0;¤40.0;¤30.0;¤20.0;@You are fine and good and fine.;£30.0;¤20.0;¤30.0;¤15.0;¤5.0;£fine;¤good;¤fine;@Great for you.;£0.0;¤20.0;¤30.0;¤30.0;¤20.0;£Great;#4
+		for(SentenceScore s: sentenceScore){
+			result += s.getSentence() + ";£" + s.getVeryPositive() + ";¤" + s.getPositive() + ";¤" + s.getNeutral() + ";¤" + s.getNegative() + ";¤" + s.getVeryNegative() +";£" + getScoreInNumber(s.getSentimentType());
+			List<String> adjectives = senti.getAdjectives(s.getSentence());
+			if(adjectives.size() > 0) {
+				result += ";£";
+				for (String a : adjectives) {
+						result += a + ";¤";
+				}
+				result = result.substring(0, result.length() -2);
+			}
+			result += ";@";
+		}
+		result = result.substring(0, result.length() -2);
+		return result;
+	}
+	 private int getScoreInNumber(String score){
+		switch (score){
+			case "Very Positive":
+				return 5;
+			case "Positive":
+				return 4;
+			case "Neutral":
+				return 3;
+			case "Negative":
+				return 2;
+			case "Very Negative":
+				return 1;
+		}
+		return 0;
+	 }
 }
