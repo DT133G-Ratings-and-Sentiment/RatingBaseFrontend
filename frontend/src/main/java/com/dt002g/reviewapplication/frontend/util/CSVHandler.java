@@ -116,12 +116,26 @@ public class CSVHandler {
 			    	String tempRow = "";
 				    for(int i = 0; i < headerIndexes.size(); i++) {
 				    	if(i == 0) {
-				    		int temp = Integer.parseInt(rowData.get(headerIndexes.get(i)))%(maxRating+1);
-				    		int divider = 100/(maxRating -minRating);
-				    		int result = divider * (temp-minRating);
-				    		if(temp == maxRating)
-				    			result = 100;
-				    		tempRow += result + ";#";
+							// Transform to a common rating scale of 0-100  with formula:
+							// (rating – 1)/(number of response categories – 1) × 100.
+							// If the actual rating is bigger than the anonced maxrating it get max value
+							//if its lower it get 0 value.
+							double rawRating = Double.parseDouble(rowData.get(headerIndexes.get(i)));
+							if(rawRating > maxRating){
+								rawRating = maxRating;
+							}
+							else if(rawRating < minRating){
+								rawRating = minRating;
+							}
+							int rating = (int)Math.round((rawRating -1)/ ((((double)maxRating+1)-(double)minRating) -1) * 100);
+							tempRow += rating + ";#";
+							/*old algorithm
+							int temp = Integer.parseInt(rowData.get(headerIndexes.get(i)))%(maxRating+1);
+							int divider = 100/(maxRating -minRating);
+							int result = divider * (temp-minRating);
+							if(temp == maxRating)
+								result = 100;
+							tempRow += result + ";#";*/
 				    	}
 				    	else if(i ==1){
 				    		//tempRow += rowData.get(headerIndexes.get(i)) + ";#";

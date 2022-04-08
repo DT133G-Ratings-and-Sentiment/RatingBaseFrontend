@@ -188,9 +188,9 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	public void initialize(URL location, ResourceBundle resources) {
 		ratingSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
 		minRating.setValueFactory(
-				new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
+				new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1));
 		maxRating.setValueFactory(
-				new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
+				new SpinnerValueFactory.IntegerSpinnerValueFactory(2, 100, 1));
 	    selectRating.setDisable(true);
 	    selectFreeText.setDisable(true);
 	    storeDataButton.setDisable(true);
