@@ -1,8 +1,13 @@
 package com.dt002g.reviewapplication.frontend.util;
 
 import com.dt002g.reviewapplication.frontend.service.ReviewBackendAPIService;
+import com.dt002g.reviewapplication.frontend.service.UploadCSVFileCallBack;
 import com.stanford_nlp.SentimentAnalyser.SentenceScore;
 import com.stanford_nlp.SentimentAnalyser.SentimentAnalyser;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 
 import java.io.*;
@@ -12,11 +17,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class CSVHandler {
+public class CSVHandler implements UploadCSVFileCallBack {
 	private static CSVHandler instance = null;
 	private CSVHandler() {}
 	private static ExecutorService executorService = Executors.newFixedThreadPool(1);
-
+	public boolean cancel = false;
+	public IntegerProperty numberOfParsedRows = new SimpleIntegerProperty(0);
+	public IntegerProperty numberOfExportedRows = new SimpleIntegerProperty(0);
+	public IntegerProperty numberOfFailedRows = new SimpleIntegerProperty(0);
+	public StringProperty failedLineProp = new SimpleStringProperty("");
+	private ArrayList<String> failedLines;
 	public static CSVHandler getInstance() {
 		if(instance == null)
 			instance = new CSVHandler();
@@ -164,6 +174,11 @@ public class CSVHandler {
 	}*/
 
 	public boolean parseCSVFileAndSend(ArrayList<String> neededHeaders, File file, int minRating, int maxRating){
+		numberOfParsedRows.setValue(0);
+		numberOfExportedRows.setValue(0);
+		numberOfFailedRows.setValue(0);
+		failedLines = new ArrayList<>();
+		cancel = false;
 		int fileNr = 1;
 		int nrOfRows = 0;
 		ArrayList<String> data = new ArrayList<String>();
@@ -186,7 +201,8 @@ public class CSVHandler {
 			}
 			String line;
 			int numberOfLines = 0;
-			while ((line = br.readLine()) != null) {
+			while ((line = br.readLine()) != null && !cancel) {
+				String rawLine = line;
 				System.out.println(line);
 				numberOfLines++;
 				if(line.charAt(0) == '\"' && line.charAt(line.length()-1) == '\"') {
@@ -260,16 +276,28 @@ public class CSVHandler {
 					}
 					data.add(tempRow);
 					nrOfRows +=1;
+					numberOfParsedRows.setValue(numberOfParsedRows.getValue() +1);
 				}catch(NumberFormatException e) {
 					System.out.println("NumberFormatException: " + numberOfLines );
+					failedLines.add(rawLine);
+					failedLineProp.setValue(rawLine);
+					numberOfFailedRows.setValue(failedLines.size());
 					e.printStackTrace();
 				}catch(java.lang.IndexOutOfBoundsException e){
+					failedLines.add(rawLine);
+					failedLineProp.setValue(rawLine);
+					numberOfFailedRows.setValue(failedLines.size());
 					System.out.println("NumberFormatException: " + numberOfLines );
+					e.printStackTrace();
+				}catch(Exception e){
+					failedLines.add(rawLine);
+					failedLineProp.setValue(rawLine);
+					numberOfFailedRows.setValue(failedLines.size());
 					e.printStackTrace();
 				}
 				if(nrOfRows == 100){
 					ArrayList clonedList = (ArrayList) data.clone();
-					SendCSVFileTask task = new SendCSVFileTask(clonedList, "localCsvFile" + fileNr + ".csv");
+					SendCSVFileTask task = new SendCSVFileTask(clonedList, "localCsvFile" + fileNr + ".csv", this);
 					executorService.execute(task);
 					//sendBatch(clonedList, "localCsvFile" + fileNr + ".csv");
 					data.clear();
@@ -281,8 +309,8 @@ public class CSVHandler {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		if(data.size() > 0){
-			SendCSVFileTask task = new SendCSVFileTask(data, "localCsvFile" + fileNr + ".csv");
+		if(data.size() > 0 && !cancel){
+			SendCSVFileTask task = new SendCSVFileTask(data, "localCsvFile" + fileNr + ".csv", this);
 			executorService.execute(task);
 		}
 		return true;
@@ -344,4 +372,13 @@ public class CSVHandler {
 		}
 		return 0;
 	 }
+
+	@Override
+	public void processUploadCSVFileCallBack(int amount) {
+		numberOfExportedRows.setValue(numberOfExportedRows.getValue() +amount);
+	}
+
+	public ArrayList<String> getFailedLines(){
+		return failedLines;
+	}
 }

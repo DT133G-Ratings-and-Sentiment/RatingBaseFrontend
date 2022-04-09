@@ -1,10 +1,7 @@
 package com.dt002g.reviewapplication.frontend;
 
 import com.dt002g.reviewapplication.frontend.service.*;
-import com.dt002g.reviewapplication.frontend.util.CSVHandler;
-import com.dt002g.reviewapplication.frontend.util.PieChartHolder;
-import com.dt002g.reviewapplication.frontend.util.SearchHandler;
-import com.dt002g.reviewapplication.frontend.util.Utility;
+import com.dt002g.reviewapplication.frontend.util.*;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -25,6 +22,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -32,6 +30,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack {
 	@FXML private GridPane root;
@@ -65,6 +65,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	private final ArrayList<Review> reviews = new ArrayList<>();
 	private final ArrayList<RatingStats> ratingsByComment = new ArrayList<>();
 	private final HashMap<Integer, Review> reviewMap = new HashMap<>();
+	private static ExecutorService executorService = Executors.newFixedThreadPool(1);
 
 	public HashMap<Integer, Review> getReviewMap(){
 		return reviewMap;
@@ -152,7 +153,14 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			neededHeaders.add(selectRating.getValue());
 			neededHeaders.add(selectFreeText.getValue());
 			//ArrayList<String> data = CSVHandler.getInstance().parseCSVFile(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
-			CSVHandler.getInstance().parseCSVFileAndSend(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
+			ProgressWindow prog = new ProgressWindow((Stage)((Node)event.getSource()).getScene().getWindow(), CSVHandler.getInstance(), executorService);
+			prog.activate();
+			//CSVHandler.getInstance().parseCSVFileAndSend(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
+
+			CSVHandlerTask task = new CSVHandlerTask(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
+			executorService = Executors.newFixedThreadPool(1);
+			executorService.execute(task);
+
 			/*if(data == null) {
 				couldNotParseCSVFileAlertDialog((Node)event.getSource());
 			}

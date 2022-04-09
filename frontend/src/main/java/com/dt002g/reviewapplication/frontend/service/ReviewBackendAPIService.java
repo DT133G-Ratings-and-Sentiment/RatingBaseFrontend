@@ -182,7 +182,7 @@ public class ReviewBackendAPIService {
 		ratingsCallBack(getRatingStatsCallBack, searchString, reviewRequest);
 	}
 
-	public void uploadCSVFile(File file) {
+	public void uploadCSVFile(File file, UploadCSVFileCallBack uploadCSVFileCallBack, int numberOfRows) {
 		System.out.println("uploading SCV file from frontend");
 		RequestBody descriptionPart = RequestBody.create(okhttp3.MultipartBody.FORM, "csvFile");
 		RequestBody filePart = RequestBody.create(MediaType.parse("text/plain"), file);
@@ -197,6 +197,7 @@ public class ReviewBackendAPIService {
 				if(response.isSuccessful()) {
 					System.out.println("Successfully uploaded SCV file from frontend");
 					file.delete();
+					uploadCSVFileCallBack.processUploadCSVFileCallBack(numberOfRows);
 				}
 				else {
 					System.out.println("Failed to  upload SCV file from frontend");
