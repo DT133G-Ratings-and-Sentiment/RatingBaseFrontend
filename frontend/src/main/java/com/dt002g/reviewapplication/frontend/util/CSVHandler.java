@@ -1,19 +1,22 @@
 package com.dt002g.reviewapplication.frontend.util;
 
+import com.dt002g.reviewapplication.frontend.service.ReviewBackendAPIService;
 import com.stanford_nlp.SentimentAnalyser.SentenceScore;
 import com.stanford_nlp.SentimentAnalyser.SentimentAnalyser;
+import javafx.scene.Node;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class CSVHandler {
 	private static CSVHandler instance = null;
 	private CSVHandler() {}
+	private static ExecutorService executorService = Executors.newFixedThreadPool(1);
+
 	public static CSVHandler getInstance() {
 		if(instance == null)
 			instance = new CSVHandler();
@@ -42,7 +45,7 @@ public class CSVHandler {
 		return headersToUse;
 	}
 	
-	public ArrayList<String> parseCSVFile(ArrayList<String> neededHeaders, File file, int minRating, int maxRating){
+	/*public ArrayList<String> parseCSVFile(ArrayList<String> neededHeaders, File file, int minRating, int maxRating){
 		ArrayList<String> data = new ArrayList<String>();
 		SentimentAnalyser senti = new SentimentAnalyser();
 
@@ -64,6 +67,7 @@ public class CSVHandler {
 		    String line; 
 		    int numberOfLines = 0;
 		    while ((line = br.readLine()) != null) {
+				System.out.println(line);
 		    	numberOfLines++;
 		    	if(line.charAt(0) == '\"' && line.charAt(line.length()-1) == '\"') {
 		    		line = line.substring(1, line.length()-1);
@@ -129,13 +133,13 @@ public class CSVHandler {
 							}
 							int rating = (int)Math.round((rawRating -1)/ ((((double)maxRating+1)-(double)minRating) -1) * 100);
 							tempRow += rating + ";#";
-							/*old algorithm
-							int temp = Integer.parseInt(rowData.get(headerIndexes.get(i)))%(maxRating+1);
-							int divider = 100/(maxRating -minRating);
-							int result = divider * (temp-minRating);
-							if(temp == maxRating)
-								result = 100;
-							tempRow += result + ";#";*/
+							//old algorithm
+							//int temp = Integer.parseInt(rowData.get(headerIndexes.get(i)))%(maxRating+1);
+							//int divider = 100/(maxRating -minRating);
+							//int result = divider * (temp-minRating);
+							//if(temp == maxRating)
+							//	result = 100;
+							//tempRow += result + ";#";
 				    	}
 				    	else if(i ==1){
 				    		//tempRow += rowData.get(headerIndexes.get(i)) + ";#";
@@ -157,7 +161,151 @@ public class CSVHandler {
 			e.printStackTrace();
 		}
 	    return data;
+	}*/
+
+	public boolean parseCSVFileAndSend(ArrayList<String> neededHeaders, File file, int minRating, int maxRating){
+		int fileNr = 1;
+		int nrOfRows = 0;
+		ArrayList<String> data = new ArrayList<String>();
+		SentimentAnalyser senti = new SentimentAnalyser();
+
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			String headersRow = br.readLine();
+			String[] headers = headersRow.split(",");
+			ArrayList<Integer> headerIndexes = new ArrayList<>();
+			for(String s: neededHeaders) {
+				for(int i = 0; i < headers.length; i++) {
+					if(s.equalsIgnoreCase(headers[i])) {
+						headerIndexes.add(i);
+					}
+				}
+			}
+			if(headerIndexes.size() != neededHeaders.size()) {
+				return false;
+			}
+			String line;
+			int numberOfLines = 0;
+			while ((line = br.readLine()) != null) {
+				System.out.println(line);
+				numberOfLines++;
+				if(line.charAt(0) == '\"' && line.charAt(line.length()-1) == '\"') {
+					line = line.substring(1, line.length()-1);
+				}
+				String row = "";
+				ArrayList<String> rowData = new ArrayList<>();
+				while(line.length() > 0) {
+					if(line.charAt(0) == '\"') {
+						while(line.charAt(0) == '\"' && line.length() >2) {
+							line = line.substring(line.indexOf("\"") +1);
+						}
+						if(line.indexOf(",") == -1) {
+							rowData.add(line);
+							line = "";
+							break;
+						}
+						else {
+							if(line.indexOf("\",", 0) != -1) {
+								row = line.substring(0, line.indexOf("\","));
+								line = line.substring(line.indexOf("\","));
+							}
+							else{
+								row = line.substring(0, line.indexOf(","));
+								line = line.substring(line.indexOf(","));
+							}
+						}
+						while(line.charAt(0) == '\"' && line.length() > 2) {
+							line = line.substring(line.indexOf("\"") +1);
+						}
+						if(line.indexOf(",") == -1)
+							break;
+						line = line.substring(line.indexOf(","));
+						if(line.length() > 0)
+							line = line.substring(1);
+						rowData.add(row);
+					}
+					else {
+						if(line.indexOf(",") == -1) {
+							rowData.add(line);
+							break;
+						}
+						row = line.substring(0, line.indexOf(","));
+						line = line.substring(line.indexOf(","));
+						if(line.length() > 0)
+							line = line.substring(1);
+						rowData.add(row);
+					}
+				}
+				try {
+					String tempRow = "";
+					for(int i = 0; i < headerIndexes.size(); i++) {
+						if(i == 0) {
+							// Transform to a common rating scale of 0-100  with formula:
+							// (rating – 1)/(number of response categories – 1) × 100.
+							// If the actual rating is bigger than the anonced maxrating it get max value
+							//if its lower it get 0 value.
+							double rawRating = Double.parseDouble(rowData.get(headerIndexes.get(i)));
+							if(rawRating > maxRating){
+								rawRating = maxRating;
+							}
+							else if(rawRating < minRating){
+								rawRating = minRating;
+							}
+							int rating = (int)Math.round((rawRating -1)/ ((((double)maxRating+1)-(double)minRating) -1) * 100);
+							tempRow += rating + ";#";
+						}
+						else if(i ==1){
+							tempRow += handleFreeText(rowData.get(headerIndexes.get(i)));
+						}
+					}
+					data.add(tempRow);
+					nrOfRows +=1;
+				}catch(NumberFormatException e) {
+					System.out.println("NumberFormatException: " + numberOfLines );
+					e.printStackTrace();
+				}catch(java.lang.IndexOutOfBoundsException e){
+					System.out.println("NumberFormatException: " + numberOfLines );
+					e.printStackTrace();
+				}
+				if(nrOfRows == 100){
+					ArrayList clonedList = (ArrayList) data.clone();
+					SendCSVFileTask task = new SendCSVFileTask(clonedList, "localCsvFile" + fileNr + ".csv");
+					executorService.execute(task);
+					//sendBatch(clonedList, "localCsvFile" + fileNr + ".csv");
+					data.clear();
+					fileNr += 1;
+					nrOfRows = 0;
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(data.size() > 0){
+			SendCSVFileTask task = new SendCSVFileTask(data, "localCsvFile" + fileNr + ".csv");
+			executorService.execute(task);
+		}
+		return true;
 	}
+
+	/*private void sendBatch(ArrayList<String> data, String fileName){
+		File myObj = new File(fileName);
+		try {
+			if (myObj.createNewFile()) {
+				BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+				for(String s: data) {
+					writer.write(s + "\n");
+
+				}
+				writer.close();
+
+				ReviewBackendAPIService.getInstance().uploadCSVFile(myObj);
+			}
+		} catch (IOException | SecurityException e) {
+			System.out.println(e.getMessage());
+		}
+
+	}*/
 
 	private String handleFreeText(String freeText){
 		String result = freeText + ";#";

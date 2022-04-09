@@ -151,8 +151,9 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			ArrayList<String> neededHeaders = new ArrayList<>();
 			neededHeaders.add(selectRating.getValue());
 			neededHeaders.add(selectFreeText.getValue());
-			ArrayList<String> data = CSVHandler.getInstance().parseCSVFile(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
-			if(data == null) {
+			//ArrayList<String> data = CSVHandler.getInstance().parseCSVFile(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
+			CSVHandler.getInstance().parseCSVFileAndSend(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
+			/*if(data == null) {
 				couldNotParseCSVFileAlertDialog((Node)event.getSource());
 			}
 			else {
@@ -172,7 +173,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 					System.out.println(e.getMessage());
 				}
 
-			}
+			}*/
     	}
     	Platform.runLater(() -> {
 			selectRating.setDisable(true);
