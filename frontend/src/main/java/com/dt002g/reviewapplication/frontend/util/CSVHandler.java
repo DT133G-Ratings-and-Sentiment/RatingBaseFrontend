@@ -203,7 +203,6 @@ public class CSVHandler implements UploadCSVFileCallBack {
 			int numberOfLines = 0;
 			while ((line = br.readLine()) != null && !cancel) {
 				String rawLine = line;
-				System.out.println(line);
 				numberOfLines++;
 				if(line.startsWith("\"") && line.endsWith("\"")) {
 					line = line.substring(1, line.length()-1);
@@ -211,10 +210,8 @@ public class CSVHandler implements UploadCSVFileCallBack {
 				String row = "";
 				ArrayList<String> rowData = new ArrayList<>();
 				while(line.length() > 0) {
-					System.out.println(line);
 					line = line.trim();
 					if(line.startsWith("\"")) {
-						System.out.println("here*");
 						while(line.charAt(0) == '\"' && line.length() >2) {
 							line = line.substring(line.indexOf("\"") +1);
 						}
@@ -226,17 +223,14 @@ public class CSVHandler implements UploadCSVFileCallBack {
 						}
 						else {
 							if(line.indexOf("\",", 0) != -1) {
-								System.out.println("here2");
 								row = line.substring(0, line.indexOf("\","));
 								line = line.substring(line.indexOf("\","));
 							}
 							else if(line.endsWith("\"")){
-								System.out.println("here3");
 								row = line.substring(0, line.lastIndexOf("\""));
 								line = line.substring(line.lastIndexOf("\""));
 							}
 							else{
-								System.out.println("here4");
 								row = line.substring(0, line.indexOf(","));
 								line = line.substring(line.indexOf(","));
 							}
@@ -252,7 +246,6 @@ public class CSVHandler implements UploadCSVFileCallBack {
 						rowData.add(row);
 					}
 					else {
-						System.out.println("here8");
 						if(line.indexOf(",") == -1) {
 							rowData.add(line);
 							break;
