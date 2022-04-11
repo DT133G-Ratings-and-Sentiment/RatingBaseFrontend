@@ -107,6 +107,22 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
     @FXML
     private Spinner<Integer> maxRating;
+
+	@FXML private RadioButton oneFiveScaleRadioButton = new RadioButton();
+
+	@FXML private RadioButton oneThreeScaleRadioButton = new RadioButton();
+	private final ToggleGroup sentimentGroup = new ToggleGroup();
+	private String selectedAnalysisRadioButton = "Scale 1-5";
+
+	@FXML private Tab sentimentAnalysisTab;
+
+	@FXML private TableView<SentimentCorrelationStatistics> sentimentTableView;
+	private final ObservableList<SentimentCorrelationStatistics> sentimentCorrelationStatisticsList = FXCollections.observableArrayList();
+	@FXML private TableColumn<SentimentCorrelationStatistics, String> ratingSpanColumn;
+	@FXML private TableColumn<SentimentCorrelationStatistics, String> sentimentColumn;
+	@FXML private TableColumn<SentimentCorrelationStatistics, Integer> correlatingReviewsColumn;
+	@FXML private TableColumn<SentimentCorrelationStatistics, Double> correlatingPercentColumn;
+	@FXML private TableColumn<SentimentCorrelationStatistics, Integer> totalReviewsColumn;
     
     @FXML
     void chooseFileButtonClicked(ActionEvent event) {
@@ -205,10 +221,23 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	    storeDataButton.setDisable(true);
 	    minRating.setDisable(true);
 	    maxRating.setDisable(true);
-	   
+
+		//  Reviews table
 	    referenceTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
 	    referenceTable.setId("tableStyle");
+		referenceTable.setItems(reviewsInTable);
+		idColumn.setCellValueFactory(rowData -> rowData.getValue().idProperty());
+		ratingColumn.setCellValueFactory(rowData -> rowData.getValue().ratingProperty());
+		freeTextColumn.setCellValueFactory(rowData -> rowData.getValue().freeTextProperty());
 
+		//  Sentiment table
+		sentimentTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		sentimentTableView.setItems(sentimentCorrelationStatisticsList);
+		ratingSpanColumn.setCellValueFactory(rowData -> rowData.getValue().ratingSpan);
+		sentimentColumn.setCellValueFactory(rowData -> rowData.getValue().sentiment);
+		correlatingReviewsColumn.setCellValueFactory(rowData -> rowData.getValue().numberOfCorrelations);
+		correlatingPercentColumn.setCellValueFactory(rowData -> rowData.getValue().correlationPercent);
+		totalReviewsColumn.setCellValueFactory(rowData -> rowData.getValue().totalReviews);
 
 		root.setOnKeyPressed(event -> {
 			if(event.getCode().equals(KeyCode.ENTER)) {
@@ -216,16 +245,34 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				searchAction(ae);
 			}
 		});
-		
+
+		//  Prevent permanent tabs to be closed
 		tableDataTab.setClosable(false);
 		barChartTab.setClosable(false);
 		importTab.setClosable(false);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.SELECTED_TAB);
 		barChart.setAnimated(false);
-		referenceTable.setItems(reviewsInTable);
-		idColumn.setCellValueFactory(rowData -> rowData.getValue().idProperty());
-		ratingColumn.setCellValueFactory(rowData -> rowData.getValue().ratingProperty());
-		freeTextColumn.setCellValueFactory(rowData -> rowData.getValue().freeTextProperty());
+		sentimentAnalysisTab.setClosable(false);
+
+		//  Sentiment radio button code
+		oneFiveScaleRadioButton.setToggleGroup(sentimentGroup);
+		oneThreeScaleRadioButton.setToggleGroup(sentimentGroup);
+		oneFiveScaleRadioButton.setSelected(true);
+
+		//  Fixa switch sen när fler funktioner finns
+		sentimentGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) -> {
+			RadioButton tempButton = (RadioButton) sentimentGroup.getSelectedToggle();
+			selectedAnalysisRadioButton = tempButton.getText();
+
+			switch (selectedAnalysisRadioButton) {
+				case "Scale 1-5":
+					setCorrelationTableView();
+					break;
+				case "Scale 1-3":
+					break;
+			}
+		});
+
 
 		//  Radio button code
 		getAllRadioButton.setToggleGroup(group);
@@ -278,6 +325,27 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 					break;
 			}
 		});
+	}
+
+	public void processGetSentimentStatisticsCallback(List<?> response){
+		//  Kod för callback
+	}
+
+	public void setCorrelationTableView(){
+		// Test
+		sentimentCorrelationStatisticsList.clear();
+		SentimentCorrelationStatistics test = new SentimentCorrelationStatistics("81-100", "Very Positive", 0.36, 7612, 452100);
+		SentimentCorrelationStatistics test2 = new SentimentCorrelationStatistics("61-80", "Positive", 0.71, 6712, 1100);
+		SentimentCorrelationStatistics test3 = new SentimentCorrelationStatistics("41-60", "Neutral", 0.37, 6113, 12300);
+		SentimentCorrelationStatistics test4 = new SentimentCorrelationStatistics("21-40", "Negative", 0.93, 875, 1000);
+		SentimentCorrelationStatistics test5 = new SentimentCorrelationStatistics("1-20", "Very Negative", 0.45, 2165, 1000);
+		sentimentCorrelationStatisticsList.add(test);
+		sentimentCorrelationStatisticsList.add(test2);
+		sentimentCorrelationStatisticsList.add(test3);
+		sentimentCorrelationStatisticsList.add(test4);
+		sentimentCorrelationStatisticsList.add(test5);
+
+
 	}
 	
 	public void setReviews(List<Review> pReviews, int page) {

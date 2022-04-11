@@ -18,6 +18,7 @@ module com.dt002g.reviewapplication.frontend {
 	opens com.dt002g.reviewapplication.frontend to javafx.fxml;
     exports com.dt002g.reviewapplication.frontend;
     exports com.dt002g.reviewapplication.frontend.service;
+	opens com.dt002g.reviewapplication.frontend.service to javafx.fxml;
 
-    
+
 }
