@@ -2,19 +2,21 @@ package com.dt002g.reviewapplication.frontend.service;
 
 import com.dt002g.reviewapplication.frontend.Review;
 
+import java.util.List;
+
 public class ReviewBackendEntity {
 	
 	public String freeText = "";
 	public long id;
 	public int rating;
+
 	
 	public ReviewBackendEntity(){
 		
 	}
 	
-	public ReviewBackendEntity(String freeText, long id, int rating){
+	public ReviewBackendEntity(int rating, long id, String comment, List<SentenceBackendEntity> sentence){
 		this.freeText = freeText;
-		this.id = id;
 		this.rating = rating;
 	}
 	

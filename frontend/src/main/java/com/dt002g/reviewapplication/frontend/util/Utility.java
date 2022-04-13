@@ -10,9 +10,15 @@ public class Utility {
 
 	public static double round(double value, int places) {
 	    if (places < 0) throw new IllegalArgumentException();
-	    BigDecimal bd = BigDecimal.valueOf(value);
-	    bd = bd.setScale(places, RoundingMode.HALF_UP);
-	    return bd.doubleValue();
+	   try {
+		   BigDecimal bd = BigDecimal.valueOf(value);
+		   bd = bd.setScale(places, RoundingMode.HALF_UP);
+		   return bd.doubleValue();
+	   }
+	   catch(NumberFormatException e){
+		   return value;
+	   }
+
 	}
 	
 	public static void customResize(TableView<?> view) {

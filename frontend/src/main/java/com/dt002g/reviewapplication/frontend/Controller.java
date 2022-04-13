@@ -24,16 +24,13 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack {
+public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack, GetSentimentStatisticsCallBack {
 	@FXML private GridPane root;
 
 	@FXML private RadioButton getAllRadioButton = new RadioButton();
@@ -266,7 +263,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 			switch (selectedAnalysisRadioButton) {
 				case "Scale 1-5":
-					setCorrelationTableView();
+					ReviewBackendAPIService.getInstance().getSentimentMatrix(this);
+
 					break;
 				case "Scale 1-3":
 					break;
@@ -327,9 +325,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		});
 	}
 
-	public void processGetSentimentStatisticsCallback(List<?> response){
-		//  Kod för callback
-	}
+
 
 	public void setCorrelationTableView(){
 		// Test
@@ -339,8 +335,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		SentimentCorrelationStatistics test3 = new SentimentCorrelationStatistics("41-60", "Neutral", 0.37, 6113, 12300);
 		SentimentCorrelationStatistics test4 = new SentimentCorrelationStatistics("21-40", "Negative", 0.93, 875, 1000);
 		SentimentCorrelationStatistics test5 = new SentimentCorrelationStatistics("1-20", "Very Negative", 0.45, 2165, 1000);
-		sentimentCorrelationStatisticsList.add(test);
-		sentimentCorrelationStatisticsList.add(test2);
+
 		sentimentCorrelationStatisticsList.add(test3);
 		sentimentCorrelationStatisticsList.add(test4);
 		sentimentCorrelationStatisticsList.add(test5);
@@ -644,4 +639,90 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		alert.setContentText("The CSV file could not be parsed. Check the SCV file for errors and also that the separator is a \",\" ");
 		alert.showAndWait();
 	}
+
+	@Override
+	public void processGetSentimentStatisticsCallBack(List<SentimentStatisticsBackendEntity> response) {
+		final double PosMaxInterval = 3.5;
+		final double PosMinInterval = 3.5;
+		final double NeutralMaxInterval = 3.5;
+		final double NeutralMinInterval = 2.5;
+		final double NegMaxInterval = 3.5;
+
+		SentimentCorrelationStatistics positive = new SentimentCorrelationStatistics("61-100", "Positive", 0, 0, 0);
+		SentimentCorrelationStatistics neutral = new SentimentCorrelationStatistics("41-60", "Neutral", 0, 0, 0);
+		SentimentCorrelationStatistics negative = new SentimentCorrelationStatistics("0-40", "Negative", 0, 0, 0);
+		double numberOfCorrelations = 0;
+		double total = 0;
+		double correlationPercent;
+		for(SentimentStatisticsBackendEntity sentiment : response ){
+			if(sentiment.getRating() == 41){
+
+				try {
+					correlationPercent = numberOfCorrelations / total;
+				}
+				catch(ArithmeticException e){
+					correlationPercent = 0;
+				}
+				correlationPercent =Utility.round(correlationPercent, 2);
+				negative.setNumberOfCorrelations((int) numberOfCorrelations);
+				negative.setCorrelationPercent(correlationPercent);
+				negative.setTotalReviews((int) total);
+				numberOfCorrelations = 0;
+				total = 0;
+			}
+
+		 	if(sentiment.getRating() == 61) {
+
+				 try {
+					correlationPercent = numberOfCorrelations / total;
+				}
+				catch(ArithmeticException e){
+					correlationPercent = 0;
+				}
+				 correlationPercent = Utility.round(correlationPercent, 2);
+				neutral.setNumberOfCorrelations((int) numberOfCorrelations);
+				neutral.setCorrelationPercent(correlationPercent);
+				neutral.setTotalReviews((int) total);
+				numberOfCorrelations = 0;
+				total = 0;
+
+			 }
+
+			if(sentiment.getAmount() > 0){
+				if(sentiment.getRating() > 61){
+					if(sentiment.getMinScore() >= PosMinInterval){
+						numberOfCorrelations += sentiment.getAmount();
+					}
+				}
+				else if(sentiment.getRating() > 41){
+					if(sentiment.getMaxScore() < NeutralMaxInterval && sentiment.getMinScore() >= NeutralMinInterval){
+						numberOfCorrelations += sentiment.getAmount();
+					}
+				}
+				else{
+					if(sentiment.getMaxScore() <= NegMaxInterval){
+						numberOfCorrelations += sentiment.getAmount();
+					}
+				}
+				total += sentiment.getAmount();
+			}
+		}
+
+		try {
+			correlationPercent = numberOfCorrelations / total;
+		}
+		catch(ArithmeticException e){
+			correlationPercent = 0;
+		}
+		correlationPercent = Utility.round(correlationPercent, 2);
+		positive.setNumberOfCorrelations((int) numberOfCorrelations);
+		positive.setCorrelationPercent(correlationPercent);
+		positive.setTotalReviews((int) total);
+
+		sentimentCorrelationStatisticsList.add(positive);
+		sentimentCorrelationStatisticsList.add(neutral);
+		sentimentCorrelationStatisticsList.add(negative);
+
+	}
 }
+
