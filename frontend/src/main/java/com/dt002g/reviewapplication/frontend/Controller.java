@@ -648,15 +648,18 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		final double NeutralMinInterval = 2.5;
 		final double NegMaxInterval = 3.5;
 
+
 		SentimentCorrelationStatistics positive = new SentimentCorrelationStatistics("61-100", "Positive", 0, 0, 0);
 		SentimentCorrelationStatistics neutral = new SentimentCorrelationStatistics("41-60", "Neutral", 0, 0, 0);
 		SentimentCorrelationStatistics negative = new SentimentCorrelationStatistics("0-40", "Negative", 0, 0, 0);
 		double numberOfCorrelations = 0;
 		double total = 0;
 		double correlationPercent;
-		for(SentimentStatisticsBackendEntity sentiment : response ){
-			if(sentiment.getRating() == 41){
+		boolean checkedNeg = false;
+		boolean checkedNeutral = false;
 
+		for(SentimentStatisticsBackendEntity sentiment : response ){
+			if(sentiment.getRating() == 41 && !checkedNeg){
 				try {
 					correlationPercent = numberOfCorrelations / total;
 				}
@@ -669,9 +672,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				negative.setTotalReviews((int) total);
 				numberOfCorrelations = 0;
 				total = 0;
+				checkedNeg = true;
 			}
 
-		 	if(sentiment.getRating() == 61) {
+		 	if(sentiment.getRating() == 61 && !checkedNeutral) {
 
 				 try {
 					correlationPercent = numberOfCorrelations / total;
@@ -685,17 +689,18 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				neutral.setTotalReviews((int) total);
 				numberOfCorrelations = 0;
 				total = 0;
+				checkedNeutral = true;
 
 			 }
 
 			if(sentiment.getAmount() > 0){
-				if(sentiment.getRating() > 61){
+				if(sentiment.getRating() >= 61){
 					if(sentiment.getMinScore() >= PosMinInterval){
 						numberOfCorrelations += sentiment.getAmount();
 					}
 				}
-				else if(sentiment.getRating() > 41){
-					if(sentiment.getMaxScore() < NeutralMaxInterval && sentiment.getMinScore() >= NeutralMinInterval){
+				else if(sentiment.getRating() >= 41 && sentiment.getRating() < 61){
+					if(sentiment.getMaxScore() <= NeutralMaxInterval && sentiment.getMinScore() >= NeutralMinInterval){
 						numberOfCorrelations += sentiment.getAmount();
 					}
 				}
@@ -704,8 +709,9 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 						numberOfCorrelations += sentiment.getAmount();
 					}
 				}
-				total += sentiment.getAmount();
+
 			}
+			total += sentiment.getAmount();
 		}
 
 		try {
@@ -722,7 +728,6 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		sentimentCorrelationStatisticsList.add(positive);
 		sentimentCorrelationStatisticsList.add(neutral);
 		sentimentCorrelationStatisticsList.add(negative);
-
 	}
 }
 
