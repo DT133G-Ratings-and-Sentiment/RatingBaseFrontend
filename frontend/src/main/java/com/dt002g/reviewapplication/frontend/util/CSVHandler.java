@@ -259,6 +259,7 @@ public class CSVHandler implements UploadCSVFileCallBack {
 				}
 				try {
 					String tempRow = "";
+					boolean addRow = true;
 					for(int i = 0; i < headerIndexes.size(); i++) {
 						if(i == 0) {
 							// Transform to a common rating scale of 0-100  with formula:
@@ -276,12 +277,23 @@ public class CSVHandler implements UploadCSVFileCallBack {
 							tempRow += rating + ";#";
 						}
 						else if(i ==1){
+							if(rowData.get(headerIndexes.get(i)).length() > 2000) {
+								addRow = false;
+							}
 							tempRow += handleFreeText(rowData.get(headerIndexes.get(i)));
 						}
 					}
-					data.add(tempRow);
-					nrOfRows +=1;
-					numberOfParsedRows.setValue(numberOfParsedRows.getValue() +1);
+					if(addRow) {
+						data.add(tempRow);
+						nrOfRows += 1;
+						numberOfParsedRows.setValue(numberOfParsedRows.getValue() + 1);
+					}
+					else{
+						failedLines.add(rawLine);
+						failedLineProp.setValue(rawLine);
+						numberOfFailedRows.setValue(failedLines.size());
+						System.out.println("Free text longer than 2000 characters: " + numberOfLines );
+					}
 				}catch(NumberFormatException e) {
 					System.out.println("NumberFormatException: " + numberOfLines );
 					failedLines.add(rawLine);
