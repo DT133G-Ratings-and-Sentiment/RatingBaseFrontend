@@ -12,6 +12,7 @@ import javafx.scene.Node;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -275,6 +276,8 @@ public class CSVHandler implements UploadCSVFileCallBack {
 							}
 							int rating = (int)Math.round((rawRating -1)/ ((((double)maxRating+1)-(double)minRating) -1) * 100);
 							tempRow += rating + ";#";
+
+
 						}
 						else if(i ==1){
 							if(rowData.get(headerIndexes.get(i)).length() > 2000) {
@@ -359,8 +362,14 @@ public class CSVHandler implements UploadCSVFileCallBack {
 		//String[] sentences =freeText.split(".");
 
 		//3;#okay. You are fine and good and fine. Great for you.;#okay.;£0.0;¤10.0;¤40.0;¤30.0;¤20.0;@You are fine and good and fine.;£30.0;¤20.0;¤30.0;¤15.0;¤5.0;£fine;¤good;¤fine;@Great for you.;£0.0;¤20.0;¤30.0;¤30.0;¤20.0;£Great;#4
+		double totalScore = 0;
+		ArrayList<Double> scores = new ArrayList<>();
 		for(SentenceScore s: sentenceScore){
-			result += s.getSentence() + ";£" + s.getVeryPositive() + ";¤" + s.getPositive() + ";¤" + s.getNeutral() + ";¤" + s.getNegative() + ";¤" + s.getVeryNegative() +";£" + getScoreInNumber(s.getSentimentType());
+			int scoreNumber = getScoreInNumber(s.getSentimentType());
+			double normalisedScore = (((double)scoreNumber -1.0)/ 4.0) * 100.0;
+			scores.add(normalisedScore);
+			totalScore += normalisedScore;
+			result += s.getSentence() + ";£" + s.getVeryPositive() + ";¤" + s.getPositive() + ";¤" + s.getNeutral() + ";¤" + s.getNegative() + ";¤" + s.getVeryNegative() +";£" + scoreNumber +";£" +normalisedScore;
 			List<String> adjectives = senti.getAdjectives(s.getSentence());
 			if(adjectives.size() > 0) {
 				result += ";£";
@@ -371,7 +380,20 @@ public class CSVHandler implements UploadCSVFileCallBack {
 			}
 			result += ";@";
 		}
-		result = result.substring(0, result.length() -2);
+		double avgScore = totalScore /sentenceScore.size();
+		Collections.sort(scores);
+		double medianScore = 0;
+		if(scores.size() >=2 && scores.size() %2 ==0) {
+			medianScore = (scores.get((scores.size() / 2)) + scores.get((scores.size() / 2)-1))/2;
+		}
+		else if(scores.size() >=2){
+			medianScore = scores.get((scores.size() / 2));
+		}
+		else{
+			medianScore = scores.get(0);
+		}
+		result += ";#" + avgScore + ";#" + medianScore;
+		//result = result.substring(0, result.length() -2);
 		return result;
 	}
 	 private int getScoreInNumber(String score){

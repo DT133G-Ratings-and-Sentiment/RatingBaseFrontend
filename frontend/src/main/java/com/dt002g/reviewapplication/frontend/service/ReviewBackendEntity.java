@@ -10,6 +10,8 @@ public class ReviewBackendEntity {
 	public String comment = "";
 	public long id;
 	public int rating;
+	public double normalisedAverageSentenceScore;
+	public double normalisedMedianSentenceScore;
 	public ArrayList<SentenceBackendEntity> sentences = new ArrayList<>();
 
 	
@@ -58,5 +60,21 @@ public class ReviewBackendEntity {
 	public void setSentences(ArrayList<SentenceBackendEntity> sentences) {
 		System.out.println("ReviewBackendEntity setSentencesMethod");
 		this.sentences = sentences;
+	}
+
+	public double getNormalisedAverageSentenceScore() {
+		return normalisedAverageSentenceScore;
+	}
+
+	public void setNormalisedAverageSentenceScore(double normalisedAverageSentenceScore) {
+		this.normalisedAverageSentenceScore = normalisedAverageSentenceScore;
+	}
+
+	public double getNormalisedMedianSentenceScore() {
+		return normalisedMedianSentenceScore;
+	}
+
+	public void setNormalisedMedianSentenceScore(double normalisedMedianSentenceScore) {
+		this.normalisedMedianSentenceScore = normalisedMedianSentenceScore;
 	}
 }
