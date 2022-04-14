@@ -1,19 +1,20 @@
 package com.dt002g.reviewapplication.frontend.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class SentenceBackendEntity {
 
-    Long id;
-    String text;
-    double veryPositive;
-    double positive;
-    double neutral;
-    double negative;
-    double veryNegative;
-    int score;
-
+    public Long id;
+    public String text = "";
+    public double veryPositive;
+    public double positive;
+    public double neutral;
+    public double negative;
+    public double veryNegative;
+    public int score;
+    public ArrayList<SentenceToAdjectiveBackendEntity> sentenceToAdjectives = new ArrayList<>();
     public SentenceBackendEntity() {
 
     }
@@ -28,6 +29,19 @@ public class SentenceBackendEntity {
             this.negative = grades.get(3);
             this.veryNegative = grades.get(4);
         }
+    }
+
+    public SentenceBackendEntity(Long id, String text, double veryPositive, double positive, double neutral, double negative, double veryNegative, int score, List<SentenceToAdjectiveBackendEntity> sentenceToAdjectives) {
+        this.id = id;
+        this.text = text;
+        this.score = score;
+        this.veryPositive = veryPositive;
+        this.positive = positive;
+        this.neutral = neutral;
+        this.negative = negative;
+        this.veryNegative = veryNegative;
+        this.sentenceToAdjectives = new ArrayList<>();
+        this.sentenceToAdjectives.addAll(sentenceToAdjectives);
     }
 
     public Long getId() {

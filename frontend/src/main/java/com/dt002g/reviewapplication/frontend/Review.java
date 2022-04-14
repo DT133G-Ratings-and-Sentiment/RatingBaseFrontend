@@ -25,7 +25,7 @@ public class Review {
 	public Review(ReviewBackendEntity reviewBackendEntity) {
 		this.id.set(reviewBackendEntity.getId());
 		this.rating.set(reviewBackendEntity.getRating());
-		this.freeText.set(reviewBackendEntity.getFreeText());
+		this.freeText.set(reviewBackendEntity.getComment());
 	}
 	
 	public void setId(Long value) {
