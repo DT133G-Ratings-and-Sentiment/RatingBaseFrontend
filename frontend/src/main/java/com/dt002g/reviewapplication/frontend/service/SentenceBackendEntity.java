@@ -14,6 +14,7 @@ public class SentenceBackendEntity {
     public double negative;
     public double veryNegative;
     public int score;
+    public double normalisedScore;
     public ArrayList<SentenceToAdjectiveBackendEntity> sentenceToAdjectives = new ArrayList<>();
     public SentenceBackendEntity() {
 
@@ -109,5 +110,19 @@ public class SentenceBackendEntity {
         this.score = score;
     }
 
+    public double getNormalisedScore() {
+        return normalisedScore;
+    }
 
+    public void setNormalisedScore(double normalisedScore) {
+        this.normalisedScore = normalisedScore;
+    }
+
+    public ArrayList<SentenceToAdjectiveBackendEntity> getSentenceToAdjectives() {
+        return sentenceToAdjectives;
+    }
+
+    public void setSentenceToAdjectives(ArrayList<SentenceToAdjectiveBackendEntity> sentenceToAdjectives) {
+        this.sentenceToAdjectives = sentenceToAdjectives;
+    }
 }
