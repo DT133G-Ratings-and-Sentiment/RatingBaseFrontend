@@ -120,6 +120,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private TableColumn<SentimentCorrelationStatistics, Integer> correlatingReviewsColumn;
 	@FXML private TableColumn<SentimentCorrelationStatistics, Double> correlatingPercentColumn;
 	@FXML private TableColumn<SentimentCorrelationStatistics, Integer> totalReviewsColumn;
+	@FXML private Button sentimentSearchButton;
     
     @FXML
     void chooseFileButtonClicked(ActionEvent event) {
@@ -257,18 +258,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		oneFiveScaleRadioButton.setToggleGroup(sentimentGroup);
 		oneThreeScaleRadioButton.setToggleGroup(sentimentGroup);
 		oneFiveScaleRadioButton.setSelected(true);
-		Controller tempController = this;
-		sentimentAnalysisTab.setOnSelectionChanged(event -> {
-			if(sentimentAnalysisTab.isSelected()){
-				ReviewBackendAPIService.getInstance().getSentimentMatrix(tempController);
-			}
-		});
 
-		//  Fixa switch sen när fler funktioner finns
 		sentimentGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) -> {
 			RadioButton tempButton = (RadioButton) sentimentGroup.getSelectedToggle();
 			selectedAnalysisRadioButton = tempButton.getText();
-			ReviewBackendAPIService.getInstance().getSentimentMatrix(this);
 		});
 
 
@@ -751,6 +744,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		sentimentCorrelationStatistics.setNumberOfCorrelations((int) correlations);
 		sentimentCorrelationStatistics.setCorrelationPercent(correlationPercent);
 		sentimentCorrelationStatistics.setTotalReviews((int) total);
+	}
+
+	public void startSentimentAnalysis(ActionEvent event) {
+		ReviewBackendAPIService.getInstance().getSentimentMatrix(this);
 	}
 }
 

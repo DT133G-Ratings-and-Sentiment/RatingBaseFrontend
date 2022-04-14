@@ -177,6 +177,7 @@
                               </AnchorPane>
                           </content>
                         </ScrollPane>
+                        <Button fx:id="sentimentSearchButton" layoutX="413.0" layoutY="50.0" mnemonicParsing="false" onAction="#startSentimentAnalysis" text="Start Analysis" />
                      </children>
                   </AnchorPane>
               </content>
