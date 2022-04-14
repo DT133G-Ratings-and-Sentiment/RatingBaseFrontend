@@ -208,6 +208,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+
+		//  Upload csv
 		ratingSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
 		minRating.setValueFactory(
 				new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1));
@@ -255,20 +257,18 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		oneFiveScaleRadioButton.setToggleGroup(sentimentGroup);
 		oneThreeScaleRadioButton.setToggleGroup(sentimentGroup);
 		oneFiveScaleRadioButton.setSelected(true);
+		Controller tempController = this;
+		sentimentAnalysisTab.setOnSelectionChanged(event -> {
+			if(sentimentAnalysisTab.isSelected()){
+				ReviewBackendAPIService.getInstance().getSentimentMatrix(tempController);
+			}
+		});
 
 		//  Fixa switch sen när fler funktioner finns
 		sentimentGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) -> {
 			RadioButton tempButton = (RadioButton) sentimentGroup.getSelectedToggle();
 			selectedAnalysisRadioButton = tempButton.getText();
-
-			switch (selectedAnalysisRadioButton) {
-				case "Scale 1-5":
-					ReviewBackendAPIService.getInstance().getSentimentMatrix(this);
-
-					break;
-				case "Scale 1-3":
-					break;
-			}
+			ReviewBackendAPIService.getInstance().getSentimentMatrix(this);
 		});
 
 
@@ -326,23 +326,6 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	}
 
 
-
-	public void setCorrelationTableView(){
-		// Test
-		sentimentCorrelationStatisticsList.clear();
-		SentimentCorrelationStatistics test = new SentimentCorrelationStatistics("81-100", "Very Positive", 0.36, 7612, 452100);
-		SentimentCorrelationStatistics test2 = new SentimentCorrelationStatistics("61-80", "Positive", 0.71, 6712, 1100);
-		SentimentCorrelationStatistics test3 = new SentimentCorrelationStatistics("41-60", "Neutral", 0.37, 6113, 12300);
-		SentimentCorrelationStatistics test4 = new SentimentCorrelationStatistics("21-40", "Negative", 0.93, 875, 1000);
-		SentimentCorrelationStatistics test5 = new SentimentCorrelationStatistics("1-20", "Very Negative", 0.45, 2165, 1000);
-
-		sentimentCorrelationStatisticsList.add(test3);
-		sentimentCorrelationStatisticsList.add(test4);
-		sentimentCorrelationStatisticsList.add(test5);
-
-
-	}
-	
 	public void setReviews(List<Review> pReviews, int page) {
 		Platform.runLater(() -> {
 
@@ -642,92 +625,132 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 	@Override
 	public void processGetSentimentStatisticsCallBack(List<SentimentStatisticsBackendEntity> response) {
-		final double PosMaxInterval = 3.5;
-		final double PosMinInterval = 3.5;
-		final double NeutralMaxInterval = 3.5;
-		final double NeutralMinInterval = 2.5;
-		final double NegMaxInterval = 3.5;
+		sentimentCorrelationStatisticsList.clear();
+		if (selectedAnalysisRadioButton.equals("Scale 1-3")) {
+			double positiveNumberOfCorrelations = 0;
+			double positiveTotal = 0;
+			double neutralNumberOfCorrelations = 0;
+			double neutralTotal = 0;
+			double negativeNumberOfCorrelations = 0;
+			double negativeTotal = 0;
 
+			for (SentimentStatisticsBackendEntity sentiment : response) {
+				if (sentiment.getAmount() > 0) {
+					// Positive
+					if (sentiment.getRating() >= 61) {
+						if (sentiment.getMinScore() >= 61) {
+							positiveNumberOfCorrelations += sentiment.getAmount();
+						}
+						positiveTotal += sentiment.getAmount();
+					} else if (sentiment.getRating() >= 41 && sentiment.getRating() <= 60) {
+						if (sentiment.getMaxScore() <= 60 && sentiment.getMinScore() >= 41) {
+							neutralNumberOfCorrelations += sentiment.getAmount();
+						}
+						neutralTotal += sentiment.getAmount();
+					} else {
+						if (sentiment.getMaxScore() <= 40) {
+							negativeNumberOfCorrelations += sentiment.getAmount();
+						}
+						negativeTotal += sentiment.getAmount();
+					}
+				}
+			}
 
-		SentimentCorrelationStatistics positive = new SentimentCorrelationStatistics("61-100", "Positive", 0, 0, 0);
-		SentimentCorrelationStatistics neutral = new SentimentCorrelationStatistics("41-60", "Neutral", 0, 0, 0);
-		SentimentCorrelationStatistics negative = new SentimentCorrelationStatistics("0-40", "Negative", 0, 0, 0);
-		double numberOfCorrelations = 0;
-		double total = 0;
+			SentimentCorrelationStatistics positive = new SentimentCorrelationStatistics("61-100", "Positive", 0, 0, 0);
+			SentimentCorrelationStatistics neutral = new SentimentCorrelationStatistics("41-60", "Neutral", 0, 0, 0);
+			SentimentCorrelationStatistics negative = new SentimentCorrelationStatistics("0-40", "Negative", 0, 0, 0);
+
+			insertSentimentStats(positive, positiveTotal, positiveNumberOfCorrelations);
+			insertSentimentStats(neutral, neutralTotal, neutralNumberOfCorrelations);
+			insertSentimentStats(negative, negativeTotal, negativeNumberOfCorrelations);
+
+			sentimentCorrelationStatisticsList.add(positive);
+			sentimentCorrelationStatisticsList.add(neutral);
+			sentimentCorrelationStatisticsList.add(negative);
+		}
+		else {
+
+			double veryPositiveNumberOfCorrelations = 0;
+			double veryPositiveTotal = 0;
+			double positiveNumberOfCorrelations = 0;
+			double positiveTotal = 0;
+			double neutralNumberOfCorrelations = 0;
+			double neutralTotal = 0;
+			double negativeNumberOfCorrelations = 0;
+			double negativeTotal = 0;
+			double veryNegativeNumberOfCorrelations = 0;
+			double veryNegativeTotal = 0;
+
+			for (SentimentStatisticsBackendEntity sentiment : response) {
+				if (sentiment.getAmount() > 0) {
+					// Neg
+					if (sentiment.getRating() >= 21 && sentiment.getRating() < 41) {
+						if (sentiment.getMinScore() >= 21 && sentiment.getMinScore() < 41) {
+							negativeNumberOfCorrelations += sentiment.getAmount();
+						}
+						negativeTotal += sentiment.getAmount();
+					}
+					//  Neutral
+					else if (sentiment.getRating() >= 41 && sentiment.getRating() < 61) {
+						if (sentiment.getMaxScore() < 61 && sentiment.getMinScore() >= 41) {
+							neutralNumberOfCorrelations += sentiment.getAmount();
+						}
+						neutralTotal += sentiment.getAmount();
+					// Positive
+					} else if(sentiment.getRating() >= 61 && sentiment.getRating() < 81) {
+						if (sentiment.getMaxScore() < 81 && sentiment.getMinScore() >= 61) {
+							positiveNumberOfCorrelations += sentiment.getAmount();
+						}
+						positiveTotal += sentiment.getAmount();
+					}
+					//  Very postive
+					else if(sentiment.getRating() >= 81){
+						if(sentiment.getMinScore() >= 81){
+							veryPositiveNumberOfCorrelations += sentiment.getAmount();
+						}
+						veryPositiveTotal += sentiment.getAmount();
+					}
+					// Very negative
+					else{
+						if(sentiment.getMaxScore() < 21) {
+							veryNegativeNumberOfCorrelations += sentiment.getAmount();
+						}
+						veryNegativeTotal += sentiment.getAmount();
+					}
+				}
+			}
+
+			SentimentCorrelationStatistics veryPositive = new SentimentCorrelationStatistics("81-100", "Very Positive", 0, 0, 0);
+			SentimentCorrelationStatistics positive = new SentimentCorrelationStatistics("61-80", "Positive", 0, 0, 0);
+			SentimentCorrelationStatistics neutral = new SentimentCorrelationStatistics("41-60", "Neutral", 0, 0, 0);
+			SentimentCorrelationStatistics negative = new SentimentCorrelationStatistics("21-40", "Negative", 0, 0, 0);
+			SentimentCorrelationStatistics veryNegative = new SentimentCorrelationStatistics("1-20", "Very Negative", 0, 0, 0);
+
+			insertSentimentStats(veryPositive, veryPositiveTotal, veryPositiveNumberOfCorrelations);
+			insertSentimentStats(positive, positiveTotal, positiveNumberOfCorrelations);
+			insertSentimentStats(neutral, neutralTotal, neutralNumberOfCorrelations);
+			insertSentimentStats(negative, negativeTotal, negativeNumberOfCorrelations);
+			insertSentimentStats(veryNegative, veryNegativeTotal, veryNegativeNumberOfCorrelations);
+
+			sentimentCorrelationStatisticsList.add(veryPositive);
+			sentimentCorrelationStatisticsList.add(positive);
+			sentimentCorrelationStatisticsList.add(neutral);
+			sentimentCorrelationStatisticsList.add(negative);
+			sentimentCorrelationStatisticsList.add(veryNegative);
+		}
+	}
+
+	private void insertSentimentStats(SentimentCorrelationStatistics sentimentCorrelationStatistics, double total, double correlations){
 		double correlationPercent;
-		boolean checkedNeg = false;
-		boolean checkedNeutral = false;
-
-		for(SentimentStatisticsBackendEntity sentiment : response ){
-			if(sentiment.getRating() == 41 && !checkedNeg){
-				try {
-					correlationPercent = numberOfCorrelations / total;
-				}
-				catch(ArithmeticException e){
-					correlationPercent = 0;
-				}
-				correlationPercent =Utility.round(correlationPercent, 2);
-				negative.setNumberOfCorrelations((int) numberOfCorrelations);
-				negative.setCorrelationPercent(correlationPercent);
-				negative.setTotalReviews((int) total);
-				numberOfCorrelations = 0;
-				total = 0;
-				checkedNeg = true;
-			}
-
-		 	if(sentiment.getRating() == 61 && !checkedNeutral) {
-
-				 try {
-					correlationPercent = numberOfCorrelations / total;
-				}
-				catch(ArithmeticException e){
-					correlationPercent = 0;
-				}
-				 correlationPercent = Utility.round(correlationPercent, 2);
-				neutral.setNumberOfCorrelations((int) numberOfCorrelations);
-				neutral.setCorrelationPercent(correlationPercent);
-				neutral.setTotalReviews((int) total);
-				numberOfCorrelations = 0;
-				total = 0;
-				checkedNeutral = true;
-
-			 }
-
-			if(sentiment.getAmount() > 0){
-				if(sentiment.getRating() >= 61){
-					if(sentiment.getMinScore() >= PosMinInterval){
-						numberOfCorrelations += sentiment.getAmount();
-					}
-				}
-				else if(sentiment.getRating() >= 41 && sentiment.getRating() < 61){
-					if(sentiment.getMaxScore() <= NeutralMaxInterval && sentiment.getMinScore() >= NeutralMinInterval){
-						numberOfCorrelations += sentiment.getAmount();
-					}
-				}
-				else{
-					if(sentiment.getMaxScore() <= NegMaxInterval){
-						numberOfCorrelations += sentiment.getAmount();
-					}
-				}
-
-			}
-			total += sentiment.getAmount();
-		}
-
 		try {
-			correlationPercent = numberOfCorrelations / total;
-		}
-		catch(ArithmeticException e){
+			correlationPercent = correlations / total;
+		} catch (ArithmeticException e) {
 			correlationPercent = 0;
 		}
 		correlationPercent = Utility.round(correlationPercent, 2);
-		positive.setNumberOfCorrelations((int) numberOfCorrelations);
-		positive.setCorrelationPercent(correlationPercent);
-		positive.setTotalReviews((int) total);
-
-		sentimentCorrelationStatisticsList.add(positive);
-		sentimentCorrelationStatisticsList.add(neutral);
-		sentimentCorrelationStatisticsList.add(negative);
+		sentimentCorrelationStatistics.setNumberOfCorrelations((int) correlations);
+		sentimentCorrelationStatistics.setCorrelationPercent(correlationPercent);
+		sentimentCorrelationStatistics.setTotalReviews((int) total);
 	}
 }
 
