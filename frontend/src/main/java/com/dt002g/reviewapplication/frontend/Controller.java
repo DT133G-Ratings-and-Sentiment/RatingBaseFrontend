@@ -110,7 +110,11 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private RadioButton oneThreeScaleRadioButton = new RadioButton();
 	private final ToggleGroup sentimentGroup = new ToggleGroup();
 	private String selectedAnalysisRadioButton = "Scale 1-5";
+	private String selectedAnalyseFormRadioButton = "Mean";
 
+	@FXML RadioButton meanRadioButton;
+	@FXML RadioButton averageRadioButton;
+	private final ToggleGroup analysisFormGroup = new ToggleGroup();
 	@FXML private Tab sentimentAnalysisTab;
 
 	@FXML private TableView<SentimentCorrelationStatistics> sentimentTableView;
@@ -258,10 +262,17 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		oneFiveScaleRadioButton.setToggleGroup(sentimentGroup);
 		oneThreeScaleRadioButton.setToggleGroup(sentimentGroup);
 		oneFiveScaleRadioButton.setSelected(true);
+		meanRadioButton.setToggleGroup(analysisFormGroup);
+		averageRadioButton.setToggleGroup(analysisFormGroup);
+		meanRadioButton.setSelected(true);
 
 		sentimentGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) -> {
 			RadioButton tempButton = (RadioButton) sentimentGroup.getSelectedToggle();
 			selectedAnalysisRadioButton = tempButton.getText();
+		});
+		analysisFormGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) -> {
+			RadioButton tempButton = (RadioButton) analysisFormGroup.getSelectedToggle();
+			selectedAnalyseFormRadioButton = tempButton.getText();
 		});
 
 
@@ -317,7 +328,6 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			}
 		});
 	}
-
 
 	public void setReviews(List<Review> pReviews, int page) {
 		Platform.runLater(() -> {
@@ -619,6 +629,32 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@Override
 	public void processGetSentimentStatisticsCallBack(List<SentimentStatisticsBackendEntity> response) {
 		sentimentCorrelationStatisticsList.clear();
+		analyseAndSaveAnalysedSentimentToTable(response);
+	}
+
+	private void insertSentimentStats(SentimentCorrelationStatistics sentimentCorrelationStatistics, double total, double correlations){
+		double correlationPercent;
+		try {
+			correlationPercent = correlations / total;
+		} catch (ArithmeticException e) {
+			correlationPercent = 0;
+		}
+		correlationPercent = Utility.round(correlationPercent, 2);
+		sentimentCorrelationStatistics.setNumberOfCorrelations((int) correlations);
+		sentimentCorrelationStatistics.setCorrelationPercent(correlationPercent);
+		sentimentCorrelationStatistics.setTotalReviews((int) total);
+	}
+
+	public void startSentimentAnalysis(ActionEvent event) {
+		if(selectedAnalyseFormRadioButton.equals("Mean")) {
+			ReviewBackendAPIService.getInstance().getSentimentMatrix(this);
+		}
+		else{
+			ReviewBackendAPIService.getInstance().getSentimentMatrixMedian(this);
+		}
+	}
+
+	private void analyseAndSaveAnalysedSentimentToTable(List<SentimentStatisticsBackendEntity> response){
 		if (selectedAnalysisRadioButton.equals("Scale 1-3")) {
 			double positiveNumberOfCorrelations = 0;
 			double positiveTotal = 0;
@@ -631,12 +667,12 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				if (sentiment.getAmount() > 0) {
 					// Positive
 					if (sentiment.getRating() >= 61) {
-						if (sentiment.getMinScore() >= 61) {
+						if (sentiment.getMinScore() >= 60) {
 							positiveNumberOfCorrelations += sentiment.getAmount();
 						}
 						positiveTotal += sentiment.getAmount();
-					} else if (sentiment.getRating() >= 41 && sentiment.getRating() <= 60) {
-						if (sentiment.getMaxScore() <= 60 && sentiment.getMinScore() >= 41) {
+					} else if (sentiment.getRating() >= 40 && sentiment.getRating() <= 60) {
+						if (sentiment.getMaxScore() <= 60 && sentiment.getMinScore() >= 40) {
 							neutralNumberOfCorrelations += sentiment.getAmount();
 						}
 						neutralTotal += sentiment.getAmount();
@@ -677,28 +713,28 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			for (SentimentStatisticsBackendEntity sentiment : response) {
 				if (sentiment.getAmount() > 0) {
 					// Neg
-					if (sentiment.getRating() >= 21 && sentiment.getRating() < 41) {
-						if (sentiment.getMinScore() >= 21 && sentiment.getMinScore() < 41) {
+					if (sentiment.getRating() >= 20 && sentiment.getRating() < 41) {
+						if (sentiment.getMinScore() >= 20 && sentiment.getMinScore() < 41) {
 							negativeNumberOfCorrelations += sentiment.getAmount();
 						}
 						negativeTotal += sentiment.getAmount();
 					}
 					//  Neutral
-					else if (sentiment.getRating() >= 41 && sentiment.getRating() < 61) {
-						if (sentiment.getMaxScore() < 61 && sentiment.getMinScore() >= 41) {
+					else if (sentiment.getRating() >= 40 && sentiment.getRating() < 61) {
+						if (sentiment.getMaxScore() < 61 && sentiment.getMinScore() >= 40) {
 							neutralNumberOfCorrelations += sentiment.getAmount();
 						}
 						neutralTotal += sentiment.getAmount();
-					// Positive
-					} else if(sentiment.getRating() >= 61 && sentiment.getRating() < 81) {
-						if (sentiment.getMaxScore() < 81 && sentiment.getMinScore() >= 61) {
+						// Positive
+					} else if(sentiment.getRating() >= 60 && sentiment.getRating() < 81) {
+						if (sentiment.getMaxScore() < 81 && sentiment.getMinScore() >= 60) {
 							positiveNumberOfCorrelations += sentiment.getAmount();
 						}
 						positiveTotal += sentiment.getAmount();
 					}
 					//  Very postive
 					else if(sentiment.getRating() >= 81){
-						if(sentiment.getMinScore() >= 81){
+						if(sentiment.getMinScore() >= 80){
 							veryPositiveNumberOfCorrelations += sentiment.getAmount();
 						}
 						veryPositiveTotal += sentiment.getAmount();
@@ -731,23 +767,6 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			sentimentCorrelationStatisticsList.add(negative);
 			sentimentCorrelationStatisticsList.add(veryNegative);
 		}
-	}
-
-	private void insertSentimentStats(SentimentCorrelationStatistics sentimentCorrelationStatistics, double total, double correlations){
-		double correlationPercent;
-		try {
-			correlationPercent = correlations / total;
-		} catch (ArithmeticException e) {
-			correlationPercent = 0;
-		}
-		correlationPercent = Utility.round(correlationPercent, 2);
-		sentimentCorrelationStatistics.setNumberOfCorrelations((int) correlations);
-		sentimentCorrelationStatistics.setCorrelationPercent(correlationPercent);
-		sentimentCorrelationStatistics.setTotalReviews((int) total);
-	}
-
-	public void startSentimentAnalysis(ActionEvent event) {
-		ReviewBackendAPIService.getInstance().getSentimentMatrix(this);
 	}
 }
 

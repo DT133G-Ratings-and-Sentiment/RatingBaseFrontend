@@ -13,6 +13,7 @@ module com.dt002g.reviewapplication.frontend {
 	requires retrofit2.converter.jackson;
 	requires Sentiment.Analysis;
 	requires okio;
+	requires annotations;
 
 
 	opens com.dt002g.reviewapplication.frontend to javafx.fxml;

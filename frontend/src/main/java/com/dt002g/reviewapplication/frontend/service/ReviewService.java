@@ -67,6 +67,8 @@ public interface ReviewService {
 	@POST("csvupload")
 	Call<ResponseBody> uploadCSVFile(@Part("description") RequestBody description,  @Part MultipartBody.Part csvFile);
 
-	@GET("getNumberOfRewiewsByRatingAndScoreMatrix")
+	@GET("getNumberOfReviewsByRatingAndScoreMatrix")
 	Call<List<SentimentStatisticsBackendEntity>> getNumberOfReviewsByRatingAndScoreMatrix();
+	@GET("getNumberOfReviewsByRatingAndScoreMatrixMedian")
+	Call<List<SentimentStatisticsBackendEntity>> getNumberOfReviewsByRatingAndScoreMatrixMedian();
 }

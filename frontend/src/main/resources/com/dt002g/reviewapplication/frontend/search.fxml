@@ -158,8 +158,8 @@
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <RadioButton fx:id="oneFiveScaleRadioButton" layoutX="51.0" layoutY="54.0" mnemonicParsing="false" text="Scale 1-5" />
-                        <RadioButton fx:id="oneThreeScaleRadioButton" layoutX="128.0" layoutY="54.0" mnemonicParsing="false" text="Scale 1-3" />
+                        <RadioButton fx:id="oneFiveScaleRadioButton" layoutX="16.0" layoutY="26.0" mnemonicParsing="false" text="Scale 1-5" />
+                        <RadioButton fx:id="oneThreeScaleRadioButton" layoutX="102.0" layoutY="26.0" mnemonicParsing="false" text="Scale 1-3" />
                         <ScrollPane fx:id="statsContainer" layoutY="113.0" pannable="true" prefHeight="555.0" prefWidth="980.0">
                           <content>
                             <AnchorPane prefHeight="541.0" prefWidth="965.0">
@@ -178,6 +178,8 @@
                           </content>
                         </ScrollPane>
                         <Button fx:id="sentimentSearchButton" layoutX="413.0" layoutY="50.0" mnemonicParsing="false" onAction="#startSentimentAnalysis" text="Start Analysis" />
+                        <RadioButton fx:id="meanRadioButton" layoutX="16.0" layoutY="54.0" mnemonicParsing="false" text="Mean" />
+                        <RadioButton fx:id="averageRadioButton" layoutX="102.0" layoutY="54.0" mnemonicParsing="false" text="Median" />
                      </children>
                   </AnchorPane>
               </content>

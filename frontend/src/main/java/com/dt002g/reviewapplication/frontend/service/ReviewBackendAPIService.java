@@ -11,6 +11,7 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import org.jetbrains.annotations.NotNull;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -64,6 +65,25 @@ public class ReviewBackendAPIService {
 			}
 			@Override
 			public void onFailure(Call<List<RatingBackendEntity>> call, Throwable t) {
+				showErrorAlert(t);
+			}
+		});
+	}
+
+	private void sentimentRequest(GetSentimentStatisticsCallBack getSentimentStatisticsCallBack, Call<List<SentimentStatisticsBackendEntity>> sentimentRequest) {
+		sentimentRequest.enqueue(new Callback<>() {
+			@Override
+			public void onResponse(@NotNull Call<List<SentimentStatisticsBackendEntity>> call, @NotNull Response<List<SentimentStatisticsBackendEntity>> response) {
+				if (response.isSuccessful()) {
+
+					List<SentimentStatisticsBackendEntity> sentimentStats = response.body();
+					getSentimentStatisticsCallBack.processGetSentimentStatisticsCallBack(sentimentStats);
+				} else {
+					showErrorAlert(response);
+				}
+			}
+			@Override
+			public void onFailure(Call<List<SentimentStatisticsBackendEntity>> call, Throwable t) {
 				showErrorAlert(t);
 			}
 		});
@@ -169,24 +189,16 @@ public class ReviewBackendAPIService {
 	public void getSentimentMatrix(GetSentimentStatisticsCallBack getSentimentStatisticsCallBack) {
 		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
 		Call<List<SentimentStatisticsBackendEntity>> sentimentRequest = reviewService.getNumberOfReviewsByRatingAndScoreMatrix();
-		sentimentRequest.enqueue(new Callback<>() {
-			@Override
-			public void onResponse(Call<List<SentimentStatisticsBackendEntity>> call, Response<List<SentimentStatisticsBackendEntity>> response) {
-				if (response.isSuccessful()) {
-					System.out.println("HERE");
-					List<SentimentStatisticsBackendEntity> sentimentStats = response.body();
-					getSentimentStatisticsCallBack.processGetSentimentStatisticsCallBack(sentimentStats);
-				} else {
-					showErrorAlert(response);
-				}
-			}
-			@Override
-			public void onFailure(Call<List<SentimentStatisticsBackendEntity>> call, Throwable t) {
-				showErrorAlert(t);
-			}
-		});
+		sentimentRequest(getSentimentStatisticsCallBack, sentimentRequest);
 	}
-	
+
+	public void getSentimentMatrixMedian(GetSentimentStatisticsCallBack getSentimentStatisticsCallBack) {
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<SentimentStatisticsBackendEntity>> sentimentRequest = reviewService.getNumberOfReviewsByRatingAndScoreMatrixMedian();
+		sentimentRequest(getSentimentStatisticsCallBack, sentimentRequest);
+	}
+
+
 	public void getTopReviewsLargerThanId(GetReviewsCallBack getReviewsCallBack, Long id) {
 		this.getReviewsCallBack = getReviewsCallBack;
 		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
