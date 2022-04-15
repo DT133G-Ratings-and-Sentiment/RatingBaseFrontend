@@ -125,6 +125,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private TableColumn<SentimentCorrelationStatistics, Double> correlatingPercentColumn;
 	@FXML private TableColumn<SentimentCorrelationStatistics, Integer> totalReviewsColumn;
 	@FXML private Button sentimentSearchButton;
+	@FXML private ProgressIndicator progressIndicator;
     
     @FXML
     void chooseFileButtonClicked(ActionEvent event) {
@@ -136,7 +137,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
     		csvFile = null;
     	}
     	else {
-	    	ArrayList<String> headers = CSVHandler.getInstance().getHeades(csvFile);
+	    	ArrayList<String> headers = CSVHandler.getInstance().getHeaders(csvFile);
 	    	if(headers.size() < 2) {
 	    		showInvalidCSVFileAlertDialog((Node)event.getSource());
 	    	}
@@ -327,6 +328,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 					break;
 			}
 		});
+
+		// Progress indicator for analysis
+		progressIndicator.setVisible(false);
+		progressIndicator.setManaged(false);
 	}
 
 	public void setReviews(List<Review> pReviews, int page) {
@@ -646,6 +651,11 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	}
 
 	public void startSentimentAnalysis(ActionEvent event) {
+		progressIndicator.setManaged(true);
+		progressIndicator.setVisible(true);
+		progressIndicator.setProgress(-1d);
+		sentimentSearchButton.setDisable(true);
+
 		if(selectedAnalyseFormRadioButton.equals("Mean")) {
 			ReviewBackendAPIService.getInstance().getSentimentMatrix(this);
 		}
@@ -712,7 +722,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 			for (SentimentStatisticsBackendEntity sentiment : response) {
 				if (sentiment.getAmount() > 0) {
-					// Neg
+					// Negative
 					if (sentiment.getRating() >= 20 && sentiment.getRating() < 41) {
 						if (sentiment.getMinScore() >= 20 && sentiment.getMinScore() < 41) {
 							negativeNumberOfCorrelations += sentiment.getAmount();
@@ -732,7 +742,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 						}
 						positiveTotal += sentiment.getAmount();
 					}
-					//  Very postive
+					//  Very positive
 					else if(sentiment.getRating() >= 81){
 						if(sentiment.getMinScore() >= 80){
 							veryPositiveNumberOfCorrelations += sentiment.getAmount();
@@ -766,7 +776,11 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			sentimentCorrelationStatisticsList.add(neutral);
 			sentimentCorrelationStatisticsList.add(negative);
 			sentimentCorrelationStatisticsList.add(veryNegative);
+
 		}
+		progressIndicator.setManaged(false);
+		progressIndicator.setVisible(false);
+		sentimentSearchButton.setDisable(false);
 	}
 }
 

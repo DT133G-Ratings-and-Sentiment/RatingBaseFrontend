@@ -1,6 +1,5 @@
 package com.dt002g.reviewapplication.frontend.util;
 
-import com.dt002g.reviewapplication.frontend.service.ReviewBackendAPIService;
 import com.dt002g.reviewapplication.frontend.service.UploadCSVFileCallBack;
 import com.stanford_nlp.SentimentAnalyser.SentenceScore;
 import com.stanford_nlp.SentimentAnalyser.SentimentAnalyser;
@@ -8,7 +7,6 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.scene.Node;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -35,7 +33,7 @@ public class CSVHandler implements UploadCSVFileCallBack {
 	}
 	
 	
-	public ArrayList<String> getHeades(File file){
+	public ArrayList<String> getHeaders(File file){
 		ArrayList<String> headersToUse = new ArrayList<String>();
 	    String headersRow;
 		try {
@@ -283,7 +281,9 @@ public class CSVHandler implements UploadCSVFileCallBack {
 							if(rowData.get(headerIndexes.get(i)).length() > 2000) {
 								addRow = false;
 							}
-							tempRow += handleFreeText(rowData.get(headerIndexes.get(i)));
+							else {
+								tempRow += handleFreeText(rowData.get(headerIndexes.get(i)));
+							}
 						}
 					}
 					if(addRow) {

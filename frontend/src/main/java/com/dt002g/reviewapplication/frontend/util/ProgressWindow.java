@@ -29,6 +29,7 @@ public class ProgressWindow {
     public ProgressWindow(Stage owner, CSVHandler handler, ExecutorService executorService) {
         System.out.println("Intialise ProgressWindow");
         dialogStage = new Stage();
+        dialogStage.setResizable(true);
         dialogStage.initStyle(StageStyle.UTILITY);
         dialogStage.setResizable(false);
         dialogStage.initModality(Modality.APPLICATION_MODAL);
