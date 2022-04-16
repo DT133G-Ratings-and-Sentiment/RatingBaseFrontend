@@ -218,6 +218,68 @@ public class ReviewBackendAPIService {
 		ratingsCallBack(getRatingStatsCallBack, searchString, reviewRequest);
 	}
 
+	public void getNumberOfAdjectivesByNameInReviewRatingAndAverageScoreRangeMatrix(GetNumberOfAdjectivesByNameInReviewRatingAndAverageScoreRangeMatrixCallBack getNumberOfAdjectivesByNameInReviewRatingAndAverageScoreRangeMatrixCallBack) {
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<AdjectiveByReviewRatingAndScoreBackendEntity>> reviewRequest = reviewService.getNumberOfAdjectivesByNameInReviewRatingAndAverageScoreRangeMatrix();
+
+		reviewRequest.enqueue(new Callback<List<AdjectiveByReviewRatingAndScoreBackendEntity>>() {
+
+								  @Override
+								  public void onResponse(Call<List<AdjectiveByReviewRatingAndScoreBackendEntity>> call, Response<List<AdjectiveByReviewRatingAndScoreBackendEntity>> response) {
+									  if(response.isSuccessful()) {
+										  List<AdjectiveByReviewRatingAndScoreBackendEntity> adjectiveByReviewRatingAndScoreBackendEntities = response.body();
+										  getNumberOfAdjectivesByNameInReviewRatingAndAverageScoreRangeMatrixCallBack.processGetNumberOfAdjectivesByNameInReviewRatingAndAverageScoreRangeMatrixCallBack(adjectiveByReviewRatingAndScoreBackendEntities);
+									  }
+									  else {
+										  Platform.runLater(() -> {
+											  Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+											  alert.show();
+										  });
+									  }
+								  }
+
+								  @Override
+								  public void onFailure(Call<List<AdjectiveByReviewRatingAndScoreBackendEntity>> call, Throwable t) {
+									  Platform.runLater(() -> {
+										  Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+										  alert.show();
+									  });
+
+								  }
+							  });
+	}
+
+	public void getNumberOfAdjectivesByNameInReviewRatingAndMedianScoreRangeMatrix(GetNumberOfAdjectivesByNameInReviewRatingAndMedianScoreRangeMatrixCallBack getNumberOfAdjectivesByNameInReviewRatingAndMedianScoreRangeMatrixCallBack) {
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<AdjectiveByReviewRatingAndScoreBackendEntity>> reviewRequest = reviewService.getNumberOfAdjectivesByNameInReviewRatingAndMedianScoreRangeMatrix();
+
+		reviewRequest.enqueue(new Callback<List<AdjectiveByReviewRatingAndScoreBackendEntity>>() {
+
+			@Override
+			public void onResponse(Call<List<AdjectiveByReviewRatingAndScoreBackendEntity>> call, Response<List<AdjectiveByReviewRatingAndScoreBackendEntity>> response) {
+				if(response.isSuccessful()) {
+					List<AdjectiveByReviewRatingAndScoreBackendEntity> adjectiveByReviewRatingAndScoreBackendEntities = response.body();
+					getNumberOfAdjectivesByNameInReviewRatingAndMedianScoreRangeMatrixCallBack.processGetNumberOfAdjectivesByNameInReviewRatingAndMedianScoreRangeMatrixCallBack(adjectiveByReviewRatingAndScoreBackendEntities);
+				}
+				else {
+					Platform.runLater(() -> {
+						Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+						alert.show();
+					});
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<AdjectiveByReviewRatingAndScoreBackendEntity>> call, Throwable t) {
+				Platform.runLater(() -> {
+					Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+					alert.show();
+				});
+
+			}
+		});
+	}
+
 	public void uploadCSVFile(File file, UploadCSVFileCallBack uploadCSVFileCallBack, int numberOfRows) {
 		System.out.println("uploading SCV file from frontend");
 		RequestBody descriptionPart = RequestBody.create(okhttp3.MultipartBody.FORM, "csvFile");

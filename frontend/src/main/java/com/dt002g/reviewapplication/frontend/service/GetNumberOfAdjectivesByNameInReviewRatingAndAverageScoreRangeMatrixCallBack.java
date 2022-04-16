@@ -1,0 +1,7 @@
+package com.dt002g.reviewapplication.frontend.service;
+
+import java.util.List;
+
+public interface GetNumberOfAdjectivesByNameInReviewRatingAndAverageScoreRangeMatrixCallBack {
+    void processGetNumberOfAdjectivesByNameInReviewRatingAndAverageScoreRangeMatrixCallBack(List<AdjectiveByReviewRatingAndScoreBackendEntity> response);
+}

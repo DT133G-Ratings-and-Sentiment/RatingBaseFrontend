@@ -71,4 +71,10 @@ public interface ReviewService {
 	Call<List<SentimentStatisticsBackendEntity>> getNumberOfReviewsByRatingAndScoreMatrix();
 	@GET("getNumberOfReviewsByRatingAndScoreMatrixMedian")
 	Call<List<SentimentStatisticsBackendEntity>> getNumberOfReviewsByRatingAndScoreMatrixMedian();
+
+	@GET("getNumberOfAdjectivesByNameInReviewRatingAndAverageScoreRangeMatrix")
+	Call<List<AdjectiveByReviewRatingAndScoreBackendEntity>> getNumberOfAdjectivesByNameInReviewRatingAndAverageScoreRangeMatrix();
+
+	@GET("getNumberOfAdjectivesByNameInReviewRatingAndMedianScoreRangeMatrix")
+	Call<List<AdjectiveByReviewRatingAndScoreBackendEntity>> getNumberOfAdjectivesByNameInReviewRatingAndMedianScoreRangeMatrix();
 }
