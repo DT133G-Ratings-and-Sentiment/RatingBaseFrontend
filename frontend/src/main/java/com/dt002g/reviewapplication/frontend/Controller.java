@@ -111,11 +111,16 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	private final ToggleGroup sentimentGroup = new ToggleGroup();
 	private String selectedAnalysisRadioButton = "Scale 1-5";
 	private String selectedAnalyseFormRadioButton = "Mean";
+	private String selectedSentimentOrAdjective = "Sentiment";
 
 	@FXML RadioButton meanRadioButton;
 	@FXML RadioButton averageRadioButton;
 	private final ToggleGroup analysisFormGroup = new ToggleGroup();
 	@FXML private Tab sentimentAnalysisTab;
+
+	@FXML private RadioButton sentimentButton;
+	@FXML private RadioButton adjectivesButton;
+	private final ToggleGroup sentimentAdjectivesGroup = new ToggleGroup();
 
 	@FXML private TableView<SentimentCorrelationStatistics> sentimentTableView;
 	private final ObservableList<SentimentCorrelationStatistics> sentimentCorrelationStatisticsList = FXCollections.observableArrayList();
@@ -126,6 +131,13 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private TableColumn<SentimentCorrelationStatistics, Integer> totalReviewsColumn;
 	@FXML private Button sentimentSearchButton;
 	@FXML private ProgressIndicator progressIndicator;
+
+	@FXML private TableView<AdjectivesStatistics> adjectiveTableView;
+	private final ObservableList<AdjectivesStatistics> adjectiveStatisticsList = FXCollections.observableArrayList();
+	@FXML private TableColumn<AdjectivesStatistics, String> adjectiveRatingSpanColumn;
+	@FXML private TableColumn<AdjectivesStatistics, String> adjectiveSentimentColumn;
+	@FXML private TableColumn<AdjectivesStatistics, String> adjectiveColumn;
+	@FXML private TableColumn<AdjectivesStatistics, Integer> adjectiveAmountColumn;
     
     @FXML
     void chooseFileButtonClicked(ActionEvent event) {
@@ -266,6 +278,9 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		meanRadioButton.setToggleGroup(analysisFormGroup);
 		averageRadioButton.setToggleGroup(analysisFormGroup);
 		meanRadioButton.setSelected(true);
+		sentimentButton.setToggleGroup(sentimentAdjectivesGroup);
+		sentimentButton.setSelected(true);
+		adjectivesButton.setToggleGroup(sentimentAdjectivesGroup);
 
 		sentimentGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) -> {
 			RadioButton tempButton = (RadioButton) sentimentGroup.getSelectedToggle();
@@ -274,6 +289,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		analysisFormGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) -> {
 			RadioButton tempButton = (RadioButton) analysisFormGroup.getSelectedToggle();
 			selectedAnalyseFormRadioButton = tempButton.getText();
+		});
+		sentimentAdjectivesGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) -> {
+			RadioButton tempButton = (RadioButton) sentimentAdjectivesGroup.getSelectedToggle();
+			selectedSentimentOrAdjective = tempButton.getText();
 		});
 
 
@@ -634,6 +653,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@Override
 	public void processGetSentimentStatisticsCallBack(List<SentimentStatisticsBackendEntity> response) {
 		sentimentCorrelationStatisticsList.clear();
+		adjectiveTableView.setVisible(false);
+		adjectiveTableView.setManaged(false);
+		sentimentTableView.setVisible(true);
+		sentimentTableView.setManaged(true);
 		analyseAndSaveAnalysedSentimentToTable(response);
 	}
 
@@ -655,12 +678,20 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		progressIndicator.setVisible(true);
 		progressIndicator.setProgress(-1d);
 		sentimentSearchButton.setDisable(true);
-
-		if(selectedAnalyseFormRadioButton.equals("Mean")) {
-			ReviewBackendAPIService.getInstance().getSentimentMatrix(this);
+		if(selectedSentimentOrAdjective.equals("Sentiment")) {
+			if (selectedAnalyseFormRadioButton.equals("Mean")) {
+				ReviewBackendAPIService.getInstance().getSentimentMatrix(this);
+			} else {
+				ReviewBackendAPIService.getInstance().getSentimentMatrixMedian(this);
+			}
 		}
 		else{
-			ReviewBackendAPIService.getInstance().getSentimentMatrixMedian(this);
+			if(selectedAnalyseFormRadioButton.equals("Mean")){
+				//  Do mean adjective code
+			}
+			else{
+				//  Do average Adjective code
+			}
 		}
 	}
 
