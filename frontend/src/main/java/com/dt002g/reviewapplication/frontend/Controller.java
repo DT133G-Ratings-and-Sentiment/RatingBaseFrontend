@@ -351,6 +351,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		// Progress indicator for analysis
 		progressIndicator.setVisible(false);
 		progressIndicator.setManaged(false);
+
+		//StatisticsCalculator.CorrelationCoefficient(null);
 	}
 
 	public void setReviews(List<Review> pReviews, int page) {
