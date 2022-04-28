@@ -840,7 +840,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			double coefficient = StatisticsCalculator.getCorrelationCoefficient(response);
 			coefficient = Utility.round(coefficient, 2);
 			coefficientLabel.setVisible(true);
-			coefficientLabel.setText("r = " + String.valueOf(coefficient));
+			coefficientLabel.setText("r = " + coefficient);
 
 
 
@@ -854,7 +854,9 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			XYChart.Series corr10 = new XYChart.Series();
 			corr10.setName("+-10");
 			XYChart.Series corr20 = new XYChart.Series();
+			XYChart.Series corr = new XYChart.Series();
 			corr20.setName("+-20");
+			corr.setName("+-0");
 			long totalAmount = 0;
 			for(SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity: response){
 				totalAmount += sentimentStatisticsBackendEntity.getAmount();
@@ -863,20 +865,25 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 
 			for (SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity : response) {
-
-				if(findCorrelationCloserThan20(sentimentStatisticsBackendEntity)){
+				if(sentimentStatisticsBackendEntity.getAmount() == 0){
+					continue;
+				}
+				if(sentimentStatisticsBackendEntity.getRating() == sentimentStatisticsBackendEntity.getMinScore()){
+					corr.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
+				}
+				else if(findCorrelationCloserThan20(sentimentStatisticsBackendEntity)){
 					corr20.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
 				}
 				else if(findCorrelationCloserThan10(sentimentStatisticsBackendEntity)){
 					corr10.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
 				}
-				else if(sentimentStatisticsBackendEntity.getAmount() > 0){
+				else {
 					series1.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
 				}
 
 			}
 
-			bubbleChart.getData().addAll(series1, corr10, corr20);
+			bubbleChart.getData().addAll(series1, corr10, corr20, corr);
 		corr10.nodeProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue != null) {
 				System.out.println("HELLO");
