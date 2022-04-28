@@ -4,3 +4,7 @@
 .series-line *.chart-series-area-fill{
     -fx-fill: #1E90FF;
 }
+
+#coefficientLabel{
+    -fx-font-size: 20px;
+}

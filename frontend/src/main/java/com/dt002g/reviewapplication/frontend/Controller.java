@@ -138,6 +138,11 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private TableColumn<AdjectivesStatistics, String> adjectiveSentimentColumn;
 	@FXML private TableColumn<AdjectivesStatistics, String> adjectiveColumn;
 	@FXML private TableColumn<AdjectivesStatistics, Integer> adjectiveAmountColumn;
+
+	@FXML private BubbleChart<Number, Number> bubbleChart;
+	@FXML private Label coefficientLabel;
+	@FXML final NumberAxis xAxis = new NumberAxis(-10, 105, 0.5);
+	@FXML final NumberAxis yAxis = new NumberAxis(-10, 105, 0.5);
     
     @FXML
     void chooseFileButtonClicked(ActionEvent event) {
@@ -659,7 +664,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		adjectiveTableView.setManaged(false);
 		sentimentTableView.setVisible(true);
 		sentimentTableView.setManaged(true);
-		analyseAndSaveAnalysedSentimentToTable(response);
+		//analyseAndSaveAnalysedSentimentToTable(response);
 	}
 
 	private void insertSentimentStats(SentimentCorrelationStatistics sentimentCorrelationStatistics, double total, double correlations){
@@ -698,7 +703,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			}
 		}
 	}
-
+/*
 	private void analyseAndSaveAnalysedSentimentToTable(List<SentimentStatisticsBackendEntity> response){
 		if (selectedAnalysisRadioButton.equals("Scale 1-3")) {
 			double positiveNumberOfCorrelations = 0;
@@ -817,27 +822,33 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		progressIndicator.setVisible(false);
 		sentimentSearchButton.setDisable(false);
 	}
-
+*/
 	@Override
 	public void processGetNumberOfReviewsByRatingAndAverageScoreCallBack(List<SentimentStatisticsBackendEntity> response) {
 	Platform.runLater(() ->{
-			FlowPane pane = new FlowPane();
+		/*	FlowPane pane = new FlowPane();
 			pane.prefWidth(tabPane.getWidth());
 			pane.prefHeight(tabPane.getHeight());
 			pane.setMinWidth(tabPane.getWidth());
 			pane.setMaxWidth(tabPane.getWidth());
 			pane.setMaxHeight(PieChart.USE_COMPUTED_SIZE);
 			pane.setMinHeight(PieChart.USE_COMPUTED_SIZE);
+			Label label = new Label("");
 
-			final NumberAxis xAxis = new NumberAxis(-10, 110, 1);
-			final NumberAxis yAxis = new NumberAxis(-10, 110, 1);
-			final BubbleChart<Number, Number> sc = new
-					BubbleChart(xAxis, yAxis);
+		 */
+			bubbleChart.setVisible(true);
+			double coefficient = StatisticsCalculator.getCorrelationCoefficient(response);
+			coefficient = Utility.round(coefficient, 2);
+			coefficientLabel.setVisible(true);
+			coefficientLabel.setText("r = " + String.valueOf(coefficient));
+
+
+
 			//sc.getStylesheets().add(String.valueOf(getClass().getClassLoader().getResource("stylesheet.css")));
 
 			xAxis.setLabel("Rating");
 			yAxis.setLabel("Sentiment");
-			sc.setTitle("Correlation");
+			bubbleChart.setTitle("Correlation");
 			XYChart.Series series1 = new XYChart.Series();
 			series1.setName("Other");
 			XYChart.Series corr10 = new XYChart.Series();
@@ -865,7 +876,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 			}
 
-			sc.getData().addAll(series1, corr10, corr20);
+			bubbleChart.getData().addAll(series1, corr10, corr20);
 		corr10.nodeProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue != null) {
 				System.out.println("HELLO");
@@ -873,15 +884,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			}
 		});
 
-			Label label = new Label("");
-			pane.getChildren().addAll(sc, label);
-			Tab tab = new Tab("Correlation", pane);
-			tab.setClosable(true);
-			sc.setMinWidth(tabPane.getWidth());
-			sc.setMaxWidth(tabPane.getWidth());
-			sc.setMaxHeight(tabPane.getHeight() - 100);
-			sc.setMinHeight(tabPane.getHeight() - 100);
-			tabPane.getTabs().add(tab);
+
+
 		progressIndicator.setManaged(false);
 		progressIndicator.setVisible(false);
 		sentimentSearchButton.setDisable(false);
