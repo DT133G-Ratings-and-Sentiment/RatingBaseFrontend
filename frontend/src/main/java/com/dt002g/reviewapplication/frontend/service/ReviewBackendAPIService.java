@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.http.GET;
 
 
 public class ReviewBackendAPIService {
@@ -334,4 +335,66 @@ public class ReviewBackendAPIService {
 			}
 		});
 	}
+
+	public void getNumberOfReviewsByRatingAndAvgScoreTotalMatrix(GetSentimentStatisticsCallBack getSentimentStatisticsCallBack){
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<SentimentStatisticsBackendEntity>> reviewRequest = reviewService.getNumberOfReviewsByRatingAndAvgScoreTotalMatrix();
+		reviewRequest.enqueue(new Callback<List<SentimentStatisticsBackendEntity>>() {
+
+			@Override
+			public void onResponse(Call<List<SentimentStatisticsBackendEntity>> call, Response<List<SentimentStatisticsBackendEntity>> response) {
+				if(response.isSuccessful()) {
+					List<SentimentStatisticsBackendEntity> matrix= response.body();
+					getSentimentStatisticsCallBack.processGetSentimentStatisticsCallBack(matrix);
+				}
+				else {
+					Platform.runLater(() -> {
+						Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+						alert.show();
+					});
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<SentimentStatisticsBackendEntity>> call, Throwable t) {
+				Platform.runLater(() -> {
+					Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+					alert.show();
+				});
+
+			}
+		});
+	}
+
+	public void getNumberOfReviewsByRatingAndMedianScoreTotalMatrix(GetSentimentStatisticsCallBack getSentimentStatisticsCallBack){
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<SentimentStatisticsBackendEntity>> reviewRequest = reviewService.getNumberOfReviewsByRatingAndMedianScoreTotalMatrix();
+		reviewRequest.enqueue(new Callback<List<SentimentStatisticsBackendEntity>>() {
+
+			@Override
+			public void onResponse(Call<List<SentimentStatisticsBackendEntity>> call, Response<List<SentimentStatisticsBackendEntity>> response) {
+				if(response.isSuccessful()) {
+					List<SentimentStatisticsBackendEntity> matrix= response.body();
+					getSentimentStatisticsCallBack.processGetSentimentStatisticsCallBack(matrix);
+				}
+				else {
+					Platform.runLater(() -> {
+						Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+						alert.show();
+					});
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<SentimentStatisticsBackendEntity>> call, Throwable t) {
+				Platform.runLater(() -> {
+					Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+					alert.show();
+				});
+
+			}
+		});
+	}
+
+
 }
