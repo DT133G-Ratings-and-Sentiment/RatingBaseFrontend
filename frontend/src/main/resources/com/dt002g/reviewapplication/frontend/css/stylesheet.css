@@ -1,3 +1,6 @@
 #tableStyle .column-header .label {
     -fx-alignment: CENTER-LEFT;
 }
+.series-line *.chart-series-area-fill{
+    -fx-fill: #1E90FF;
+}

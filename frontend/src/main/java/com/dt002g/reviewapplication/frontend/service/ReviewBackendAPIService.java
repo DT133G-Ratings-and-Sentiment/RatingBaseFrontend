@@ -280,6 +280,37 @@ public class ReviewBackendAPIService {
 		});
 	}
 
+	public void getNumberOfReviewsByRatingAndAverageScoreTotal(GetNumberOfReviewsByRatingAndAverageScoreTotalCallback getNumberOfReviewsByRatingAndAverageScoreTotalCallback) {
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<SentimentStatisticsBackendEntity>> reviewRequest = reviewService.getNumberOfReviewsByRatingAndAvgScoreTotalMatrix();
+
+		reviewRequest.enqueue(new Callback<List<SentimentStatisticsBackendEntity>>() {
+
+			@Override
+			public void onResponse(Call<List<SentimentStatisticsBackendEntity>> call, Response<List<SentimentStatisticsBackendEntity>> response) {
+				if(response.isSuccessful()) {
+					List<SentimentStatisticsBackendEntity> numberOfReviewsByRatingAndAverageScoreTotal = response.body();
+					getNumberOfReviewsByRatingAndAverageScoreTotalCallback.processGetNumberOfReviewsByRatingAndAverageScoreCallBack(numberOfReviewsByRatingAndAverageScoreTotal);
+				}
+				else {
+					Platform.runLater(() -> {
+						Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+						alert.show();
+					});
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<SentimentStatisticsBackendEntity>> call, Throwable t) {
+				Platform.runLater(() -> {
+					Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+					alert.show();
+				});
+
+			}
+		});
+	}
+
 	public void uploadCSVFile(File file, UploadCSVFileCallBack uploadCSVFileCallBack, int numberOfRows) {
 		System.out.println("uploading SCV file from frontend");
 		RequestBody descriptionPart = RequestBody.create(okhttp3.MultipartBody.FORM, "csvFile");

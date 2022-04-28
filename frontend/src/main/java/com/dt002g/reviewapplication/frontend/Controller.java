@@ -30,7 +30,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack, GetSentimentStatisticsCallBack {
+public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack, GetSentimentStatisticsCallBack, GetNumberOfReviewsByRatingAndAverageScoreTotalCallback {
 	@FXML private GridPane root;
 
 	@FXML private RadioButton getAllRadioButton = new RadioButton();
@@ -682,9 +682,11 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		sentimentSearchButton.setDisable(true);
 		if(selectedSentimentOrAdjective.equals("Sentiment")) {
 			if (selectedAnalyseFormRadioButton.equals("Mean")) {
-				ReviewBackendAPIService.getInstance().getSentimentMatrix(this);
+				ReviewBackendAPIService.getInstance().getNumberOfReviewsByRatingAndAverageScoreTotal(this);
+				//ReviewBackendAPIService.getInstance().getSentimentMatrix(this);
 			} else {
-				ReviewBackendAPIService.getInstance().getSentimentMatrixMedian(this);
+				ReviewBackendAPIService.getInstance().getNumberOfReviewsByRatingAndAverageScoreTotal(this);
+				//ReviewBackendAPIService.getInstance().getSentimentMatrixMedian(this);
 			}
 		}
 		else{
@@ -814,6 +816,133 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		progressIndicator.setManaged(false);
 		progressIndicator.setVisible(false);
 		sentimentSearchButton.setDisable(false);
+	}
+
+	@Override
+	public void processGetNumberOfReviewsByRatingAndAverageScoreCallBack(List<SentimentStatisticsBackendEntity> response) {
+	Platform.runLater(() ->{
+			FlowPane pane = new FlowPane();
+			pane.prefWidth(tabPane.getWidth());
+			pane.prefHeight(tabPane.getHeight());
+			pane.setMinWidth(tabPane.getWidth());
+			pane.setMaxWidth(tabPane.getWidth());
+			pane.setMaxHeight(PieChart.USE_COMPUTED_SIZE);
+			pane.setMinHeight(PieChart.USE_COMPUTED_SIZE);
+
+			final NumberAxis xAxis = new NumberAxis(-10, 110, 1);
+			final NumberAxis yAxis = new NumberAxis(-10, 110, 1);
+			final BubbleChart<Number, Number> sc = new
+					BubbleChart(xAxis, yAxis);
+			//sc.getStylesheets().add(String.valueOf(getClass().getClassLoader().getResource("stylesheet.css")));
+
+			xAxis.setLabel("Rating");
+			yAxis.setLabel("Sentiment");
+			sc.setTitle("Correlation");
+			XYChart.Series series1 = new XYChart.Series();
+			series1.setName("Other");
+			XYChart.Series corr10 = new XYChart.Series();
+			corr10.setName("+-10");
+			XYChart.Series corr20 = new XYChart.Series();
+			corr20.setName("+-20");
+			long totalAmount = 0;
+			for(SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity: response){
+				totalAmount += sentimentStatisticsBackendEntity.getAmount();
+			}
+
+
+
+			for (SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity : response) {
+
+				if(findCorrelationCloserThan20(sentimentStatisticsBackendEntity)){
+					corr20.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
+				}
+				else if(findCorrelationCloserThan10(sentimentStatisticsBackendEntity)){
+					corr10.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
+				}
+				else if(sentimentStatisticsBackendEntity.getAmount() > 0){
+					series1.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
+				}
+
+			}
+
+			sc.getData().addAll(series1, corr10, corr20);
+		corr10.nodeProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue != null) {
+				System.out.println("HELLO");
+				corr10.getNode().getStyleClass().add("series-line");
+			}
+		});
+
+			Label label = new Label("");
+			pane.getChildren().addAll(sc, label);
+			Tab tab = new Tab("Correlation", pane);
+			tab.setClosable(true);
+			sc.setMinWidth(tabPane.getWidth());
+			sc.setMaxWidth(tabPane.getWidth());
+			sc.setMaxHeight(tabPane.getHeight() - 100);
+			sc.setMinHeight(tabPane.getHeight() - 100);
+			tabPane.getTabs().add(tab);
+		progressIndicator.setManaged(false);
+		progressIndicator.setVisible(false);
+		sentimentSearchButton.setDisable(false);
+		});
+
+	}
+	private boolean findCorrelationCloserThan10(SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity){
+		if(sentimentStatisticsBackendEntity.getAmount() == 0){
+			return false;
+		}
+		if(sentimentStatisticsBackendEntity.getRating() > sentimentStatisticsBackendEntity.getMinScore() + 10){
+			return true;
+		}
+		if(sentimentStatisticsBackendEntity.getRating() < sentimentStatisticsBackendEntity.getMinScore() - 10){
+			return true;
+		}
+		return false;
+	}
+	private boolean findCorrelationCloserThan20(SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity){
+		if(sentimentStatisticsBackendEntity.getAmount() == 0){
+			return false;
+		}
+		if(sentimentStatisticsBackendEntity.getRating() > sentimentStatisticsBackendEntity.getMinScore() + 20){
+			return true;
+		}
+		if(sentimentStatisticsBackendEntity.getRating() < sentimentStatisticsBackendEntity.getMinScore() - 20){
+			return true;
+		}
+		return false;
+	}
+
+	private double calculateSize(long amount, long totalAmount){
+
+		double percent = (double)amount/(double)totalAmount;
+		System.out.println(percent*100);
+		if(((percent*100)) > 10){
+			return 10;
+		}
+		if(((percent*100)) < 1){
+			return 1;
+		}
+		return Math.ceil(percent*100);
+
+/*
+		if(amount > (totalAmount/10)){
+			return 5;
+		}
+		else if(amount > (totalAmount/20)){
+			return 4;
+		}
+		else if(amount > (totalAmount/30)){
+			return 3;
+		}
+		else if(amount > (totalAmount/40)){
+			return 2;
+		}
+		else{
+			return 1;
+		}
+		*/
+
 	}
 }
 
