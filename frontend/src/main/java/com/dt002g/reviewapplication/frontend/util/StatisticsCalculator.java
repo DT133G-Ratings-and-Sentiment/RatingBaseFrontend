@@ -223,7 +223,7 @@ public class StatisticsCalculator {
 
     public static double getCorrelationCoefficient(List<SentimentStatisticsBackendEntity> reviewRatingByScoreMatrix){
         if(reviewRatingByScoreMatrix == null){
-            reviewRatingByScoreMatrix = createMatrix2();
+            reviewRatingByScoreMatrix = createMatrix3();
         }
         int ratingScaleNumbers = 101;
         int scoreScaleNumbers = 101;
@@ -303,7 +303,7 @@ public class StatisticsCalculator {
         System.out.println("covarriance: " + covarriance);
         System.out.println("correlationCofficient: " + correlationCofficient);
 
-        return 0;
+        return correlationCofficient;
     }
 
     private static List<SentimentStatisticsBackendEntity> createMatrix2() {
@@ -408,6 +408,167 @@ public class StatisticsCalculator {
         75
         90
         90
+        80
+        90
+        100
+        */
+        return matrix;
+    }
+
+    private static List<SentimentStatisticsBackendEntity> createMatrix3() {
+        List<SentimentStatisticsBackendEntity> matrix = new ArrayList<>();
+        matrix.add(new SentimentStatisticsBackendEntity(0, 5, 5, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(0, 10, 10, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(3, 8, 8, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(10, 10, 10, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(10, 30, 30, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(10, 35, 35, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(13, 9, 9, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(13, 15, 15, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(20, 10, 10, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(20, 20, 20, 1));
+
+        matrix.add(new SentimentStatisticsBackendEntity(30, 30, 30, 2));
+        matrix.add(new SentimentStatisticsBackendEntity(30, 45, 45, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(37, 12, 12, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(37, 37, 37, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(38, 56, 56, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(40, 10, 10, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(50, 40, 40, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(50, 80, 80, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(50, 85, 85, 1));
+
+        matrix.add(new SentimentStatisticsBackendEntity(52, 100, 100, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(53, 67, 67, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(54, 50, 50, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(60, 60, 60, 2));
+        matrix.add(new SentimentStatisticsBackendEntity(60, 75, 75, 2));
+        matrix.add(new SentimentStatisticsBackendEntity(70, 70, 70, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(80, 75, 75, 1));
+
+        matrix.add(new SentimentStatisticsBackendEntity(81, 76, 76, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(89, 76, 76, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(90, 90, 90, 2));
+        matrix.add(new SentimentStatisticsBackendEntity(94, 23, 23, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(96, 88, 88, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(100, 80, 80, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(100, 90, 90, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(100, 100, 100, 1));
+        /*
+        0, 5
+        0, 10
+        3,  8
+        10, 10
+        10, 30
+        10, 35
+        13, 9
+        13, 15
+        20, 10
+        20, 20
+        30, 30
+        30, 30
+        30, 45
+        37, 12
+        37, 37
+        38, 56
+        40, 10
+        50, 40
+        50, 80
+        50, 85
+        52, 100
+        53, 67
+        54, 50
+        60, 60
+        60, 60
+        60, 75
+        60, 75
+        70, 70
+        80, 75
+        81, 76
+        89, 76
+        90, 90
+        90, 90
+        94, 23
+        96, 88
+        100, 80
+        100, 90
+        100, 100*/
+        /*
+        0
+        0
+        3
+        10
+        10
+        10
+        13
+        13
+        20
+        20
+        30
+        30
+        30
+        37
+        37
+        38
+        40
+        50
+        50
+        50
+        52
+        53
+        54
+        60
+        60
+        60
+        60
+        70
+        80
+        81
+        89
+        90
+        90
+        94
+        96
+        100
+        100
+        100
+        */
+        /*
+        5
+        10
+        8
+        10
+        30
+        35
+        9
+        15
+        10
+        20
+        30
+        30
+        45
+        12
+        37
+        56
+        10
+        40
+        80
+        85
+        100
+        67
+        50
+        60
+        60
+        75
+        75
+        70
+        75
+        76
+        76
+        90
+        90
+        23
+        88
         80
         90
         100
