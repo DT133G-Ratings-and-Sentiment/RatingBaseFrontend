@@ -140,9 +140,13 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private TableColumn<AdjectivesStatistics, Integer> adjectiveAmountColumn;
 
 	@FXML private BubbleChart<Number, Number> bubbleChart;
+	@FXML private ScatterChart<Number, Number> scatterChart;
 	@FXML private Label coefficientLabel;
 	@FXML final NumberAxis xAxis = new NumberAxis(-10, 105, 0.5);
 	@FXML final NumberAxis yAxis = new NumberAxis(-10, 105, 0.5);
+	@FXML final NumberAxis xAxisScatter = new NumberAxis(-10, 105, 0.5);
+	@FXML final NumberAxis yAxisScatter = new NumberAxis(-10, 105, 0.5);
+
     
     @FXML
     void chooseFileButtonClicked(ActionEvent event) {
@@ -231,6 +235,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+
 
 		//  Upload csv
 		ratingSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
@@ -836,7 +841,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			Label label = new Label("");
 
 		 */
-			bubbleChart.setVisible(true);
+			scatterChart.setVisible(true);
 			double coefficient = StatisticsCalculator.getCorrelationCoefficient(response).correlationCofficient;
 			coefficient = Utility.round(coefficient, 2);
 			coefficientLabel.setVisible(true);
@@ -846,17 +851,22 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 			//sc.getStylesheets().add(String.valueOf(getClass().getClassLoader().getResource("stylesheet.css")));
 
-			xAxis.setLabel("Rating");
-			yAxis.setLabel("Sentiment");
-			bubbleChart.setTitle("Correlation");
-			XYChart.Series series1 = new XYChart.Series();
-			series1.setName("Other");
-			XYChart.Series corr10 = new XYChart.Series();
-			corr10.setName("+-10");
-			XYChart.Series corr20 = new XYChart.Series();
-			XYChart.Series corr = new XYChart.Series();
-			corr20.setName("+-20");
-			corr.setName("+-0");
+			xAxisScatter.setLabel("Rating");
+			yAxisScatter.setLabel("Sentiment");
+			//bubbleChart.setTitle("Correlation");
+			XYChart.Series lowest = new XYChart.Series();
+
+			XYChart.Series lower = new XYChart.Series();
+
+			XYChart.Series middle = new XYChart.Series();
+			XYChart.Series higher = new XYChart.Series();
+			XYChart.Series highest = new XYChart.Series();
+			lowest.setName("Lowest amount");
+			lower.setName("Lower amount");
+		middle.setName("Middle amount");
+		higher.setName("Higher amount");
+		highest.setName("Highest amount");
+
 			long totalAmount = 0;
 			for(SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity: response){
 				totalAmount += sentimentStatisticsBackendEntity.getAmount();
@@ -868,28 +878,45 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				if(sentimentStatisticsBackendEntity.getAmount() == 0){
 					continue;
 				}
-				if(sentimentStatisticsBackendEntity.getRating() == sentimentStatisticsBackendEntity.getMinScore()){
-					corr.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
+				double size = calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount);
+				if(size >= 9){
+					highest.getData().add(new XYChart.Data(sentimentStatisticsBackendEntity.getRating(), sentimentStatisticsBackendEntity.getMinScore()));
+
+				}
+				else if(size >= 6){
+					higher.getData().add(new XYChart.Data(sentimentStatisticsBackendEntity.getRating(), sentimentStatisticsBackendEntity.getMinScore()));
+					System.out.println(size);
+				}
+				else if(size >= 4){
+					middle.getData().add(new XYChart.Data(sentimentStatisticsBackendEntity.getRating(), sentimentStatisticsBackendEntity.getMinScore()));
+				}
+				else if(size >= 2){
+					lower.getData().add(new XYChart.Data(sentimentStatisticsBackendEntity.getRating(), sentimentStatisticsBackendEntity.getMinScore()));
+				}
+				else{
+
+					lowest.getData().add(new XYChart.Data(sentimentStatisticsBackendEntity.getRating(), sentimentStatisticsBackendEntity.getMinScore()));
+				}
+				/*if(sentimentStatisticsBackendEntity.getRating() == sentimentStatisticsBackendEntity.getMinScore()){
+					higher.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
 				}
 				else if(findCorrelationCloserThan20(sentimentStatisticsBackendEntity)){
-					corr20.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
+					middle.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
 				}
 				else if(findCorrelationCloserThan10(sentimentStatisticsBackendEntity)){
-					corr10.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
+					lower.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
 				}
 				else {
-					series1.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
+					lowest.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
 				}
 
+				 */
+
 			}
 
-			bubbleChart.getData().addAll(series1, corr10, corr20, corr);
-		corr10.nodeProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null) {
-				System.out.println("HELLO");
-				corr10.getNode().getStyleClass().add("series-line");
-			}
-		});
+			scatterChart.getData().addAll(lowest, lower, middle, higher, highest);
+
+
 
 
 
@@ -927,7 +954,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	private double calculateSize(long amount, long totalAmount){
 
 		double percent = (double)amount/(double)totalAmount;
-		System.out.println(percent*100);
+
 		if(((percent*100)) > 10){
 			return 10;
 		}

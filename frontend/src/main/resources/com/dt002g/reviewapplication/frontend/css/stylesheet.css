@@ -1,10 +1,33 @@
 #tableStyle .column-header .label {
     -fx-alignment: CENTER-LEFT;
 }
-.series-line *.chart-series-area-fill{
-    -fx-fill: #1E90FF;
-}
+
 
 #coefficientLabel{
     -fx-font-size: 20px;
+}
+
+.default-color4.chart-symbol { /* hollow circle */
+    -fx-background-color: rgb(255, 0, 0);
+
+}
+.default-color3.chart-symbol { /* hollow circle */
+    -fx-background-color: rgb(255, 0, 0, 0.8);
+
+}
+.default-color2.chart-symbol { /* hollow circle */
+    -fx-background-color: rgb(255, 0, 0, 0.6);
+
+}
+.default-color1.chart-symbol { /* hollow circle */
+    -fx-background-color: rgb(255, 0, 0, 0.4);
+
+}
+.default-color0.chart-symbol { /* hollow circle */
+    -fx-background-color: rgb(255, 0, 0, 0.2);
+
+}
+
+.chart-symbol{
+    -fx-shape: " M 25, 50 a 25,25 0 1,1 50,0 a 25,25 0 1,1 -50,0";
 }

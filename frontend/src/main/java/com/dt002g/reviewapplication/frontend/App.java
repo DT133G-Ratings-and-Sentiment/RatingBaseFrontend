@@ -30,6 +30,7 @@ public class App extends Application {
 	    	GridPane grid = loader.load();
 			controller = loader.getController();
 	        Scene scene = new Scene(grid);
+			scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
 
 	        stage.setScene(scene);
 	        stage.setTitle("Review Search");
