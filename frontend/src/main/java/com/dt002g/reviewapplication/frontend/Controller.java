@@ -837,7 +837,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 		 */
 			bubbleChart.setVisible(true);
-			double coefficient = StatisticsCalculator.getCorrelationCoefficient(response);
+			double coefficient = StatisticsCalculator.getCorrelationCoefficient(response).correlationCofficient;
 			coefficient = Utility.round(coefficient, 2);
 			coefficientLabel.setVisible(true);
 			coefficientLabel.setText("r = " + coefficient);

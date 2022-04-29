@@ -221,7 +221,7 @@ public class StatisticsCalculator {
         return matrix;
     }
 
-    public static double getCorrelationCoefficient(List<SentimentStatisticsBackendEntity> reviewRatingByScoreMatrix){
+    /*public static double getCorrelationCoefficient(List<SentimentStatisticsBackendEntity> reviewRatingByScoreMatrix){
         if(reviewRatingByScoreMatrix == null){
             reviewRatingByScoreMatrix = createMatrix3();
         }
@@ -304,6 +304,85 @@ public class StatisticsCalculator {
         System.out.println("correlationCofficient: " + correlationCofficient);
 
         return correlationCofficient;
+    }*/
+
+    public static StatisticResult getCorrelationCoefficient(List<SentimentStatisticsBackendEntity> reviewRatingByScoreMatrix){
+        if(reviewRatingByScoreMatrix == null){
+            reviewRatingByScoreMatrix = createMatrix3();
+        }
+        StatisticResult stats = new StatisticResult();
+        stats.ratingScaleStart = 0;
+        stats.ratingScaleNumbers = 101;
+        stats.getScoreScaleStart = 0;
+        stats.scoreScaleNumbers = 101;
+        stats.ratingPercentage = new double[stats.ratingScaleNumbers];
+        stats.sentimentScorePercentage = new double[stats.scoreScaleNumbers];
+        stats.ratingSentimentScorePercentage = new double[stats.ratingScaleNumbers][stats.scoreScaleNumbers];
+        stats.ratingSentimentScoreAmount = new double[stats.ratingScaleNumbers][stats.scoreScaleNumbers];
+        stats.ratingAmount = new int[stats.ratingScaleNumbers];
+        stats.sentimentScoreAmount= new int[stats.scoreScaleNumbers];
+        stats.totalRatings = 0;
+        stats.ratingExpectedValue = 0;
+        stats.sentimentScoreExpectedValue =0;
+        stats.deviationRating= 0;
+        stats.deviationSentimentScore = 0;
+
+        for(SentimentStatisticsBackendEntity ssbe: reviewRatingByScoreMatrix){
+            System.out.println("Rating: " + ssbe.rating + " minScore: " + ssbe.minScore + " maxScore: " + ssbe.maxScore + " amount: " + ssbe.amount);
+            stats.ratingAmount[ssbe.rating] += ssbe.amount;
+            stats.sentimentScoreAmount[(int)ssbe.minScore] += ssbe.amount;
+            stats.ratingSentimentScoreAmount[ssbe.rating][(int)ssbe.minScore] += ssbe.amount;
+            stats.totalRatings += ssbe.amount;
+        }
+
+        for(int k = stats.ratingScaleStart; k < stats.ratingScaleNumbers; k++){
+            stats.ratingPercentage[k] = ((double)stats.ratingAmount[k])/((double)stats.totalRatings);
+            stats.ratingExpectedValue += k * stats.ratingPercentage[k];
+            stats.sentimentScorePercentage[k] = ((double)stats.sentimentScoreAmount[k])/ ((double)stats.totalRatings);
+            stats.sentimentScoreExpectedValue += k * stats.sentimentScorePercentage[k];
+            for(int j = stats.getScoreScaleStart; j < stats.scoreScaleNumbers; j++){
+                stats.ratingSentimentScorePercentage[k][j] = stats.ratingSentimentScoreAmount[k][j]/ ((double)stats.totalRatings);
+            }
+        }
+
+        for(int i = stats.ratingScaleStart; i < stats.ratingScaleNumbers; i++){
+            stats.deviationRating += (i - stats.ratingExpectedValue ) * (i - stats.ratingExpectedValue ) * stats.ratingPercentage[i];
+        }
+        for(int i = 0; i < stats.scoreScaleNumbers; i++){
+            stats.deviationSentimentScore += (i -stats.sentimentScoreExpectedValue) * (i -stats.sentimentScoreExpectedValue) * stats.sentimentScorePercentage[i];
+        }
+
+        double ratingsSentimentScorePecentageProduct = 0;
+
+        //double covarriance = 0;
+
+
+        for(int i = stats.ratingScaleStart; i < stats.ratingScaleNumbers; i++){
+            System.out.print("Rating: " + i);
+            for(int j = 0; j < stats.scoreScaleNumbers; j++){
+                System.out.print("| Score: " + j +" | percentage:" + stats.ratingSentimentScorePercentage[i][j]);
+                ratingsSentimentScorePecentageProduct += i * j * stats.ratingSentimentScorePercentage[i][j];
+            }
+            System.out.println();
+        }
+
+        stats.covarriance = ratingsSentimentScorePecentageProduct  - (stats.ratingExpectedValue * stats.sentimentScoreExpectedValue);
+
+        stats.correlationCofficient = stats.covarriance / (Math.sqrt((stats.deviationRating*stats.deviationSentimentScore)));
+
+        System.out.println("ratingExpectedValue: " + stats.ratingExpectedValue);
+        System.out.println("sentimentScoreExpectedValue: " + stats.sentimentScoreExpectedValue);
+        System.out.println("deviationRating: " + stats.deviationRating);
+        System.out.println("deviationSentimentScore: " + stats.deviationSentimentScore);
+        System.out.println("covarriance: " + stats.covarriance);
+        System.out.println("correlationCofficient: " + stats.correlationCofficient);
+
+        return stats;
+    }
+
+    public ConfidenceInterval caclulateConfidenceInterval(double sampleMean, double zValue, double standardDeviation, int sampleSize){
+        double halfWidth = zValue*(standardDeviation/(Math.sqrt(sampleSize)));
+        return new ConfidenceInterval(sampleMean, halfWidth, zValue, standardDeviation, sampleSize);
     }
 
     private static List<SentimentStatisticsBackendEntity> createMatrix2() {
