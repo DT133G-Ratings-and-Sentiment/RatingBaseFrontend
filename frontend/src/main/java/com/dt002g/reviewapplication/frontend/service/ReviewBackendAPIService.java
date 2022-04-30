@@ -399,7 +399,7 @@ public class ReviewBackendAPIService {
 		});
 	}
 
-	public void getNumberOfReviewsByRatingAndMedianScoreTotalMatrix(GetSentimentStatisticsCallBack getSentimentStatisticsCallBack){
+	public void getNumberOfReviewsByRatingAndMedianScoreTotalMatrix(GetNumberOfReviewsByRatingAndAverageScoreTotalCallback getNumberOfReviewsByRatingAndAverageScoreTotalCallback){
 		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
 		Call<List<SentimentStatisticsBackendEntity>> reviewRequest = reviewService.getNumberOfReviewsByRatingAndMedianScoreTotalMatrix();
 		reviewRequest.enqueue(new Callback<List<SentimentStatisticsBackendEntity>>() {
@@ -408,7 +408,7 @@ public class ReviewBackendAPIService {
 			public void onResponse(Call<List<SentimentStatisticsBackendEntity>> call, Response<List<SentimentStatisticsBackendEntity>> response) {
 				if(response.isSuccessful()) {
 					List<SentimentStatisticsBackendEntity> matrix= response.body();
-					getSentimentStatisticsCallBack.processGetSentimentStatisticsCallBack(matrix);
+					getNumberOfReviewsByRatingAndAverageScoreTotalCallback.processGetNumberOfReviewsByRatingAndAverageScoreCallBack(matrix);
 				}
 				else {
 					Platform.runLater(() -> {

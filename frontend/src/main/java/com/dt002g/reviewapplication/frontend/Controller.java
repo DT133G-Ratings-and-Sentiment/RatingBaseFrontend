@@ -109,7 +109,6 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 	@FXML private RadioButton oneThreeScaleRadioButton = new RadioButton();
 	private final ToggleGroup sentimentGroup = new ToggleGroup();
-	private String selectedAnalysisRadioButton = "Scale 1-5";
 	private String selectedAnalyseFormRadioButton = "Mean";
 	private String selectedSentimentOrAdjective = "Sentiment";
 
@@ -140,7 +139,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private TableColumn<AdjectivesStatistics, Integer> adjectiveAmountColumn;
 
 	@FXML private BubbleChart<Number, Number> bubbleChart;
-	@FXML private ScatterChart<Number, Number> scatterChart;
+	@FXML private ScatterChart<Number, Number> scatterChartMedian;
+	@FXML private ScatterChart<Number, Number> scatterChartMean;
 	@FXML private Label coefficientLabel;
 	@FXML final NumberAxis xAxis = new NumberAxis(-10, 105, 0.5);
 	@FXML final NumberAxis yAxis = new NumberAxis(-10, 105, 0.5);
@@ -292,10 +292,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		sentimentButton.setSelected(true);
 		adjectivesButton.setToggleGroup(sentimentAdjectivesGroup);
 
-		sentimentGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) -> {
-			RadioButton tempButton = (RadioButton) sentimentGroup.getSelectedToggle();
-			selectedAnalysisRadioButton = tempButton.getText();
-		});
+
 		analysisFormGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) -> {
 			RadioButton tempButton = (RadioButton) analysisFormGroup.getSelectedToggle();
 			selectedAnalyseFormRadioButton = tempButton.getText();
@@ -690,12 +687,18 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		progressIndicator.setVisible(true);
 		progressIndicator.setProgress(-1d);
 		sentimentSearchButton.setDisable(true);
+		scatterChartMedian.setManaged(false);
+		scatterChartMedian.setVisible(false);
+		scatterChartMean.setManaged(false);
+		scatterChartMean.setVisible(false);
+		coefficientLabel.setVisible(false);
 		if(selectedSentimentOrAdjective.equals("Sentiment")) {
+
 			if (selectedAnalyseFormRadioButton.equals("Mean")) {
 				ReviewBackendAPIService.getInstance().getNumberOfReviewsByRatingAndAverageScoreTotal(this);
 				//ReviewBackendAPIService.getInstance().getSentimentMatrix(this);
 			} else {
-				ReviewBackendAPIService.getInstance().getNumberOfReviewsByRatingAndAverageScoreTotal(this);
+				ReviewBackendAPIService.getInstance().getNumberOfReviewsByRatingAndMedianScoreTotalMatrix(this);
 				//ReviewBackendAPIService.getInstance().getSentimentMatrixMedian(this);
 			}
 		}
@@ -831,48 +834,40 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@Override
 	public void processGetNumberOfReviewsByRatingAndAverageScoreCallBack(List<SentimentStatisticsBackendEntity> response) {
 	Platform.runLater(() ->{
-		/*	FlowPane pane = new FlowPane();
-			pane.prefWidth(tabPane.getWidth());
-			pane.prefHeight(tabPane.getHeight());
-			pane.setMinWidth(tabPane.getWidth());
-			pane.setMaxWidth(tabPane.getWidth());
-			pane.setMaxHeight(PieChart.USE_COMPUTED_SIZE);
-			pane.setMinHeight(PieChart.USE_COMPUTED_SIZE);
-			Label label = new Label("");
 
-		 */
-			scatterChart.setVisible(true);
+			if(selectedAnalyseFormRadioButton.equals("Median")) {
+				scatterChartMedian.getData().clear();
+				scatterChartMedian.setVisible(true);
+				coefficientLabel.setVisible(false);
+			}
+			else{
+				scatterChartMean.getData().clear();
+				scatterChartMean.setVisible(true);
+			}
+
 			double coefficient = StatisticsCalculator.getCorrelationCoefficient(response).correlationCofficient;
 			coefficient = Utility.round(coefficient, 2);
-			coefficientLabel.setVisible(true);
+
 			coefficientLabel.setText("r = " + coefficient);
-
-
-
-			//sc.getStylesheets().add(String.valueOf(getClass().getClassLoader().getResource("stylesheet.css")));
-
+		coefficientLabel.setVisible(true);
 			xAxisScatter.setLabel("Rating");
 			yAxisScatter.setLabel("Sentiment");
-			//bubbleChart.setTitle("Correlation");
+
 			XYChart.Series lowest = new XYChart.Series();
-
 			XYChart.Series lower = new XYChart.Series();
-
 			XYChart.Series middle = new XYChart.Series();
 			XYChart.Series higher = new XYChart.Series();
 			XYChart.Series highest = new XYChart.Series();
 			lowest.setName("Lowest amount");
 			lower.setName("Lower amount");
-		middle.setName("Middle amount");
-		higher.setName("Higher amount");
-		highest.setName("Highest amount");
+			middle.setName("Middle amount");
+			higher.setName("Higher amount");
+			highest.setName("Highest amount");
 
 			long totalAmount = 0;
 			for(SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity: response){
 				totalAmount += sentimentStatisticsBackendEntity.getAmount();
 			}
-
-
 
 			for (SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity : response) {
 				if(sentimentStatisticsBackendEntity.getAmount() == 0){
@@ -914,7 +909,12 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 			}
 
-			scatterChart.getData().addAll(lowest, lower, middle, higher, highest);
+		if(selectedAnalyseFormRadioButton.equals("Median")) {
+			scatterChartMedian.getData().addAll(lowest, lower, middle, higher, highest);
+		}
+		else{
+			scatterChartMean.getData().addAll(lowest, lower, middle, higher, highest);
+		}
 
 
 
