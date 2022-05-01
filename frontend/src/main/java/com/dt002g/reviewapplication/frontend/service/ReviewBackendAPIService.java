@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.http.GET;
 
 
 public class ReviewBackendAPIService {
@@ -429,5 +428,34 @@ public class ReviewBackendAPIService {
 		});
 	}
 
+	public void getNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSame(GetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack getNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack){
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<Pair<String,Long>>> reviewRequest = reviewService.getNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSame();
+		reviewRequest.enqueue(new Callback<List<Pair<String,Long>>>() {
+
+			@Override
+			public void onResponse(Call<List<Pair<String,Long>>> call, Response<List<Pair<String,Long>>> response) {
+				if(response.isSuccessful()) {
+					List<Pair<String,Long>> matrix= response.body();
+					getNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack.processGetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack(matrix);
+				}
+				else {
+					Platform.runLater(() -> {
+						Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+						alert.show();
+					});
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<Pair<String,Long>>> call, Throwable t) {
+				Platform.runLater(() -> {
+					Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+					alert.show();
+				});
+
+			}
+		});
+	}
 
 }

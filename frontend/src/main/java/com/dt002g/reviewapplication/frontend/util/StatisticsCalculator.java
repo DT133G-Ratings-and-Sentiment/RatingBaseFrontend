@@ -376,11 +376,17 @@ public class StatisticsCalculator {
         System.out.println("deviationSentimentScore: " + stats.deviationSentimentScore);
         System.out.println("covarriance: " + stats.covarriance);
         System.out.println("correlationCofficient: " + stats.correlationCofficient);
+        System.out.println("Rating standard deviation: " + stats.getRatingStandardDeviation());
+        System.out.println("Sentiment score standartd deviation: " + stats.getSentimentScoreStandardDeviation());
+        ConfidenceInterval ratingConfidenceInterval = caclulateConfidenceInterval(stats.ratingExpectedValue, 1.96, stats.getRatingStandardDeviation(), stats.totalRatings);
+        ConfidenceInterval sentimentScoreConfidenceInterval = caclulateConfidenceInterval(stats.sentimentScoreExpectedValue, 1.96, stats.getSentimentScoreStandardDeviation(), stats.totalRatings);
+        System.out.println("Rating confidence interval: minvalue: " + ratingConfidenceInterval.min + ", maxValue:" + ratingConfidenceInterval.max + " width: " + ratingConfidenceInterval.width + " halfWidth: " + ratingConfidenceInterval.width/2);
+        System.out.println("Sentimnet score confidence interval: minvalue: " + sentimentScoreConfidenceInterval.min + ", maxValue:" + sentimentScoreConfidenceInterval.max + " width: " + sentimentScoreConfidenceInterval.width + " halfWidth: " + sentimentScoreConfidenceInterval.width/2);
 
         return stats;
     }
 
-    public ConfidenceInterval caclulateConfidenceInterval(double sampleMean, double zValue, double standardDeviation, int sampleSize){
+    public static ConfidenceInterval caclulateConfidenceInterval(double sampleMean, double zValue, double standardDeviation, int sampleSize){
         double halfWidth = zValue*(standardDeviation/(Math.sqrt(sampleSize)));
         return new ConfidenceInterval(sampleMean, halfWidth, zValue, standardDeviation, sampleSize);
     }

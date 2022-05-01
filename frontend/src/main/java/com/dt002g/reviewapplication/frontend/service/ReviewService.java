@@ -82,4 +82,8 @@ public interface ReviewService {
 
 	@GET("getNumberOfAdjectivesByNameInReviewRatingAndMedianScoreRangeMatrix")
 	Call<List<AdjectiveByReviewRatingAndScoreBackendEntity>> getNumberOfAdjectivesByNameInReviewRatingAndMedianScoreRangeMatrix();
+
+	@GET("getNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSame")
+	Call<List<Pair<String,Long>>> getNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSame();
+
 }

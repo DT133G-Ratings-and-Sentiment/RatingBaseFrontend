@@ -30,7 +30,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack, GetSentimentStatisticsCallBack, GetNumberOfReviewsByRatingAndAverageScoreTotalCallback {
+public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack, GetSentimentStatisticsCallBack, GetNumberOfReviewsByRatingAndAverageScoreTotalCallback, GetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack {
 	@FXML private GridPane root;
 
 	@FXML private RadioButton getAllRadioButton = new RadioButton();
@@ -360,6 +360,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		progressIndicator.setManaged(false);
 
 		StatisticsCalculator.getCorrelationCoefficient(null);
+		GetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack callback = this;
+		ReviewBackendAPIService.getInstance().getNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSame(callback);
 	}
 
 	public void setReviews(List<Review> pReviews, int page) {
@@ -981,6 +983,13 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		}
 		*/
 
+	}
+
+	@Override
+	public void processGetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack(List<Pair<String, Long>> response) {
+		for(Pair<String, Long> p: response){
+			System.out.println("Adjective: " + p.first + " Amount: " + p.second);
+		}
 	}
 }
 
