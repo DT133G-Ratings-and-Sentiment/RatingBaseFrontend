@@ -30,7 +30,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack, GetSentimentStatisticsCallBack, GetNumberOfReviewsByRatingAndAverageScoreTotalCallback, GetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack {
+public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack, GetSentimentStatisticsCallBack, GetNumberOfReviewsByRatingAndAverageScoreTotalCallback, GetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack, GetAllReviewsWithAdjectiveMatrixCallBack {
 	@FXML private GridPane root;
 
 	@FXML private RadioButton getAllRadioButton = new RadioButton();
@@ -359,9 +359,11 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		progressIndicator.setVisible(false);
 		progressIndicator.setManaged(false);
 
-		StatisticsCalculator.getCorrelationCoefficient(null);
-		GetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack callback = this;
-		ReviewBackendAPIService.getInstance().getNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSame(callback);
+		/*StatisticsCalculator.getCorrelationCoefficient(null);
+		//GetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack callback = this;
+		//ReviewBackendAPIService.getInstance().getNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSame(callback);
+		GetAllReviewsWithAdjectiveMatrixCallBack callback = this;
+		ReviewBackendAPIService.getInstance().getAllReviewsWithAdjectiveMatrix(callback);*/
 	}
 
 	public void setReviews(List<Review> pReviews, int page) {
@@ -989,6 +991,17 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	public void processGetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack(List<Pair<String, Long>> response) {
 		for(Pair<String, Long> p: response){
 			System.out.println("Adjective: " + p.first + " Amount: " + p.second);
+		}
+	}
+
+	@Override
+	public void processGetAllReviewsWithAdjectiveMatrixCallBack(List<ReviewsByAdjective> response) {
+		System.out.println("GetAllReviewsWithAdjectiveMatrixCallBack received");
+		for(ReviewsByAdjective rba: response){
+			System.out.println("Adjective: " + rba.adjective);
+			for(ReviewBackendEntity rbe: rba.getReviews()){
+				System.out.println("Review id:" + rbe.id + " Comment: {" + rbe.comment + "}");
+			}
 		}
 	}
 }

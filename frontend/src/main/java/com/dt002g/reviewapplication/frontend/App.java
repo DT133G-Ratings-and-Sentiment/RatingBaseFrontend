@@ -20,12 +20,7 @@ public class App extends Application {
 	    public void start(Stage stage) throws IOException {
 			SentimentAnalyser s = new SentimentAnalyser();
 			s.initialize();
-			List<String> test = s.getAdjectives("VERY NICE DOG");
-			for(String t : test){
-				System.out.println(t);
-			}
 
-	    	System.out.println("Running app");
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("search.fxml"));
 	    	GridPane grid = loader.load();
 			controller = loader.getController();
@@ -55,7 +50,6 @@ public class App extends Application {
 	    }
 	    
 	    public void readReviews() {
-	    	System.out.println("App readReviews");
 	    	ReviewBackendAPIService.getInstance().getTopReviewsLargerThanId(controller, 0L);
 	    }
 }

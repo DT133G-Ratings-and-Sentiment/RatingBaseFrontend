@@ -16,11 +16,9 @@ public class ReviewBackendEntity {
 
 	
 	public ReviewBackendEntity(){
-		System.out.println("ReviewBackendEntity constructor1");
 	}
 	
 	public ReviewBackendEntity(int rating, long id, String comment, List<SentenceBackendEntity> sentences){
-		System.out.println("ReviewBackendEntity constructor2");
 		this.id = id;
 		this.comment = comment;
 		this.rating = rating;
@@ -28,7 +26,6 @@ public class ReviewBackendEntity {
 	}
 	
 	public ReviewBackendEntity(Review review){
-		System.out.println("ReviewBackendEntity constructor3");
 		this.comment = review.getFreeText();
 		this.id = review.getId();
 		this.rating = review.getRating();
@@ -58,7 +55,6 @@ public class ReviewBackendEntity {
 	}
 
 	public void setSentences(ArrayList<SentenceBackendEntity> sentences) {
-		System.out.println("ReviewBackendEntity setSentencesMethod");
 		this.sentences = sentences;
 	}
 

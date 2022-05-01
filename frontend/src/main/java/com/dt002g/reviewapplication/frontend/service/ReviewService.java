@@ -86,4 +86,8 @@ public interface ReviewService {
 	@GET("getNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSame")
 	Call<List<Pair<String,Long>>> getNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSame();
 
+	@GET("getAllReviewsWithAdjectiveMatrix")
+	Call<List<ReviewsByAdjective>> getAllReviewsWithAdjectiveMatrix();
+
+
 }

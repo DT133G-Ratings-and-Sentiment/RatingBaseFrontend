@@ -458,4 +458,34 @@ public class ReviewBackendAPIService {
 		});
 	}
 
+	public void getAllReviewsWithAdjectiveMatrix(GetAllReviewsWithAdjectiveMatrixCallBack getAllReviewsWithAdjectiveMatrixCallBack){
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<ReviewsByAdjective>> reviewRequest = reviewService.getAllReviewsWithAdjectiveMatrix();
+		reviewRequest.enqueue(new Callback<List<ReviewsByAdjective>>() {
+
+			@Override
+			public void onResponse(Call<List<ReviewsByAdjective>> call, Response<List<ReviewsByAdjective>> response) {
+				if(response.isSuccessful()) {
+					List<ReviewsByAdjective> matrix= response.body();
+					getAllReviewsWithAdjectiveMatrixCallBack.processGetAllReviewsWithAdjectiveMatrixCallBack(matrix);
+				}
+				else {
+					Platform.runLater(() -> {
+						Alert alert = new Alert(AlertType.WARNING , "Response code: " + response.code() + " response message: " + response.message().toString() + " error body:"+ response.errorBody().toString());
+						alert.show();
+					});
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<ReviewsByAdjective>> call, Throwable t) {
+				Platform.runLater(() -> {
+					Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+					alert.show();
+				});
+
+			}
+		});
+	}
+
 }
