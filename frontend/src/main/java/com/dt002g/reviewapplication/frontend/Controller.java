@@ -307,8 +307,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 		//  Show buttons disabled until usable
 		setAllVisibleFalse();
-		customMax.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.99, 1.0, 0, 0.1));
-		customMin.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-1.00, 0.99, 0, 0.1));
+		customMax.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.99, 1.0, 0, 0.01));
+		customMin.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-1.00, 0.99, 0, 0.01));
 
 
 		/*StatisticsCalculator.getCorrelationCoefficient(null);
@@ -673,6 +673,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				}
 			}
 		});
+		adjectiveStatisticsList.sort(Comparator.comparingDouble(AdjectivesStatistics::getAmount));
 	}
 	@FXML protected void showNegativeAdjectives(ActionEvent event){
 		Platform.runLater(() -> {
@@ -685,6 +686,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			}
 		}
 		});
+		adjectiveStatisticsList.sort(Comparator.comparingDouble(AdjectivesStatistics::getAmount));
 	}
 
 	@FXML protected void showCustomFilterAdjectives(ActionEvent event){
@@ -692,12 +694,13 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			showAllAdjectives(event);
 			for(Iterator<AdjectivesStatistics> itr = adjectiveStatisticsList.iterator(); itr.hasNext();){
 				AdjectivesStatistics as = itr.next();
-				if(!(as.correlation.get() < customMax.getValue() && as.correlation.get() > customMin.getValue())){
+				if(!(as.correlation.get() <= customMax.getValue() && as.correlation.get() >= customMin.getValue())){
 					temporaryHolderAdjectiveStatisticsList.add(as);
 					itr.remove();
 				}
 			}
 		});
+		adjectiveStatisticsList.sort(Comparator.comparingDouble(AdjectivesStatistics::getAmount));
 	}
 
 	public void clearChart() {
