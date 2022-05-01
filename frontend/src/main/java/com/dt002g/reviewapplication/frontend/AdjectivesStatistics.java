@@ -7,40 +7,15 @@ import javafx.beans.property.StringProperty;
 
 public class AdjectivesStatistics {
 
-    StringProperty ratingSpan = new SimpleStringProperty("");
-    StringProperty sentiment = new SimpleStringProperty("");
-    StringProperty adjective = new SimpleStringProperty("");
-    ObjectProperty<Integer> amount = new SimpleObjectProperty(0);
 
-    AdjectivesStatistics(String ratingSpan, String sentiment, String adjective, int amount) {
-        this.ratingSpan.set(ratingSpan);
-        this.sentiment.set(sentiment);
+    StringProperty adjective = new SimpleStringProperty("");
+    ObjectProperty<Long> amount = new SimpleObjectProperty(0);
+    ObjectProperty<Double> correlation = new SimpleObjectProperty<>(0.0);
+
+    AdjectivesStatistics( String adjective, Long amount, Double correlation) {
         this.adjective.set(adjective);
         this.amount.set(amount);
-    }
-
-    public String getRatingSpan() {
-        return ratingSpan.get();
-    }
-
-    public StringProperty ratingSpanProperty() {
-        return ratingSpan;
-    }
-
-    public void setRatingSpan(String ratingSpan) {
-        this.ratingSpan.set(ratingSpan);
-    }
-
-    public String getSentiment() {
-        return sentiment.get();
-    }
-
-    public StringProperty sentimentProperty() {
-        return sentiment;
-    }
-
-    public void setSentiment(String sentiment) {
-        this.sentiment.set(sentiment);
+        this.correlation.set(correlation);
     }
 
     public String getAdjective() {
@@ -55,15 +30,27 @@ public class AdjectivesStatistics {
         this.adjective.set(adjective);
     }
 
-    public Integer getAmount() {
+    public Long getAmount() {
         return amount.get();
     }
 
-    public ObjectProperty<Integer> amountProperty() {
+    public ObjectProperty<Long> amountProperty() {
         return amount;
     }
 
-    public void setAmount(Integer amount) {
+    public void setAmount(Long amount) {
         this.amount.set(amount);
+    }
+
+    public Double getCorrelation() {
+        return correlation.get();
+    }
+
+    public ObjectProperty<Double> correlationProperty() {
+        return correlation;
+    }
+
+    public void setCorrelation(Double correlation) {
+        this.correlation.set(correlation);
     }
 }

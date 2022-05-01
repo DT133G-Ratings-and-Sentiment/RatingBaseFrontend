@@ -6,8 +6,8 @@ import java.util.List;
 public class ReviewsByAdjective {
     public String adjective;
     public List<ReviewBackendEntity> reviews= new ArrayList<>();
-
-    public ReviewsByAdjective(){};
+    public double correlationCoefficient = 0.0;
+    public ReviewsByAdjective(){}
 
     public ReviewsByAdjective(String adjective, List<ReviewBackendEntity> reviews) {
         this.adjective = adjective;
@@ -25,5 +25,13 @@ public class ReviewsByAdjective {
     }
     public void setReviews(List<ReviewBackendEntity> reviews) {
         this.reviews = reviews;
+    }
+
+    public double getCorrelationCoefficient() {
+        return correlationCoefficient;
+    }
+
+    public void setCorrelationCoefficient(double correlationCoefficient) {
+        this.correlationCoefficient = correlationCoefficient;
     }
 }

@@ -29,16 +29,18 @@
     <ColumnConstraints hgrow="SOMETIMES" maxWidth="321.0" minWidth="0.0" prefWidth="0.0" />
     <ColumnConstraints hgrow="SOMETIMES" maxWidth="980.0" minWidth="10.0" prefWidth="980.0" />
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="92.0" minWidth="0.0" prefWidth="0.0" />
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="92.0" minWidth="0.0" prefWidth="0.0" />
   </columnConstraints>
   <rowConstraints>
+    <RowConstraints />
     <RowConstraints maxHeight="147.0" minHeight="0.0" prefHeight="0.0" vgrow="SOMETIMES" />
     <RowConstraints maxHeight="556.0" minHeight="10.0" prefHeight="19.0" vgrow="SOMETIMES" />
-    <RowConstraints maxHeight="408.0" minHeight="10.0" prefHeight="48.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="408.0" minHeight="10.0" prefHeight="48.0" vgrow="SOMETIMES" />
       <RowConstraints maxHeight="693.0" minHeight="10.0" prefHeight="693.0" vgrow="SOMETIMES" />
       <RowConstraints maxHeight="25.0" minHeight="0.0" prefHeight="0.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
-      <HBox fx:id="radioHBox" alignment="CENTER" prefHeight="100.0" prefWidth="1000.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+      <HBox fx:id="radioHBox" alignment="CENTER" prefHeight="100.0" prefWidth="1000.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
          <children>
             <RadioButton fx:id="getAllRadioButton" text="Get all" userData="Get all">
                <HBox.margin>
@@ -67,7 +69,7 @@
             </RadioButton>
          </children>
       </HBox>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="400.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="400.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
          <children>
             <Spinner fx:id="ratingSpinner" prefHeight="25.0" prefWidth="83.0" />
             <TextField fx:id="searchField" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="1" />
@@ -77,7 +79,7 @@
             <CheckBox fx:id="checkBoxOneTen" mnemonicParsing="false" prefHeight="17.0" prefWidth="100.0" text="1-10 Ratings" />
          </children>
       </HBox>
-      <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowIndex="3">
+      <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowIndex="4">
         <tabs>
           <Tab fx:id="tableDataTab" text="Table Data">
             <content>
@@ -160,6 +162,7 @@
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
+                        <Label fx:id="coefficientLabel" prefHeight="35.0" prefWidth="94.0" text="Label" visible="false" />
                         <ScrollPane fx:id="statsContainer" layoutY="113.0" pannable="true" prefHeight="555.0" prefWidth="980.0">
                           <content>
                             <AnchorPane prefHeight="541.0" prefWidth="965.0">
@@ -168,17 +171,14 @@
                                       <columns>
                                         <TableColumn fx:id="adjectiveColumn" prefWidth="75.0" text="Adjective" />
                                         <TableColumn fx:id="adjectiveAmountColumn" prefWidth="75.0" text="Amount" />
-                                          <TableColumn fx:id="adjectiveRatingSpanColumn" prefWidth="75.0" text="Rating" />
-                                          <TableColumn fx:id="adjectiveSentimentColumn" prefWidth="75.0" text="Sentiment" />
+                                          <TableColumn fx:id="adjectiveCorrelationColumn" prefWidth="75.0" text="Correlation" />
                                       </columns>
                                     </TableView>
                                     <TableView fx:id="sentimentTableView" layoutX="-2.0" layoutY="-1.0" prefHeight="544.0" prefWidth="970.0" visible="false">
                                       <columns>
-                                        <TableColumn fx:id="ratingSpanColumn" prefWidth="75.0" text="Rating" />
-                                          <TableColumn fx:id="sentimentColumn" prefWidth="75.0" text="Sentiment" />
-                                          <TableColumn fx:id="correlatingReviewsColumn" prefWidth="154.0" text="Correlating Reviews" />
-                                        <TableColumn fx:id="correlatingPercentColumn" prefWidth="82.0" text="Correlating %" />
-                                          <TableColumn fx:id="totalReviewsColumn" prefWidth="161.0" text="Total" />
+                                        <TableColumn fx:id="correlationCoefficientColumn" prefWidth="75.0" text="Correlation Coefficient" />
+                                          <TableColumn fx:id="standardDeviationColumn" prefWidth="75.0" text="Standard Deviation" />
+                                          <TableColumn fx:id="confidenceIntervalColumn" prefWidth="154.0" text="Confidence Interval" />
                                       </columns>
                                     </TableView>
                                     <ScatterChart fx:id="scatterChartMedian" prefHeight="544.0" prefWidth="973.0" styleClass="default-colour0" stylesheets="@css/stylesheet.css" title="Correlation" visible="false">
@@ -197,17 +197,27 @@
                                           <NumberAxis fx:id="yAxisScatter1" side="LEFT" />
                                        </yAxis>
                                     </ScatterChart>
-                                    <Label fx:id="coefficientLabel" layoutX="56.0" layoutY="43.0" prefHeight="35.0" prefWidth="94.0" text="Label" visible="false" />
                                  </children>
                               </AnchorPane>
                           </content>
                         </ScrollPane>
-                        <Button fx:id="sentimentSearchButton" layoutX="413.0" layoutY="50.0" mnemonicParsing="false" onAction="#startSentimentAnalysis" text="Start Analysis" />
+                        <Button fx:id="sentimentSearchButton" layoutX="410.0" layoutY="72.0" mnemonicParsing="false" onAction="#startSentimentAnalysis" text="Start Analysis" />
                         <RadioButton fx:id="meanRadioButton" layoutX="15.0" layoutY="44.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="70.0" text="Mean" />
                         <RadioButton fx:id="averageRadioButton" layoutX="103.0" layoutY="44.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="65.0" text="Median" />
                         <ProgressIndicator fx:id="progressIndicator" layoutX="549.0" layoutY="34.0" progress="0.0" />
                         <RadioButton fx:id="sentimentButton" layoutX="14.0" layoutY="23.0" mnemonicParsing="false" text="Sentiment" />
                         <RadioButton fx:id="adjectivesButton" layoutX="103.0" layoutY="22.0" mnemonicParsing="false" text="Adjective" />
+                        <RadioButton fx:id="tableButton" layoutX="15.0" layoutY="67.0" mnemonicParsing="false" text="Table" />
+                        <RadioButton fx:id="scatterChartButton" layoutX="103.0" layoutY="67.0" mnemonicParsing="false" text="Chart" />
+                        <Button fx:id="showAllAdjectivesButton" layoutX="664.0" layoutY="49.0" mnemonicParsing="false" onAction="#showAllAdjectives" text="Show All" />
+                        <Button fx:id="showPositiveCorrelationAdjectivesButton" layoutX="726.0" layoutY="49.0" mnemonicParsing="false" onAction="#showPositiveAdjectives" text="Show 1.0" />
+                        <Button fx:id="showNegativeCorrelationAdjectivesButton" layoutX="790.0" layoutY="49.0" mnemonicParsing="false" onAction="#showNegativeAdjectives" text="Show -1.0" />
+                        <Button fx:id="customSortButton" layoutX="859.0" layoutY="49.0" mnemonicParsing="false" onAction="#showCustomFilterAdjectives" text="Custom Filter" />
+                        <Label fx:id="customFilteringVariables" layoutX="204.0" layoutY="22.0" text="Custom Filtering Variables:" />
+                        <Spinner fx:id="customMin" layoutX="411.0" layoutY="18.0" />
+                        <Spinner fx:id="customMax" layoutX="609.0" layoutY="18.0" />
+                        <Label fx:id="minLabel" layoutX="375.0" layoutY="22.0" text="Min:" />
+                        <Label fx:id="maxLabel" layoutX="576.0" layoutY="22.0" text="Max:" />
                      </children>
                   </AnchorPane>
               </content>

@@ -6,56 +6,60 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class SentimentCorrelationStatistics {
-    StringProperty ratingSpan = new SimpleStringProperty("");
-    StringProperty sentiment = new SimpleStringProperty("");
-    ObjectProperty<Double> correlationPercent = new SimpleObjectProperty(0);
-    ObjectProperty<Integer> numberOfCorrelations = new SimpleObjectProperty(0);
-    ObjectProperty<Integer> totalReviews = new SimpleObjectProperty(0);
+    ObjectProperty<Double> correlationCoefficient = new SimpleObjectProperty(0);
+    ObjectProperty<Double> standardDeviation = new SimpleObjectProperty(0);
+    ObjectProperty<Double> confidenceInterval = new SimpleObjectProperty(0);
 
-    SentimentCorrelationStatistics(String ratingSpan, String sentiment, double correlationPercent, int numberOfCorrelations, int totalReviews) {
-        this.ratingSpan.set(ratingSpan);
-        this.sentiment.set(sentiment);
-        this.correlationPercent.set(correlationPercent);
-        this.numberOfCorrelations.set(numberOfCorrelations);
-        this.totalReviews.set(totalReviews);
+
+    SentimentCorrelationStatistics(double correlationCoefficient, double standardDeviation, double confidenceInterval) {
+    this.correlationCoefficient.set(correlationCoefficient);
+    this.standardDeviation.set(standardDeviation);
+    this.confidenceInterval.set(confidenceInterval);
     }
 
-    public void setRatingSpan(String ratingSpan){
-        this.ratingSpan.set(ratingSpan);
+    public Double getCorrelationCoefficient() {
+        return correlationCoefficient.get();
     }
-    public void setSentiment(String sentiment){
-        this.sentiment.set(sentiment);
+
+    public ObjectProperty<Double> correlationCoefficientProperty() {
+        return correlationCoefficient;
     }
-    public void setCorrelationPercent(Double correlationPercent){
-        this.correlationPercent.set(correlationPercent);
+
+    public void setCorrelationCoefficient(Double correlationCoefficient) {
+        this.correlationCoefficient.set(correlationCoefficient);
     }
-    public void setNumberOfCorrelations(Integer numberOfCorrelations){
-        this.numberOfCorrelations.set(numberOfCorrelations);
+
+    public Double getStandardDeviation() {
+        return standardDeviation.get();
     }
-    public void setTotalReviews(Integer totalReviews){
-        this.totalReviews.set(totalReviews);
+
+    public ObjectProperty<Double> standardDeviationProperty() {
+        return standardDeviation;
     }
-    public String getRatingSpan(){
-        return this.ratingSpan.get();
+
+    public void setStandardDeviation(Double standardDeviation) {
+        this.standardDeviation.set(standardDeviation);
     }
-    public String getSentiment(){
-        return this.sentiment.get();
+
+    public Double getConfidenceInterval() {
+        return confidenceInterval.get();
     }
-    public Double getCorrelationPercent(){
-        return this.correlationPercent.get();
+
+    public ObjectProperty<Double> confidenceIntervalProperty() {
+        return confidenceInterval;
     }
-    public Integer getNumberOfCorrelations(){
-        return this.numberOfCorrelations.get();
-    }
-    public Integer getTotalReviews(){
-        return this.totalReviews.get();
+
+    public void setConfidenceInterval(Double confidenceInterval) {
+        this.confidenceInterval.set(confidenceInterval);
     }
 
     @Override
-    public String toString(){
-        return "Rating: " + this.getRatingSpan() + ", Sentiment: " + this.getSentiment() + ", Correlation %: "
-                + this.getCorrelationPercent() + ", Correlation number: " + this.getNumberOfCorrelations() + ", Total: " + this.getTotalReviews();
+    public String toString() {
+        return "SentimentCorrelationStatistics{" +
+                "correlationCoefficient=" + correlationCoefficient +
+                ", standardDeviation=" + standardDeviation +
+                ", confidenceInterval=" + confidenceInterval +
+                '}';
     }
-
 }
 

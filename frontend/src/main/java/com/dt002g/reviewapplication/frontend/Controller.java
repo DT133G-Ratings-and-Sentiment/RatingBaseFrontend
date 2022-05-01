@@ -105,12 +105,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
     @FXML
     private Spinner<Integer> maxRating;
 
-	@FXML private RadioButton oneFiveScaleRadioButton = new RadioButton();
 
-	@FXML private RadioButton oneThreeScaleRadioButton = new RadioButton();
-	private final ToggleGroup sentimentGroup = new ToggleGroup();
 	private String selectedAnalyseFormRadioButton = "Mean";
 	private String selectedSentimentOrAdjective = "Sentiment";
+	private String selectedGraph = "Table";
 
 	@FXML RadioButton meanRadioButton;
 	@FXML RadioButton averageRadioButton;
@@ -121,22 +119,34 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private RadioButton adjectivesButton;
 	private final ToggleGroup sentimentAdjectivesGroup = new ToggleGroup();
 
+	@FXML private RadioButton scatterChartButton;
+	@FXML private RadioButton tableButton;
+	private final ToggleGroup visualsGroup = new ToggleGroup();
+
 	@FXML private TableView<SentimentCorrelationStatistics> sentimentTableView;
 	private final ObservableList<SentimentCorrelationStatistics> sentimentCorrelationStatisticsList = FXCollections.observableArrayList();
-	@FXML private TableColumn<SentimentCorrelationStatistics, String> ratingSpanColumn;
-	@FXML private TableColumn<SentimentCorrelationStatistics, String> sentimentColumn;
-	@FXML private TableColumn<SentimentCorrelationStatistics, Integer> correlatingReviewsColumn;
-	@FXML private TableColumn<SentimentCorrelationStatistics, Double> correlatingPercentColumn;
-	@FXML private TableColumn<SentimentCorrelationStatistics, Integer> totalReviewsColumn;
+	@FXML private TableColumn<SentimentCorrelationStatistics, Double> correlationCoefficientColumn;
+	@FXML private TableColumn<SentimentCorrelationStatistics, Double> standardDeviationColumn;
+	@FXML private TableColumn<SentimentCorrelationStatistics, Double> confidenceIntervalColumn;
 	@FXML private Button sentimentSearchButton;
 	@FXML private ProgressIndicator progressIndicator;
 
 	@FXML private TableView<AdjectivesStatistics> adjectiveTableView;
 	private final ObservableList<AdjectivesStatistics> adjectiveStatisticsList = FXCollections.observableArrayList();
-	@FXML private TableColumn<AdjectivesStatistics, String> adjectiveRatingSpanColumn;
-	@FXML private TableColumn<AdjectivesStatistics, String> adjectiveSentimentColumn;
+	private final ObservableList<AdjectivesStatistics> temporaryHolderAdjectiveStatisticsList = FXCollections.observableArrayList();
 	@FXML private TableColumn<AdjectivesStatistics, String> adjectiveColumn;
-	@FXML private TableColumn<AdjectivesStatistics, Integer> adjectiveAmountColumn;
+	@FXML private TableColumn<AdjectivesStatistics, Long> adjectiveAmountColumn;
+	@FXML private TableColumn<AdjectivesStatistics, Double> adjectiveCorrelationColumn;
+	@FXML private Button showAllAdjectivesButton;
+	@FXML private Button showPositiveCorrelationAdjectivesButton;
+	@FXML private Button showNegativeCorrelationAdjectivesButton;
+	@FXML private Button customSortButton;
+	@FXML private Label customFilteringVariables;
+	@FXML private Spinner<Double> customMin;
+	@FXML private Spinner<Double> customMax;
+	@FXML private Label minLabel;
+	@FXML private Label maxLabel;
+
 
 	@FXML private BubbleChart<Number, Number> bubbleChart;
 	@FXML private ScatterChart<Number, Number> scatterChartMedian;
@@ -148,90 +158,6 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML final NumberAxis yAxisScatter = new NumberAxis(-10, 105, 0.5);
 
     
-    @FXML
-    void chooseFileButtonClicked(ActionEvent event) {
-    	FileChooser fileChooser = new FileChooser();
-    	fileChooser.setTitle("Open Resource File");
-    	csvFile = fileChooser.showOpenDialog(((Node)event.getSource()).getScene().getWindow());
-    	if(csvFile == null || !(csvFile.getName().endsWith(".csv") || csvFile.getName().endsWith(".CSV"))) {
-    		showInvalidCSVFileAlertDialog((Node)event.getSource());
-    		csvFile = null;
-    	}
-    	else {
-	    	ArrayList<String> headers = CSVHandler.getInstance().getHeaders(csvFile);
-	    	if(headers.size() < 2) {
-	    		showInvalidCSVFileAlertDialog((Node)event.getSource());
-	    	}
-	    	else {
-	    		selectRating.getItems().clear();
-		    	selectRating.getItems().addAll(headers);
-		    	selectFreeText.getItems().clear();
-		    	selectFreeText.getItems().addAll(headers);
-		    	
-			    selectRating.setDisable(false);
-			    selectFreeText.setDisable(false);
-			    storeDataButton.setDisable(false);
-			    minRating.setDisable(false);
-			    maxRating.setDisable(false);
-	    	}
-    	}
-    }
-    
-    @FXML 
-    void storeDataButtonClicked(ActionEvent event){
-    	if(selectRating.getValue() == null || selectRating.getValue().equals("") || selectFreeText.getValue() == null || selectFreeText.getValue().equals("") || minRating.getValue() == null || maxRating.getValue() == null || minRating.getValue() >= maxRating.getValue()) {
-    		
-    		if(selectRating.getValue() == null || selectRating.getValue().equals("") || selectFreeText.getValue() == null || selectFreeText.getValue().equals("") ) {
-    			missingHeaderMappingsCSVFileAlertDialog((Node)event.getSource());
-    		}
-    		else {
-    			missingRatingMappingsForCSVFileAlertDialog((Node)event.getSource());
-    		}
-    	}
-    	else {
-			ArrayList<String> neededHeaders = new ArrayList<>();
-			neededHeaders.add(selectRating.getValue());
-			neededHeaders.add(selectFreeText.getValue());
-			//ArrayList<String> data = CSVHandler.getInstance().parseCSVFile(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
-			ProgressWindow prog = new ProgressWindow((Stage)((Node)event.getSource()).getScene().getWindow(), CSVHandler.getInstance(), executorService);
-			prog.activate();
-			//CSVHandler.getInstance().parseCSVFileAndSend(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
-
-			CSVHandlerTask task = new CSVHandlerTask(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
-			executorService = Executors.newFixedThreadPool(1);
-			executorService.execute(task);
-
-			/*if(data == null) {
-				couldNotParseCSVFileAlertDialog((Node)event.getSource());
-			}
-			else {
-		        File myObj = new File("localCsvFile.csv");
-		        try {
-					if (myObj.createNewFile()) {
-						BufferedWriter writer = new BufferedWriter(new FileWriter("localCsvFile.csv"));
-						for(String s: data) {
-							 writer.write(s + "\n");
-
-						}
-						writer.close();
-
-						ReviewBackendAPIService.getInstance().uploadCSVFile(myObj);
-					}
-				} catch (IOException | SecurityException e) {
-					System.out.println(e.getMessage());
-				}
-
-			}*/
-    	}
-    	Platform.runLater(() -> {
-			selectRating.setDisable(true);
-			selectFreeText.setDisable(true);
-			storeDataButton.setDisable(true);
-			minRating.setDisable(true);
-			maxRating.setDisable(true);
-			});
-	    csvFile = null;
-    }
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -260,11 +186,16 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		//  Sentiment table
 		sentimentTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		sentimentTableView.setItems(sentimentCorrelationStatisticsList);
-		ratingSpanColumn.setCellValueFactory(rowData -> rowData.getValue().ratingSpan);
-		sentimentColumn.setCellValueFactory(rowData -> rowData.getValue().sentiment);
-		correlatingReviewsColumn.setCellValueFactory(rowData -> rowData.getValue().numberOfCorrelations);
-		correlatingPercentColumn.setCellValueFactory(rowData -> rowData.getValue().correlationPercent);
-		totalReviewsColumn.setCellValueFactory(rowData -> rowData.getValue().totalReviews);
+		correlationCoefficientColumn.setCellValueFactory(rowData -> rowData.getValue().correlationCoefficient);
+		standardDeviationColumn.setCellValueFactory(rowData -> rowData.getValue().standardDeviation);
+		confidenceIntervalColumn.setCellValueFactory(rowData -> rowData.getValue().confidenceInterval);
+
+		adjectiveTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		adjectiveTableView.setItems(adjectiveStatisticsList);
+		adjectiveColumn.setCellValueFactory(rowData -> rowData.getValue().adjective);
+		adjectiveAmountColumn.setCellValueFactory(rowData-> rowData.getValue().amount);
+		adjectiveCorrelationColumn.setCellValueFactory(rowData -> rowData.getValue().correlation);
+
 
 		root.setOnKeyPressed(event -> {
 			if(event.getCode().equals(KeyCode.ENTER)) {
@@ -282,15 +213,16 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		sentimentAnalysisTab.setClosable(false);
 
 		//  Sentiment radio button code
-		oneFiveScaleRadioButton.setToggleGroup(sentimentGroup);
-		oneThreeScaleRadioButton.setToggleGroup(sentimentGroup);
-		oneFiveScaleRadioButton.setSelected(true);
 		meanRadioButton.setToggleGroup(analysisFormGroup);
 		averageRadioButton.setToggleGroup(analysisFormGroup);
 		meanRadioButton.setSelected(true);
 		sentimentButton.setToggleGroup(sentimentAdjectivesGroup);
 		sentimentButton.setSelected(true);
 		adjectivesButton.setToggleGroup(sentimentAdjectivesGroup);
+
+		tableButton.setToggleGroup(visualsGroup);
+		scatterChartButton.setToggleGroup(visualsGroup);
+		tableButton.setSelected(true);
 
 
 		analysisFormGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) -> {
@@ -300,7 +232,21 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		sentimentAdjectivesGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) -> {
 			RadioButton tempButton = (RadioButton) sentimentAdjectivesGroup.getSelectedToggle();
 			selectedSentimentOrAdjective = tempButton.getText();
+			if(!selectedSentimentOrAdjective.equals("Sentiment")){
+				tableButton.setVisible(false);
+				scatterChartButton.setVisible(false);
+			}
+			else{
+				tableButton.setVisible(true);
+				scatterChartButton.setVisible(true);
+			}
 		});
+		visualsGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) ->{
+			RadioButton tempButton = (RadioButton) visualsGroup.getSelectedToggle();
+			selectedGraph = tempButton.getText();
+
+		});
+
 
 
 		//  Radio button code
@@ -359,11 +305,102 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		progressIndicator.setVisible(false);
 		progressIndicator.setManaged(false);
 
+		//  Show buttons disabled until usable
+		setAllVisibleFalse();
+		customMax.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.99, 1.0, 0, 0.1));
+		customMin.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-1.00, 0.99, 0, 0.1));
+
+
 		/*StatisticsCalculator.getCorrelationCoefficient(null);
 		//GetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack callback = this;
 		//ReviewBackendAPIService.getInstance().getNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSame(callback);
 		GetAllReviewsWithAdjectiveMatrixCallBack callback = this;
 		ReviewBackendAPIService.getInstance().getAllReviewsWithAdjectiveMatrix(callback);*/
+	}
+
+	@FXML
+	void chooseFileButtonClicked(ActionEvent event) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open Resource File");
+		csvFile = fileChooser.showOpenDialog(((Node)event.getSource()).getScene().getWindow());
+		if(csvFile == null || !(csvFile.getName().endsWith(".csv") || csvFile.getName().endsWith(".CSV"))) {
+			showInvalidCSVFileAlertDialog((Node)event.getSource());
+			csvFile = null;
+		}
+		else {
+			ArrayList<String> headers = CSVHandler.getInstance().getHeaders(csvFile);
+			if(headers.size() < 2) {
+				showInvalidCSVFileAlertDialog((Node)event.getSource());
+			}
+			else {
+				selectRating.getItems().clear();
+				selectRating.getItems().addAll(headers);
+				selectFreeText.getItems().clear();
+				selectFreeText.getItems().addAll(headers);
+
+				selectRating.setDisable(false);
+				selectFreeText.setDisable(false);
+				storeDataButton.setDisable(false);
+				minRating.setDisable(false);
+				maxRating.setDisable(false);
+			}
+		}
+	}
+
+	@FXML
+	void storeDataButtonClicked(ActionEvent event){
+		if(selectRating.getValue() == null || selectRating.getValue().equals("") || selectFreeText.getValue() == null || selectFreeText.getValue().equals("") || minRating.getValue() == null || maxRating.getValue() == null || minRating.getValue() >= maxRating.getValue()) {
+
+			if(selectRating.getValue() == null || selectRating.getValue().equals("") || selectFreeText.getValue() == null || selectFreeText.getValue().equals("") ) {
+				missingHeaderMappingsCSVFileAlertDialog((Node)event.getSource());
+			}
+			else {
+				missingRatingMappingsForCSVFileAlertDialog((Node)event.getSource());
+			}
+		}
+		else {
+			ArrayList<String> neededHeaders = new ArrayList<>();
+			neededHeaders.add(selectRating.getValue());
+			neededHeaders.add(selectFreeText.getValue());
+			//ArrayList<String> data = CSVHandler.getInstance().parseCSVFile(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
+			ProgressWindow prog = new ProgressWindow((Stage)((Node)event.getSource()).getScene().getWindow(), CSVHandler.getInstance(), executorService);
+			prog.activate();
+			//CSVHandler.getInstance().parseCSVFileAndSend(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
+
+			CSVHandlerTask task = new CSVHandlerTask(neededHeaders, csvFile, minRating.getValue(), maxRating.getValue());
+			executorService = Executors.newFixedThreadPool(1);
+			executorService.execute(task);
+
+			/*if(data == null) {
+				couldNotParseCSVFileAlertDialog((Node)event.getSource());
+			}
+			else {
+		        File myObj = new File("localCsvFile.csv");
+		        try {
+					if (myObj.createNewFile()) {
+						BufferedWriter writer = new BufferedWriter(new FileWriter("localCsvFile.csv"));
+						for(String s: data) {
+							 writer.write(s + "\n");
+
+						}
+						writer.close();
+
+						ReviewBackendAPIService.getInstance().uploadCSVFile(myObj);
+					}
+				} catch (IOException | SecurityException e) {
+					System.out.println(e.getMessage());
+				}
+
+			}*/
+		}
+		Platform.runLater(() -> {
+			selectRating.setDisable(true);
+			selectFreeText.setDisable(true);
+			storeDataButton.setDisable(true);
+			minRating.setDisable(true);
+			maxRating.setDisable(true);
+		});
+		csvFile = null;
 	}
 
 	public void setReviews(List<Review> pReviews, int page) {
@@ -615,6 +652,54 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		});
 	}
 
+	@FXML protected void showAllAdjectives(ActionEvent event){
+		for(Iterator<AdjectivesStatistics> itr = temporaryHolderAdjectiveStatisticsList.iterator(); itr.hasNext();){
+			AdjectivesStatistics as = itr.next();
+				if (!adjectiveStatisticsList.contains(as)) {
+					adjectiveStatisticsList.add(as);
+				}
+				itr.remove();
+			}
+		temporaryHolderAdjectiveStatisticsList.sort(Comparator.comparingDouble(AdjectivesStatistics::getCorrelation));
+	}
+	@FXML protected void showPositiveAdjectives(ActionEvent event){
+		Platform.runLater(() -> {
+		showAllAdjectives(event);
+			for(Iterator<AdjectivesStatistics> itr = adjectiveStatisticsList.iterator(); itr.hasNext();){
+				AdjectivesStatistics as = itr.next();
+				if(!(as.correlation.get() == 1.0)){
+					temporaryHolderAdjectiveStatisticsList.add(as);
+					itr.remove();
+				}
+			}
+		});
+	}
+	@FXML protected void showNegativeAdjectives(ActionEvent event){
+		Platform.runLater(() -> {
+			showAllAdjectives(event);
+			for(Iterator<AdjectivesStatistics> itr = adjectiveStatisticsList.iterator(); itr.hasNext();){
+			AdjectivesStatistics as = itr.next();
+			if(!(as.correlation.get() == -1.0)){
+				temporaryHolderAdjectiveStatisticsList.add(as);
+				itr.remove();
+			}
+		}
+		});
+	}
+
+	@FXML protected void showCustomFilterAdjectives(ActionEvent event){
+		Platform.runLater(() -> {
+			showAllAdjectives(event);
+			for(Iterator<AdjectivesStatistics> itr = adjectiveStatisticsList.iterator(); itr.hasNext();){
+				AdjectivesStatistics as = itr.next();
+				if(!(as.correlation.get() < customMax.getValue() && as.correlation.get() > customMin.getValue())){
+					temporaryHolderAdjectiveStatisticsList.add(as);
+					itr.remove();
+				}
+			}
+		});
+	}
+
 	public void clearChart() {
 		Platform.runLater(() -> barChart.getData().clear());
 	}
@@ -673,46 +758,53 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		//analyseAndSaveAnalysedSentimentToTable(response);
 	}
 
-	private void insertSentimentStats(SentimentCorrelationStatistics sentimentCorrelationStatistics, double total, double correlations){
-		double correlationPercent;
-		try {
-			correlationPercent = correlations / total;
-		} catch (ArithmeticException e) {
-			correlationPercent = 0;
-		}
-		correlationPercent = Utility.round(correlationPercent, 2);
-		sentimentCorrelationStatistics.setNumberOfCorrelations((int) correlations);
-		sentimentCorrelationStatistics.setCorrelationPercent(correlationPercent);
-		sentimentCorrelationStatistics.setTotalReviews((int) total);
-	}
-
-	public void startSentimentAnalysis(ActionEvent event) {
-		progressIndicator.setManaged(true);
-		progressIndicator.setVisible(true);
-		progressIndicator.setProgress(-1d);
-		sentimentSearchButton.setDisable(true);
+	private void setAllVisibleFalse(){
 		scatterChartMedian.setManaged(false);
 		scatterChartMedian.setVisible(false);
 		scatterChartMean.setManaged(false);
 		scatterChartMean.setVisible(false);
 		coefficientLabel.setVisible(false);
+		adjectiveTableView.setVisible(false);
+		adjectiveTableView.setManaged(false);
+		sentimentTableView.setVisible(false);
+		sentimentTableView.setManaged(false);
+		showAllAdjectivesButton.setVisible(false);
+		showAllAdjectivesButton.setManaged(false);
+		showNegativeCorrelationAdjectivesButton.setVisible(false);
+		showNegativeCorrelationAdjectivesButton.setManaged(false);
+		showPositiveCorrelationAdjectivesButton.setVisible(false);
+		showPositiveCorrelationAdjectivesButton.setManaged(false);
+		customSortButton.setVisible(false);
+		customSortButton.setManaged(false);
+		customFilteringVariables.setVisible(false);
+		customFilteringVariables.setManaged(false);
+		customMax.setVisible(false);
+		customMax.setManaged(false);
+		customMin.setVisible(false);
+		customMin.setManaged(false);
+		minLabel.setVisible(false);
+		minLabel.setManaged(false);
+		maxLabel.setVisible(false);
+		maxLabel.setManaged(false);
+
+	}
+	public void startSentimentAnalysis(ActionEvent event) {
+		setAllVisibleFalse();
+		sentimentSearchButton.setDisable(true);
+		progressIndicator.setManaged(true);
+		progressIndicator.setVisible(true);
+		progressIndicator.setProgress(-1d);
 		if(selectedSentimentOrAdjective.equals("Sentiment")) {
 
 			if (selectedAnalyseFormRadioButton.equals("Mean")) {
 				ReviewBackendAPIService.getInstance().getNumberOfReviewsByRatingAndAverageScoreTotal(this);
-				//ReviewBackendAPIService.getInstance().getSentimentMatrix(this);
-			} else {
+			}
+			else {
 				ReviewBackendAPIService.getInstance().getNumberOfReviewsByRatingAndMedianScoreTotalMatrix(this);
-				//ReviewBackendAPIService.getInstance().getSentimentMatrixMedian(this);
 			}
 		}
 		else{
-			if(selectedAnalyseFormRadioButton.equals("Mean")){
-				//  Do mean adjective code
-			}
-			else{
-				//  Do average Adjective code
-			}
+			ReviewBackendAPIService.getInstance().getAllReviewsWithAdjectiveMatrix(this);
 		}
 	}
 /*
@@ -838,6 +930,14 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@Override
 	public void processGetNumberOfReviewsByRatingAndAverageScoreCallBack(List<SentimentStatisticsBackendEntity> response) {
 	Platform.runLater(() ->{
+		if(selectedGraph.equals("Table")){
+			sentimentTableView.setVisible(true);
+			sentimentTableView.setManaged(true);
+			StatisticResult statisticResult = StatisticsCalculator.getCorrelationCoefficient(response);
+			SentimentCorrelationStatistics sentimentCorrelationStatistics = new SentimentCorrelationStatistics(statisticResult.correlationCofficient, statisticResult.getRatingStandardDeviation(), 0);
+			sentimentCorrelationStatisticsList.add(sentimentCorrelationStatistics);
+		}
+		else{
 
 			if(selectedAnalyseFormRadioButton.equals("Median")) {
 				scatterChartMedian.getData().clear();
@@ -896,20 +996,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 					lowest.getData().add(new XYChart.Data(sentimentStatisticsBackendEntity.getRating(), sentimentStatisticsBackendEntity.getMinScore()));
 				}
-				/*if(sentimentStatisticsBackendEntity.getRating() == sentimentStatisticsBackendEntity.getMinScore()){
-					higher.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
-				}
-				else if(findCorrelationCloserThan20(sentimentStatisticsBackendEntity)){
-					middle.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
-				}
-				else if(findCorrelationCloserThan10(sentimentStatisticsBackendEntity)){
-					lower.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
-				}
-				else {
-					lowest.getData().add(new XYChart.Data( sentimentStatisticsBackendEntity.getRating(),sentimentStatisticsBackendEntity.getMinScore(), calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount)));
-				}
 
-				 */
 
 			}
 
@@ -919,16 +1006,12 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		else{
 			scatterChartMean.getData().addAll(lowest, lower, middle, higher, highest);
 		}
-
-
-
-
+		}
+		});
 
 		progressIndicator.setManaged(false);
 		progressIndicator.setVisible(false);
 		sentimentSearchButton.setDisable(false);
-		});
-
 	}
 	private boolean findCorrelationCloserThan10(SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity){
 		if(sentimentStatisticsBackendEntity.getAmount() == 0){
@@ -989,20 +1072,81 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 	@Override
 	public void processGetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack(List<Pair<String, Long>> response) {
+		response.sort((o1, o2) -> o2.second.compareTo(o1.second));
+		adjectiveTableView.setVisible(true);
+		adjectiveTableView.setManaged(true);
 		for(Pair<String, Long> p: response){
-			System.out.println("Adjective: " + p.first + " Amount: " + p.second);
+			AdjectivesStatistics as = new AdjectivesStatistics(p.first, p.second, 0.0);
+			adjectiveStatisticsList.add(as);
 		}
+		progressIndicator.setManaged(false);
+		progressIndicator.setVisible(false);
+		sentimentSearchButton.setDisable(false);
 	}
 
 	@Override
 	public void processGetAllReviewsWithAdjectiveMatrixCallBack(List<ReviewsByAdjective> response) {
-		System.out.println("GetAllReviewsWithAdjectiveMatrixCallBack received");
-		for(ReviewsByAdjective rba: response){
-			System.out.println("Adjective: " + rba.adjective);
-			for(ReviewBackendEntity rbe: rba.getReviews()){
-				System.out.println("Review id:" + rbe.id + " Comment: {" + rbe.comment + "}");
+		adjectiveTableView.setVisible(true);
+		adjectiveTableView.setManaged(true);
+
+			for (ReviewsByAdjective rba : response) {
+
+				List<SentimentStatisticsBackendEntity> sentimentStatisticsBackendEntityList = new ArrayList<>();
+				for (ReviewBackendEntity rbe : rba.getReviews()) {
+					SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity;
+					if (selectedAnalyseFormRadioButton.equals("Mean")) {
+						sentimentStatisticsBackendEntity = new SentimentStatisticsBackendEntity(rbe.getRating(), rbe.normalisedAverageSentenceScore, rbe.normalisedAverageSentenceScore, 1);
+					}
+					else{
+						sentimentStatisticsBackendEntity = new SentimentStatisticsBackendEntity(rbe.getRating(), rbe.normalisedAverageSentenceScore, rbe.normalisedMedianSentenceScore, 1);
+					}
+					sentimentStatisticsBackendEntityList.add(sentimentStatisticsBackendEntity);
+				}
+				StatisticResult sr = StatisticsCalculator.getCorrelationCoefficient(sentimentStatisticsBackendEntityList);
+				rba.setCorrelationCoefficient(sr.correlationCofficient);
 			}
+			response.sort(Comparator.comparingDouble(ReviewsByAdjective::getCorrelationCoefficient));
+
+			for(ReviewsByAdjective rba : response){
+				if(rba.getCorrelationCoefficient() > 1.0 || rba.getCorrelationCoefficient() < -1.0 || Double.isNaN(rba.getCorrelationCoefficient())){
+					//  Debug code below
+					System.out.println(rba.getCorrelationCoefficient() + " error below");
+					for(ReviewBackendEntity rbe : rba.getReviews()){
+						System.out.println("Average: " + rbe.normalisedAverageSentenceScore);
+						System.out.println("Median: " + rbe.normalisedMedianSentenceScore);
+						System.out.println("Id: " + rbe.id);
+						System.out.println("Comment: " + rbe.comment);
+						System.out.println("Rating: " + rbe.rating);
+
+					}
+					continue;
+				}
+				AdjectivesStatistics adjectivesStatistics = new AdjectivesStatistics(rba.getAdjective(), (long) rba.getReviews().size(), rba.getCorrelationCoefficient());
+				adjectiveStatisticsList.add(adjectivesStatistics);
+			}
+		showAllAdjectivesButton.setVisible(true);
+		showAllAdjectivesButton.setManaged(true);
+		showNegativeCorrelationAdjectivesButton.setVisible(true);
+		showNegativeCorrelationAdjectivesButton.setManaged(true);
+		showPositiveCorrelationAdjectivesButton.setVisible(true);
+		showPositiveCorrelationAdjectivesButton.setManaged(true);
+		customSortButton.setVisible(true);
+		customSortButton.setManaged(true);
+		customFilteringVariables.setVisible(true);
+		customFilteringVariables.setManaged(true);
+		customMax.setVisible(true);
+		customMax.setManaged(true);
+		customMin.setVisible(true);
+		customMin.setManaged(true);
+		minLabel.setVisible(true);
+		minLabel.setManaged(true);
+		maxLabel.setVisible(true);
+		maxLabel.setManaged(true);
+		progressIndicator.setManaged(false);
+		progressIndicator.setVisible(false);
+		sentimentSearchButton.setDisable(false);
+
 		}
-	}
+
 }
 
