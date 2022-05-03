@@ -147,8 +147,6 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private Label minLabel;
 	@FXML private Label maxLabel;
 
-
-	@FXML private BubbleChart<Number, Number> bubbleChart;
 	@FXML private ScatterChart<Number, Number> scatterChartMedian;
 	@FXML private ScatterChart<Number, Number> scatterChartMean;
 	@FXML private Label coefficientLabel;
@@ -945,18 +943,20 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			if(selectedAnalyseFormRadioButton.equals("Median")) {
 				scatterChartMedian.getData().clear();
 				scatterChartMedian.setVisible(true);
+				scatterChartMedian.setManaged(true);
 				coefficientLabel.setVisible(false);
 			}
 			else{
 				scatterChartMean.getData().clear();
 				scatterChartMean.setVisible(true);
+				scatterChartMean.setManaged(true);
 			}
 
 			double coefficient = StatisticsCalculator.getCorrelationCoefficient(response).correlationCofficient;
 			coefficient = Utility.round(coefficient, 2);
 
 			coefficientLabel.setText("r = " + coefficient);
-		coefficientLabel.setVisible(true);
+			coefficientLabel.setVisible(true);
 			xAxisScatter.setLabel("Rating");
 			yAxisScatter.setLabel("Sentiment");
 
@@ -983,11 +983,9 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				double size = calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount);
 				if(size >= 9){
 					highest.getData().add(new XYChart.Data(sentimentStatisticsBackendEntity.getRating(), sentimentStatisticsBackendEntity.getMinScore()));
-
 				}
 				else if(size >= 6){
 					higher.getData().add(new XYChart.Data(sentimentStatisticsBackendEntity.getRating(), sentimentStatisticsBackendEntity.getMinScore()));
-					System.out.println(size);
 				}
 				else if(size >= 4){
 					middle.getData().add(new XYChart.Data(sentimentStatisticsBackendEntity.getRating(), sentimentStatisticsBackendEntity.getMinScore()));
@@ -996,11 +994,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 					lower.getData().add(new XYChart.Data(sentimentStatisticsBackendEntity.getRating(), sentimentStatisticsBackendEntity.getMinScore()));
 				}
 				else{
-
 					lowest.getData().add(new XYChart.Data(sentimentStatisticsBackendEntity.getRating(), sentimentStatisticsBackendEntity.getMinScore()));
 				}
-
-
 			}
 
 		if(selectedAnalyseFormRadioButton.equals("Median")) {
@@ -1010,11 +1005,12 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			scatterChartMean.getData().addAll(lowest, lower, middle, higher, highest);
 		}
 		}
-		});
-
 		progressIndicator.setManaged(false);
 		progressIndicator.setVisible(false);
 		sentimentSearchButton.setDisable(false);
+	});
+
+
 	}
 	private boolean findCorrelationCloserThan10(SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity){
 		if(sentimentStatisticsBackendEntity.getAmount() == 0){
