@@ -1,6 +1,7 @@
 package com.dt002g.reviewapplication.frontend.service;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -488,4 +489,37 @@ public class ReviewBackendAPIService {
 		});
 	}
 
+	public void getNumberOfReviewsWithAMountOfSentencesMatrix(GetNumberOfReviewsWithAMountOfSentencesMatrixCallBack getNumberOfReviewsWithAMountOfSentencesMatrixCallBack){
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<Pair<Long,Long>>> reviewRequest = reviewService.getNumberOfReviewsWithAMountOfSentencesMatrix();
+		reviewRequest.enqueue(new Callback<List<Pair<Long,Long>>>() {
+
+			@Override
+			public void onResponse(Call<List<Pair<Long,Long>>> call, Response<List<Pair<Long,Long>>> response) {
+				if(response.isSuccessful()) {
+					List<Pair<Long,Long>> data= response.body();
+					List<AmountOfRatingsWithAMountOfScentences> matrix = new ArrayList<>();
+					for(Pair<Long,Long> p: data){
+						matrix.add(new AmountOfRatingsWithAMountOfScentences(p.first, p.second));
+					}
+					getNumberOfReviewsWithAMountOfSentencesMatrixCallBack.processGetNumberOfReviewsWithAMountOfSentencesMatrixCallBack(matrix);
+				}
+				else {
+					Platform.runLater(() -> {
+						Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+						alert.show();
+					});
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<Pair<Long,Long>>> call, Throwable t) {
+				Platform.runLater(() -> {
+					Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+					alert.show();
+				});
+
+			}
+		});
+	}
 }

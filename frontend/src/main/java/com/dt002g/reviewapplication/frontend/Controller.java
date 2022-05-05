@@ -30,7 +30,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack, GetSentimentStatisticsCallBack, GetNumberOfReviewsByRatingAndAverageScoreTotalCallback, GetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack, GetAllReviewsWithAdjectiveMatrixCallBack {
+public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack, GetSentimentStatisticsCallBack, GetNumberOfReviewsByRatingAndAverageScoreTotalCallback, GetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack, GetAllReviewsWithAdjectiveMatrixCallBack, GetNumberOfReviewsWithAMountOfSentencesMatrixCallBack {
 	@FXML private GridPane root;
 
 	@FXML private RadioButton getAllRadioButton = new RadioButton();
@@ -117,6 +117,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 	@FXML private RadioButton sentimentButton;
 	@FXML private RadioButton adjectivesButton;
+	@FXML private RadioButton sentenceButton;
 	private final ToggleGroup sentimentAdjectivesGroup = new ToggleGroup();
 
 	@FXML private RadioButton scatterChartButton;
@@ -137,6 +138,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private TableColumn<AdjectivesStatistics, String> adjectiveColumn;
 	@FXML private TableColumn<AdjectivesStatistics, Long> adjectiveAmountColumn;
 	@FXML private TableColumn<AdjectivesStatistics, Double> adjectiveCorrelationColumn;
+	@FXML private TableView<AmountOfRatingsWithAMountOfScentences> sentenceTableView;
+	private final ObservableList<AmountOfRatingsWithAMountOfScentences> scentenceStatisticsList = FXCollections.observableArrayList();
+	@FXML private TableColumn<AmountOfRatingsWithAMountOfScentences, Long> amountOfSentencesColumn;
+	@FXML private TableColumn<AmountOfRatingsWithAMountOfScentences, Long> amountOfReviewsColumn;
 	@FXML private Button showAllAdjectivesButton;
 	@FXML private Button showPositiveCorrelationAdjectivesButton;
 	@FXML private Button showNegativeCorrelationAdjectivesButton;
@@ -194,6 +199,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		adjectiveAmountColumn.setCellValueFactory(rowData-> rowData.getValue().amount);
 		adjectiveCorrelationColumn.setCellValueFactory(rowData -> rowData.getValue().correlation);
 
+		sentenceTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		sentenceTableView.setItems(scentenceStatisticsList);
+		amountOfSentencesColumn.setCellValueFactory(rowData -> rowData.getValue().amountOfSentencesProperty());
+		amountOfReviewsColumn.setCellValueFactory(rowData-> rowData.getValue().amountOfRatingsProperty());
 
 		root.setOnKeyPressed(event -> {
 			if(event.getCode().equals(KeyCode.ENTER)) {
@@ -217,6 +226,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		sentimentButton.setToggleGroup(sentimentAdjectivesGroup);
 		sentimentButton.setSelected(true);
 		adjectivesButton.setToggleGroup(sentimentAdjectivesGroup);
+		sentenceButton.setToggleGroup(sentimentAdjectivesGroup);
 
 		tableButton.setToggleGroup(visualsGroup);
 		scatterChartButton.setToggleGroup(visualsGroup);
@@ -230,13 +240,23 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		sentimentAdjectivesGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) -> {
 			RadioButton tempButton = (RadioButton) sentimentAdjectivesGroup.getSelectedToggle();
 			selectedSentimentOrAdjective = tempButton.getText();
-			if(!selectedSentimentOrAdjective.equals("Sentiment")){
+			if(selectedSentimentOrAdjective.equals("Sentence") ){
 				tableButton.setVisible(false);
 				scatterChartButton.setVisible(false);
+				averageRadioButton.setVisible(false);
+				meanRadioButton.setVisible(false);
+			}
+			else if(!selectedSentimentOrAdjective.equals("Sentiment")){
+				tableButton.setVisible(false);
+				scatterChartButton.setVisible(false);
+				averageRadioButton.setVisible(true);
+				meanRadioButton.setVisible(true);
 			}
 			else{
 				tableButton.setVisible(true);
 				scatterChartButton.setVisible(true);
+				averageRadioButton.setVisible(true);
+				meanRadioButton.setVisible(true);
 			}
 		});
 		visualsGroup.selectedToggleProperty().addListener((ov, oldToggle, newToggle) ->{
@@ -795,7 +815,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		progressIndicator.setManaged(true);
 		progressIndicator.setVisible(true);
 		progressIndicator.setProgress(-1d);
-		if(selectedSentimentOrAdjective.equals("Sentiment")) {
+		if(selectedSentimentOrAdjective.equals("Sentence")) {
+			ReviewBackendAPIService.getInstance().getNumberOfReviewsWithAMountOfSentencesMatrix(this);
+		}
+		else if(selectedSentimentOrAdjective.equals("Sentiment")) {
 
 			if (selectedAnalyseFormRadioButton.equals("Mean")) {
 				ReviewBackendAPIService.getInstance().getNumberOfReviewsByRatingAndAverageScoreTotal(this);
@@ -1147,5 +1170,14 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 		}
 
+	@Override
+	public void processGetNumberOfReviewsWithAMountOfSentencesMatrixCallBack(List<AmountOfRatingsWithAMountOfScentences> response) {
+		sentenceTableView.setVisible(true);
+		sentenceTableView.setManaged(true);
+		scentenceStatisticsList.addAll(response);
+		progressIndicator.setManaged(false);
+		progressIndicator.setVisible(false);
+		sentimentSearchButton.setDisable(false);
+	}
 }
 

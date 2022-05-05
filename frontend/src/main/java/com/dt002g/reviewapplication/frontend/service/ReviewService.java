@@ -89,5 +89,8 @@ public interface ReviewService {
 	@GET("getAllReviewsWithAdjectiveMatrix")
 	Call<List<ReviewsByAdjective>> getAllReviewsWithAdjectiveMatrix();
 
+	@GET("getNumberOfReviewsWithAMountOfSentencesMatrix")
+	Call<List<Pair<Long,Long>>> getNumberOfReviewsWithAMountOfSentencesMatrix();
+
 
 }
