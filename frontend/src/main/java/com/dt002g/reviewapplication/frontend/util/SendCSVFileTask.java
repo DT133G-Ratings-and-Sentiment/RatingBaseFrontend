@@ -23,6 +23,7 @@ public class SendCSVFileTask  extends Task<Void> {
 
     @Override
     protected Void call() throws Exception {
+        System.out.println("SendCSVFileTask start");
         File myObj = new File(fileName);
         try {
             if (myObj.createNewFile()) {
@@ -34,6 +35,7 @@ public class SendCSVFileTask  extends Task<Void> {
                 writer.close();
 
                 ReviewBackendAPIService.getInstance().uploadCSVFile(myObj, uploadCSVFileCallBack, data.size());
+                System.out.println("SendCSVFileTask file sent.");
             }
         } catch (IOException | SecurityException e) {
             System.out.println(e.getMessage());

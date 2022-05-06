@@ -325,12 +325,12 @@ public class ReviewBackendAPIService {
 			@Override
 			public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
 				if(response.isSuccessful()) {
-					System.out.println("Successfully uploaded SCV file from frontend");
+					System.out.println("Successfully uploaded SCV file from frontend: " + file.getName());
 					file.delete();
 					uploadCSVFileCallBack.processUploadCSVFileCallBack(numberOfRows);
 				}
 				else {
-					System.out.println("Failed to  upload SCV file from frontend");
+					System.out.println("Failed to  upload SCV file from frontend: " + file.getName());
 					showErrorAlert(response);
 					file.delete();
 				}

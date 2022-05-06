@@ -1,5 +1,6 @@
 package com.dt002g.reviewapplication.frontend.util;
 
+import com.dt002g.reviewapplication.frontend.service.Pair;
 import com.dt002g.reviewapplication.frontend.service.UploadCSVFileCallBack;
 import com.stanford_nlp.SentimentAnalyser.SentenceScore;
 import com.stanford_nlp.SentimentAnalyser.SentimentAnalyser;
@@ -172,7 +173,7 @@ public class CSVHandler implements UploadCSVFileCallBack {
 	    return data;
 	}*/
 
-	public boolean parseCSVFileAndSend(ArrayList<String> neededHeaders, File file, int minRating, int maxRating){
+	/*public boolean parseCSVFileAndSend(ArrayList<String> neededHeaders, File file, int minRating, int maxRating){
 		numberOfParsedRows.setValue(0);
 		numberOfExportedRows.setValue(0);
 		numberOfFailedRows.setValue(0);
@@ -334,6 +335,79 @@ public class CSVHandler implements UploadCSVFileCallBack {
 			executorService.execute(task);
 		}
 		return true;
+	}*/
+
+	public boolean parseCSVFileAndSend(ArrayList<String> neededHeaders, File file, int minRating, int maxRating){
+		numberOfParsedRows.setValue(0);
+		numberOfExportedRows.setValue(0);
+		numberOfFailedRows.setValue(0);
+		failedLines = new ArrayList<>();
+		cancel = false;
+		int fileNr = 1;
+		int nrOfRows = 0;
+		ArrayList<String> data = new ArrayList<String>();
+		SentimentAnalyser senti = new SentimentAnalyser();
+
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			String headersRow = br.readLine();
+			ArrayList<Integer> headerIndexes = getIndexesOfHeaderColumnsToUse(headersRow, neededHeaders);
+			if(headerIndexes.size() != neededHeaders.size()) {
+				return false;
+			}
+
+			String line;
+			int numberOfLines = 0;
+			while ((line = br.readLine()) != null && !cancel) {
+				String rawLine = line;
+				numberOfLines++;
+				line = removeStartingAndEndingQuotationMarks(line);
+				ArrayList<String> rowData = splitLineIntoCells(line);
+				try {
+					System.out.println(numberOfParsedRows.getValue() + " Fetch Rowdata accoriding to headers start");
+					Pair<Boolean, String> tempRowToBeAdded = createLineFromCellsAndHeaders(headerIndexes, rowData, minRating, maxRating);
+					if(tempRowToBeAdded.first) {
+						data.add(tempRowToBeAdded.second);
+						nrOfRows += 1;
+						numberOfParsedRows.setValue(numberOfParsedRows.getValue() + 1);
+					}
+					else{
+						failedLines.add(rawLine);
+						failedLineProp.setValue(rawLine);
+						numberOfFailedRows.setValue(failedLines.size());
+						System.out.println("Free text longer than 2000 characters: " + numberOfLines );
+					}
+					System.out.println(numberOfParsedRows.getValue() + " Fetch Rowdata accoriding to headers end");
+				}catch(NumberFormatException e) {
+					System.out.println("NumberFormatException: " + numberOfLines );
+					addFailedLine(rawLine);
+					e.printStackTrace();
+				}catch(java.lang.IndexOutOfBoundsException e){
+					addFailedLine(rawLine);
+					System.out.println("IndexOutOfBoundsException: " + numberOfLines );
+					e.printStackTrace();
+				}catch(Exception e){
+					addFailedLine(rawLine);
+					e.printStackTrace();
+				}
+				if(nrOfRows == 100){
+					ArrayList clonedList = (ArrayList) data.clone();
+					SendCSVFileTask task = new SendCSVFileTask(clonedList, "localCsvFile" + fileNr + ".csv", this);
+					executorService.execute(task);
+					data.clear();
+					fileNr += 1;
+					nrOfRows = 0;
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(data.size() > 0 && !cancel){
+			SendCSVFileTask task = new SendCSVFileTask(data, "localCsvFile" + fileNr + ".csv", this);
+			executorService.execute(task);
+		}
+		return true;
 	}
 
 	/*private void sendBatch(ArrayList<String> data, String fileName){
@@ -415,6 +489,119 @@ public class CSVHandler implements UploadCSVFileCallBack {
 	@Override
 	public void processUploadCSVFileCallBack(int amount) {
 		numberOfExportedRows.setValue(numberOfExportedRows.getValue() +amount);
+	}
+
+	private ArrayList<Integer> getIndexesOfHeaderColumnsToUse(String headersRow, ArrayList<String> neededHeaders){
+		ArrayList<Integer> headerIndexes = new ArrayList<>();
+		String[] headers = headersRow.split(",");
+		for(String s: neededHeaders) {
+			for(int i = 0; i < headers.length; i++) {
+				if(s.equalsIgnoreCase(headers[i])) {
+					headerIndexes.add(i);
+				}
+			}
+		}
+		return headerIndexes;
+	}
+
+	ArrayList<String> splitLineIntoCells(String line){
+		System.out.println("splitLineIntoCells start");
+		ArrayList<String> rowData = new ArrayList<>();
+		while(line.length() > 0) {
+			String row = "";
+			line = line.trim();
+			if(line.startsWith("\"")) {
+				while(line.charAt(0) == '\"' && line.length() >2) {
+					line = line.substring(line.indexOf("\"") +1);
+				}
+				if(line.indexOf(",") == -1) {
+					rowData.add(line);
+					line = "";
+					break;
+				}
+				else {
+					if(line.indexOf("\",", 0) != -1) {
+						row = line.substring(0, line.indexOf("\","));
+						line = line.substring(line.indexOf("\","));
+					}
+					else if(line.endsWith("\"")){
+						row = line.substring(0, line.lastIndexOf("\""));
+						line = line.substring(line.lastIndexOf("\""));
+					}
+					else{
+						row = line.substring(0, line.indexOf(","));
+						line = line.substring(line.indexOf(","));
+					}
+				}
+				while(line.charAt(0) == '\"' && line.length() > 2) {
+					line = line.substring(line.indexOf("\"") +1);
+				}
+				if(line.indexOf(",") == -1)
+					break;
+				line = line.substring(line.indexOf(","));
+				if(line.length() > 0)
+					line = line.substring(1);
+				rowData.add(row);
+			}
+			else {
+				if(line.indexOf(",") == -1) {
+					rowData.add(line);
+					break;
+				}
+				row = line.substring(0, line.indexOf(","));
+				line = line.substring(line.indexOf(","));
+				if(line.length() > 0)
+					line = line.substring(1);
+				rowData.add(row);
+			}
+		}
+		System.out.println("splitLineIntoCells end");
+		return rowData;
+	}
+
+	public Pair<Boolean,String> createLineFromCellsAndHeaders(ArrayList<Integer> headerIndexes, ArrayList<String> rowData, int minRating, int maxRating){
+		Pair<Boolean,String> tempRowToBeAdded = new Pair<>(true, "");
+		for(int i = 0; i < headerIndexes.size(); i++) {
+			if(i == 0) {
+				// Transform to a common rating scale of 0-100  with formula:
+				// (rating – 1)/(number of response categories – 1) × 100.
+				// If the actual rating is bigger than the anonced maxrating it get max value
+				//if its lower it get 0 value.
+				double rawRating = Double.parseDouble(rowData.get(headerIndexes.get(i)));
+				if(rawRating > maxRating){
+					rawRating = maxRating;
+				}
+				else if(rawRating < minRating){
+					rawRating = minRating;
+				}
+				int rating = (int)Math.round((rawRating -1)/ ((((double)maxRating+1)-(double)minRating) -1) * 100);
+				tempRowToBeAdded.second  += rating + ";#";
+
+
+			}
+			else if(i ==1){
+				if(rowData.get(headerIndexes.get(i)).length() > 2000) {
+					tempRowToBeAdded.first = false;
+				}
+				else {
+					tempRowToBeAdded.second += handleFreeText(rowData.get(headerIndexes.get(i)));
+				}
+			}
+		}
+		return tempRowToBeAdded;
+	}
+
+	private String removeStartingAndEndingQuotationMarks(String line){
+		if(line.startsWith("\"") && line.endsWith("\"")) {
+			line = line.substring(1, line.length()-1);
+		}
+		return line;
+	}
+
+	private void addFailedLine(String rawLine){
+		failedLines.add(rawLine);
+		failedLineProp.setValue(rawLine);
+		numberOfFailedRows.setValue(failedLines.size());
 	}
 
 	public ArrayList<String> getFailedLines(){
