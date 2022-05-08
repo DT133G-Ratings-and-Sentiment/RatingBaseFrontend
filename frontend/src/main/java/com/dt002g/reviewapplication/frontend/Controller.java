@@ -807,6 +807,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		minLabel.setManaged(false);
 		maxLabel.setVisible(false);
 		maxLabel.setManaged(false);
+		sentenceTableView.setVisible(false);
+		sentimentTableView.setManaged(false);
 
 	}
 	public void startSentimentAnalysis(ActionEvent event) {
@@ -1035,30 +1037,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 
 	}
-	private boolean findCorrelationCloserThan10(SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity){
-		if(sentimentStatisticsBackendEntity.getAmount() == 0){
-			return false;
-		}
-		if(sentimentStatisticsBackendEntity.getRating() > sentimentStatisticsBackendEntity.getMinScore() + 10){
-			return true;
-		}
-		if(sentimentStatisticsBackendEntity.getRating() < sentimentStatisticsBackendEntity.getMinScore() - 10){
-			return true;
-		}
-		return false;
-	}
-	private boolean findCorrelationCloserThan20(SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity){
-		if(sentimentStatisticsBackendEntity.getAmount() == 0){
-			return false;
-		}
-		if(sentimentStatisticsBackendEntity.getRating() > sentimentStatisticsBackendEntity.getMinScore() + 20){
-			return true;
-		}
-		if(sentimentStatisticsBackendEntity.getRating() < sentimentStatisticsBackendEntity.getMinScore() - 20){
-			return true;
-		}
-		return false;
-	}
+
 
 	private double calculateSize(long amount, long totalAmount){
 
