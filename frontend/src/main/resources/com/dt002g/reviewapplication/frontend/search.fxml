@@ -171,6 +171,7 @@
                                         <TableColumn fx:id="adjectiveColumn" prefWidth="75.0" text="Adjective" />
                                         <TableColumn fx:id="adjectiveAmountColumn" prefWidth="75.0" text="Amount" />
                                           <TableColumn fx:id="adjectiveCorrelationColumn" prefWidth="75.0" text="Correlation" />
+                                          <TableColumn fx:id="percentOfAllColumn" prefWidth="75.0" text="\% of total Adjectives" />
                                       </columns>
                                     </TableView>
                                      <TableView fx:id="sentenceTableView" prefHeight="541.0" prefWidth="966.0" visible="false">

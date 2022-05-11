@@ -16,8 +16,7 @@ import javafx.scene.chart.PieChart.Data;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TabPane.TabClosingPolicy;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -129,6 +128,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private TableColumn<SentimentCorrelationStatistics, Double> correlationCoefficientColumn;
 	@FXML private TableColumn<SentimentCorrelationStatistics, Double> standardDeviationColumn;
 	@FXML private TableColumn<SentimentCorrelationStatistics, Double> confidenceIntervalColumn;
+
 	@FXML private Button sentimentSearchButton;
 	@FXML private ProgressIndicator progressIndicator;
 
@@ -138,6 +138,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private TableColumn<AdjectivesStatistics, String> adjectiveColumn;
 	@FXML private TableColumn<AdjectivesStatistics, Long> adjectiveAmountColumn;
 	@FXML private TableColumn<AdjectivesStatistics, Double> adjectiveCorrelationColumn;
+	@FXML private TableColumn<AdjectivesStatistics, Double> percentOfAllColumn;
 	@FXML private TableView<AmountOfRatingsWithAMountOfScentences> sentenceTableView;
 	private final ObservableList<AmountOfRatingsWithAMountOfScentences> scentenceStatisticsList = FXCollections.observableArrayList();
 	@FXML private TableColumn<AmountOfRatingsWithAMountOfScentences, Long> amountOfSentencesColumn;
@@ -160,11 +161,18 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML final NumberAxis xAxisScatter = new NumberAxis(-10, 105, 0.5);
 	@FXML final NumberAxis yAxisScatter = new NumberAxis(-10, 105, 0.5);
 
+	final KeyCodeCombination keyCodeCopy = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_ANY);
+
+
     
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-
+		adjectiveTableView.setOnKeyPressed(event -> {
+			if (keyCodeCopy.match(event)) {
+				copySelectionToClipboard(adjectiveTableView);
+			}
+		});
 
 		//  Upload csv
 		ratingSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
@@ -198,6 +206,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		adjectiveColumn.setCellValueFactory(rowData -> rowData.getValue().adjective);
 		adjectiveAmountColumn.setCellValueFactory(rowData-> rowData.getValue().amount);
 		adjectiveCorrelationColumn.setCellValueFactory(rowData -> rowData.getValue().correlation);
+		percentOfAllColumn.setCellValueFactory(rowData -> rowData.getValue().percent);
 
 		sentenceTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		sentenceTableView.setItems(scentenceStatisticsList);
@@ -1077,7 +1086,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		adjectiveTableView.setVisible(true);
 		adjectiveTableView.setManaged(true);
 		for(Pair<String, Long> p: response){
-			AdjectivesStatistics as = new AdjectivesStatistics(p.first, p.second, 0.0);
+			AdjectivesStatistics as = new AdjectivesStatistics(p.first, p.second, 0.0, 0.0);
 			adjectiveStatisticsList.add(as);
 		}
 		progressIndicator.setManaged(false);
@@ -1089,6 +1098,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	public void processGetAllReviewsWithAdjectiveMatrixCallBack(List<ReviewsByAdjective> response) {
 		adjectiveTableView.setVisible(true);
 		adjectiveTableView.setManaged(true);
+		double negativeTotal = 0;
+		double positiveTotal = 0;
 
 			for (ReviewsByAdjective rba : response) {
 
@@ -1099,30 +1110,45 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 						sentimentStatisticsBackendEntity = new SentimentStatisticsBackendEntity(rbe.getRating(), rbe.normalisedAverageSentenceScore, rbe.normalisedAverageSentenceScore, 1);
 					}
 					else{
-						sentimentStatisticsBackendEntity = new SentimentStatisticsBackendEntity(rbe.getRating(), rbe.normalisedAverageSentenceScore, rbe.normalisedMedianSentenceScore, 1);
+						sentimentStatisticsBackendEntity = new SentimentStatisticsBackendEntity(rbe.getRating(), rbe.normalisedMedianSentenceScore, rbe.normalisedMedianSentenceScore, 1);
 					}
 					sentimentStatisticsBackendEntityList.add(sentimentStatisticsBackendEntity);
 				}
+
+				//  Här är statistics result
 				StatisticResult sr = StatisticsCalculator.getCorrelationCoefficient(sentimentStatisticsBackendEntityList);
+				if(sr.correlationCofficient > 0){
+					positiveTotal += rba.getReviews().size();
+				}
+				else{
+					negativeTotal += rba.getReviews().size();
+				}
+				//  Här sätts resultatet in
+				if(Double.isNaN(sr.correlationCofficient)){
+					System.out.println(rba.adjective + "is NaN");
+				}
 				rba.setCorrelationCoefficient(sr.correlationCofficient);
 			}
 			response.sort(Comparator.comparingDouble(ReviewsByAdjective::getCorrelationCoefficient));
 
+			System.out.println("Neg: " + negativeTotal);
+			System.out.println("Pos: " + positiveTotal);
 			for(ReviewsByAdjective rba : response){
+				//  Om correlation är större än 1.0, mindre än -1.0, eller NaN så hoppa över
 				if(rba.getCorrelationCoefficient() > 1.0 || rba.getCorrelationCoefficient() < -1.0 || Double.isNaN(rba.getCorrelationCoefficient())){
-					//  Debug code below
-					System.out.println(rba.getCorrelationCoefficient() + " error below");
-					for(ReviewBackendEntity rbe : rba.getReviews()){
-						System.out.println("Average: " + rbe.normalisedAverageSentenceScore);
-						System.out.println("Median: " + rbe.normalisedMedianSentenceScore);
-						System.out.println("Id: " + rbe.id);
-						System.out.println("Comment: " + rbe.comment);
-						System.out.println("Rating: " + rbe.rating);
-
+					if(rba.adjective.equals("variable")){
+						System.out.println(rba.getCorrelationCoefficient());
 					}
 					continue;
 				}
-				AdjectivesStatistics adjectivesStatistics = new AdjectivesStatistics(rba.getAdjective(), (long) rba.getReviews().size(), rba.getCorrelationCoefficient());
+				AdjectivesStatistics adjectivesStatistics;
+				if(rba.getCorrelationCoefficient() > 0){
+					adjectivesStatistics = new AdjectivesStatistics(rba.getAdjective(), (long) rba.getReviews().size(), rba.getCorrelationCoefficient(), Utility.round(((rba.getReviews().size()/positiveTotal) * 100), 2));
+				}
+				else{
+					adjectivesStatistics = new AdjectivesStatistics(rba.getAdjective(), (long) rba.getReviews().size(), rba.getCorrelationCoefficient(), Utility.round(((rba.getReviews().size()/positiveTotal) * 100), 2));
+				}
+
 				adjectiveStatisticsList.add(adjectivesStatistics);
 			}
 		showAllAdjectivesButton.setVisible(true);
@@ -1157,6 +1183,33 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		progressIndicator.setManaged(false);
 		progressIndicator.setVisible(false);
 		sentimentSearchButton.setDisable(false);
+	}
+	@SuppressWarnings("rawtypes")
+	public void copySelectionToClipboard(final TableView<?> table) {
+		final Set<Integer> rows = new TreeSet<>();
+		for (final TablePosition tablePosition : table.getSelectionModel().getSelectedCells()) {
+			rows.add(tablePosition.getRow());
+		}
+		final StringBuilder strb = new StringBuilder();
+		boolean firstRow = true;
+		for (final Integer row : rows) {
+			if (!firstRow) {
+				strb.append('\n');
+			}
+			firstRow = false;
+			boolean firstCol = true;
+			for (final TableColumn<?, ?> column : table.getColumns()) {
+				if (!firstCol) {
+					strb.append('\t');
+				}
+				firstCol = false;
+				final Object cellData = column.getCellData(row);
+				strb.append(cellData == null ? "" : cellData.toString());
+			}
+		}
+		final ClipboardContent clipboardContent = new ClipboardContent();
+		clipboardContent.putString(strb.toString());
+		Clipboard.getSystemClipboard().setContent(clipboardContent);
 	}
 }
 

@@ -12,10 +12,25 @@ public class AdjectivesStatistics {
     ObjectProperty<Long> amount = new SimpleObjectProperty(0);
     ObjectProperty<Double> correlation = new SimpleObjectProperty<>(0.0);
 
-    AdjectivesStatistics( String adjective, Long amount, Double correlation) {
+    public Double getPercent() {
+        return percent.get();
+    }
+
+    public ObjectProperty<Double> percentProperty() {
+        return percent;
+    }
+
+    public void setPercent(Double percent) {
+        this.percent.set(percent);
+    }
+
+    ObjectProperty<Double> percent = new SimpleObjectProperty<>(0.0);
+
+    AdjectivesStatistics( String adjective, Long amount, Double correlation, Double percent) {
         this.adjective.set(adjective);
         this.amount.set(amount);
         this.correlation.set(correlation);
+        this.percent.set(percent);
     }
 
     public String getAdjective() {
