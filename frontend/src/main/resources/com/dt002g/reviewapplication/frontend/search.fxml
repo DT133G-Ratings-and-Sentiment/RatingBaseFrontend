@@ -182,9 +182,9 @@
                                      </TableView>
                                     <TableView fx:id="sentimentTableView" layoutX="-2.0" layoutY="-1.0" prefHeight="544.0" prefWidth="970.0" visible="false">
                                       <columns>
+                                          <TableColumn fx:id="ratingIntervalColumn" prefWidth="75.0" text="Rating Interval" />
                                         <TableColumn fx:id="correlationCoefficientColumn" prefWidth="75.0" text="Correlation Coefficient" />
-                                          <TableColumn fx:id="standardDeviationColumn" prefWidth="75.0" text="Standard Deviation" />
-                                          <TableColumn fx:id="confidenceIntervalColumn" prefWidth="154.0" text="Confidence Interval" />
+                                          <TableColumn fx:id="standardDeviationColumn" prefWidth="154.0" text="Standard Deviation" />
                                       </columns>
                                     </TableView>
                                     <ScatterChart fx:id="scatterChartMedian" prefHeight="544.0" prefWidth="973.0" styleClass="default-colour0" stylesheets="@css/stylesheet.css" title="Correlation" visible="false">

@@ -125,9 +125,10 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 	@FXML private TableView<SentimentCorrelationStatistics> sentimentTableView;
 	private final ObservableList<SentimentCorrelationStatistics> sentimentCorrelationStatisticsList = FXCollections.observableArrayList();
+	@FXML private TableColumn<SentimentCorrelationStatistics, String> ratingIntervalColumn;
 	@FXML private TableColumn<SentimentCorrelationStatistics, Double> correlationCoefficientColumn;
 	@FXML private TableColumn<SentimentCorrelationStatistics, Double> standardDeviationColumn;
-	@FXML private TableColumn<SentimentCorrelationStatistics, Double> confidenceIntervalColumn;
+	//@FXML private TableColumn<SentimentCorrelationStatistics, Double> confidenceIntervalColumn;
 
 	@FXML private Button sentimentSearchButton;
 	@FXML private ProgressIndicator progressIndicator;
@@ -199,7 +200,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		sentimentTableView.setItems(sentimentCorrelationStatisticsList);
 		correlationCoefficientColumn.setCellValueFactory(rowData -> rowData.getValue().correlationCoefficient);
 		standardDeviationColumn.setCellValueFactory(rowData -> rowData.getValue().standardDeviation);
-		confidenceIntervalColumn.setCellValueFactory(rowData -> rowData.getValue().confidenceInterval);
+		ratingIntervalColumn.setCellValueFactory(rowData -> rowData.getValue().ratingInterval);
 
 		adjectiveTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		adjectiveTableView.setItems(adjectiveStatisticsList);
@@ -966,11 +967,67 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	public void processGetNumberOfReviewsByRatingAndAverageScoreCallBack(List<SentimentStatisticsBackendEntity> response) {
 	Platform.runLater(() ->{
 		if(selectedGraph.equals("Table")){
+			sentimentCorrelationStatisticsList.clear();
 			sentimentTableView.setVisible(true);
 			sentimentTableView.setManaged(true);
 			StatisticResult statisticResult = StatisticsCalculator.getCorrelationCoefficient(response);
-			SentimentCorrelationStatistics sentimentCorrelationStatistics = new SentimentCorrelationStatistics(statisticResult.correlationCofficient, statisticResult.getRatingStandardDeviation(), 0);
+			SentimentCorrelationStatistics sentimentCorrelationStatistics = new SentimentCorrelationStatistics(statisticResult.correlationCofficient, statisticResult.getRatingStandardDeviation(), 0, "0-100");
 			sentimentCorrelationStatisticsList.add(sentimentCorrelationStatistics);
+
+			List<List<SentimentStatisticsBackendEntity>> lists = new ArrayList<>();
+			for(int i = 0; i <= 5; i++){
+				lists.add(new ArrayList<SentimentStatisticsBackendEntity>());
+			}
+			for(SentimentStatisticsBackendEntity s: response){
+				if(s.rating >= 50) {
+					lists.get(1).add(s);
+				}
+				else if(s.rating <= 50){
+					lists.get(0).add(s);
+				}
+				else{
+					lists.get(1).add(s);
+					lists.get(0).add(s);
+				}
+				if(s.rating >74 && s.rating < 101){
+					lists.get(2).add(s);
+				}
+				if(s.rating >-1 && s.rating < 26){
+					lists.get(3).add(s);
+				}
+				if(s.rating >24 && s.rating < 76){
+					lists.get(4).add(s);
+				}
+				if(s.rating == 100 || s.rating == 0){
+					lists.get(5).add(s);
+				}
+			}
+			int index = 40;
+			for(int i = 0; i < lists.size(); i++){
+				String ratingInterval = "";
+				if(i == 0){
+					ratingInterval = "0-50";
+				}
+				else if(i == 1){
+					ratingInterval = "50-100";
+				}
+				else if(i == 2){
+					ratingInterval = "75-100";
+				}
+				else if(i == 3){
+					ratingInterval = "0-25";
+				}
+				else if(i == 4){
+					ratingInterval = "25-75";
+				}
+				else if(i == 5){
+					ratingInterval = "0 or 100";
+				}
+				StatisticResult tempStatisticResult = StatisticsCalculator.getCorrelationCoefficient(lists.get(i));
+				SentimentCorrelationStatistics tempSentimentCorrelationStatistics = new SentimentCorrelationStatistics(tempStatisticResult.correlationCofficient, tempStatisticResult.getRatingStandardDeviation(), 0, ratingInterval);
+				sentimentCorrelationStatisticsList.add(tempSentimentCorrelationStatistics);
+			}
+
 		}
 		else{
 

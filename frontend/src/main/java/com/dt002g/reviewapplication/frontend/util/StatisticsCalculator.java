@@ -308,7 +308,8 @@ public class StatisticsCalculator {
 
     public static StatisticResult getCorrelationCoefficient(List<SentimentStatisticsBackendEntity> reviewRatingByScoreMatrix){
         if(reviewRatingByScoreMatrix == null){
-            reviewRatingByScoreMatrix = createMatrix3();
+            return null;
+            //reviewRatingByScoreMatrix = createMatrix4();
         }
         StatisticResult stats = new StatisticResult();
         stats.ratingScaleStart = 0;
@@ -328,7 +329,7 @@ public class StatisticsCalculator {
         stats.deviationSentimentScore = 0;
 
      for(SentimentStatisticsBackendEntity ssbe: reviewRatingByScoreMatrix){
-//            System.out.println("Rating: " + ssbe.rating + " minScore: " + ssbe.minScore + " maxScore: " + ssbe.maxScore + " amount: " + ssbe.amount);
+            System.out.println("Rating: " + ssbe.rating + " minScore: " + ssbe.minScore + " maxScore: " + ssbe.maxScore + " amount: " + ssbe.amount);
             stats.ratingAmount[ssbe.rating] += ssbe.amount;
             stats.sentimentScoreAmount[(int)ssbe.minScore] += ssbe.amount;
             stats.ratingSentimentScoreAmount[ssbe.rating][(int)ssbe.minScore] += ssbe.amount;
@@ -370,13 +371,13 @@ public class StatisticsCalculator {
 
         stats.correlationCofficient = stats.covarriance / (Math.sqrt((stats.deviationRating*stats.deviationSentimentScore)));
 
-//        System.out.println("ratingExpectedValue: " + stats.ratingExpectedValue);System.out.println("sentimentScoreExpectedValue: " + stats.sentimentScoreExpectedValue);
-//        System.out.println("deviationRating: " + stats.deviationRating);
-//        System.out.println("deviationSentimentScore: " + stats.deviationSentimentScore);
-//        System.out.println("covarriance: " + stats.covarriance);
-//        System.out.println("correlationCofficient: " + stats.correlationCofficient);
-//        System.out.println("Rating standard deviation: " + stats.getRatingStandardDeviation());
-//        System.out.println("Sentiment score standartd deviation: " + stats.getSentimentScoreStandardDeviation());
+        System.out.println("ratingExpectedValue: " + stats.ratingExpectedValue);System.out.println("sentimentScoreExpectedValue: " + stats.sentimentScoreExpectedValue);
+        System.out.println("deviationRating: " + stats.deviationRating);
+        System.out.println("deviationSentimentScore: " + stats.deviationSentimentScore);
+        System.out.println("covarriance: " + stats.covarriance);
+        System.out.println("correlationCofficient: " + stats.correlationCofficient);
+        System.out.println("Rating standard deviation: " + stats.getRatingStandardDeviation());
+        System.out.println("Sentiment score standartd deviation: " + stats.getSentimentScoreStandardDeviation());
         ConfidenceInterval ratingConfidenceInterval = caclulateConfidenceInterval(stats.ratingExpectedValue, 1.96, stats.getRatingStandardDeviation(), stats.totalRatings);
         ConfidenceInterval sentimentScoreConfidenceInterval = caclulateConfidenceInterval(stats.sentimentScoreExpectedValue, 1.96, stats.getSentimentScoreStandardDeviation(), stats.totalRatings);
 //        System.out.println("Rating confidence interval: minvalue: " + ratingConfidenceInterval.min + ", maxValue:" + ratingConfidenceInterval.max + " width: " + ratingConfidenceInterval.width + " halfWidth: " + ratingConfidenceInterval.width/2);
@@ -657,6 +658,19 @@ public class StatisticsCalculator {
         90
         100
         */
+        return matrix;
+    }
+
+    private static List<SentimentStatisticsBackendEntity> createMatrix4() {
+        List<SentimentStatisticsBackendEntity> matrix = new ArrayList<>();
+        //matrix.add(new SentimentStatisticsBackendEntity(50, 50.0, 50.0, 3));
+        //matrix.add(new SentimentStatisticsBackendEntity(100, 50.0, 50.0, 3));
+        matrix.add(new SentimentStatisticsBackendEntity(100, 50.0, 50.0, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(50, 50.0, 50.0, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(100, 50.0, 50.0, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(50, 50.0, 50.0, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(50, 50.0, 50.0, 1));
+        matrix.add(new SentimentStatisticsBackendEntity(100, 50.0, 50.0, 1));
         return matrix;
     }
 }

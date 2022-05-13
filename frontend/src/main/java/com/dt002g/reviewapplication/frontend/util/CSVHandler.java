@@ -364,7 +364,7 @@ public class CSVHandler implements UploadCSVFileCallBack {
 				line = removeStartingAndEndingQuotationMarks(line);
 				ArrayList<String> rowData = splitLineIntoCells(line);
 				try {
-					System.out.println(numberOfParsedRows.getValue() + " Fetch Rowdata accoriding to headers start");
+					System.out.println((numberOfParsedRows.getValue() +1) + " Fetch Rowdata accoriding to headers start");
 					Pair<Boolean, String> tempRowToBeAdded = createLineFromCellsAndHeaders(headerIndexes, rowData, minRating, maxRating);
 					if(tempRowToBeAdded.first) {
 						data.add(tempRowToBeAdded.second);
@@ -429,10 +429,12 @@ public class CSVHandler implements UploadCSVFileCallBack {
 
 	}*/
 
-	private String handleFreeText(String freeText){
+	private String handleFreeText(String freeText)  throws Exception{
 		String result = freeText + ";#";
 		SentimentAnalyser senti = new SentimentAnalyser();
+		System.out.println("Stating caculating sentiment score fro: " + freeText);
 		List<SentenceScore> sentenceScore =  senti.getSentimentResult(freeText);
+		System.out.println("finished caculating sentiment score");
 		//String[] sentences =freeText.split(".");
 
 		//3;#okay. You are fine and good and fine. Great for you.;#okay.;£0.0;¤10.0;¤40.0;¤30.0;¤20.0;@You are fine and good and fine.;£30.0;¤20.0;¤30.0;¤15.0;¤5.0;£fine;¤good;¤fine;@Great for you.;£0.0;¤20.0;¤30.0;¤30.0;¤20.0;£Great;#4
@@ -559,7 +561,8 @@ public class CSVHandler implements UploadCSVFileCallBack {
 		return rowData;
 	}
 
-	public Pair<Boolean,String> createLineFromCellsAndHeaders(ArrayList<Integer> headerIndexes, ArrayList<String> rowData, int minRating, int maxRating){
+	public Pair<Boolean,String> createLineFromCellsAndHeaders(ArrayList<Integer> headerIndexes, ArrayList<String> rowData, int minRating, int maxRating) throws Exception{
+		System.out.println("createLineFromCellsAndHeaders start");
 		Pair<Boolean,String> tempRowToBeAdded = new Pair<>(true, "");
 		for(int i = 0; i < headerIndexes.size(); i++) {
 			if(i == 0) {
@@ -588,6 +591,7 @@ public class CSVHandler implements UploadCSVFileCallBack {
 				}
 			}
 		}
+		System.out.println("createLineFromCellsAndHeaders end");
 		return tempRowToBeAdded;
 	}
 

@@ -9,12 +9,14 @@ public class SentimentCorrelationStatistics {
     ObjectProperty<Double> correlationCoefficient = new SimpleObjectProperty(0);
     ObjectProperty<Double> standardDeviation = new SimpleObjectProperty(0);
     ObjectProperty<Double> confidenceInterval = new SimpleObjectProperty(0);
+    StringProperty ratingInterval = new SimpleStringProperty("");
 
 
-    SentimentCorrelationStatistics(double correlationCoefficient, double standardDeviation, double confidenceInterval) {
+    SentimentCorrelationStatistics(double correlationCoefficient, double standardDeviation, double confidenceInterval, String ratingInterval) {
     this.correlationCoefficient.set(correlationCoefficient);
     this.standardDeviation.set(standardDeviation);
     this.confidenceInterval.set(confidenceInterval);
+    this.ratingInterval.set(ratingInterval);
     }
 
     public Double getCorrelationCoefficient() {
@@ -53,12 +55,23 @@ public class SentimentCorrelationStatistics {
         this.confidenceInterval.set(confidenceInterval);
     }
 
+    public StringProperty ratingIntervalProperty() {
+        return ratingInterval;
+    }
+    public String getRatingInterval() {
+        return ratingInterval.get();
+    }
+    public void setRatingInterval(String freeText) {
+        this.ratingInterval.set(freeText);
+    }
+
     @Override
     public String toString() {
         return "SentimentCorrelationStatistics{" +
                 "correlationCoefficient=" + correlationCoefficient +
                 ", standardDeviation=" + standardDeviation +
                 ", confidenceInterval=" + confidenceInterval +
+                ", confidenceInterval=" + ratingInterval +
                 '}';
     }
 }
