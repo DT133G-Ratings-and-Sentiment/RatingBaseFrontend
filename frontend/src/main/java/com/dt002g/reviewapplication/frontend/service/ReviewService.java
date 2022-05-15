@@ -92,5 +92,13 @@ public interface ReviewService {
 	@GET("getNumberOfReviewsWithAMountOfSentencesMatrix")
 	Call<List<Pair<Long,Long>>> getNumberOfReviewsWithAMountOfSentencesMatrix();
 
+	@GET("getAllReviewsWithAdjective/{adjective}")
+	Call<List<ReviewBackendEntity>> getAllReviewsWithAdjective(@Path("adjective") String adjective);
+
+	@GET("getListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviews")
+	Call<List<Pair<String,Long>>> getListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviews();
+
+	@GET("getMatrixWithListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviews")
+	Call<List<AdjectiveReviewAmountAppearence>> getMatrixWithListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviews();
 
 }

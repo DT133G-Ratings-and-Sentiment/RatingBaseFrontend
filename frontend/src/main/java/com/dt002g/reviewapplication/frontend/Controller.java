@@ -29,7 +29,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack, GetSentimentStatisticsCallBack, GetNumberOfReviewsByRatingAndAverageScoreTotalCallback, GetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack, GetAllReviewsWithAdjectiveMatrixCallBack, GetNumberOfReviewsWithAMountOfSentencesMatrixCallBack {
+public class Controller  implements Initializable, GetReviewsCallBack, GetRatingStatsCallBack, GetNumberOfReviewsCallBack, GetSentimentStatisticsCallBack, GetNumberOfReviewsByRatingAndAverageScoreTotalCallback, GetNumberOfTimesAdjectiveOccureWhenRatingAndScoreIsTheSameCallBack, GetAllReviewsWithAdjectiveMatrixCallBack, GetNumberOfReviewsWithAMountOfSentencesMatrixCallBack, GetMatrixWithListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviewsCallBack{
 	@FXML private GridPane root;
 
 	@FXML private RadioButton getAllRadioButton = new RadioButton();
@@ -116,6 +116,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 	@FXML private RadioButton sentimentButton;
 	@FXML private RadioButton adjectivesButton;
+	@FXML private RadioButton adjectiveFrequencyInReviewButton;
 	@FXML private RadioButton sentenceButton;
 	private final ToggleGroup sentimentAdjectivesGroup = new ToggleGroup();
 
@@ -132,6 +133,13 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 
 	@FXML private Button sentimentSearchButton;
 	@FXML private ProgressIndicator progressIndicator;
+
+	@FXML private TableView<AdjectiveAmountStatistics> adjectiveNumberOfTimesInReviewTableView;
+	private final ObservableList<AdjectiveAmountStatistics> adjectiveNumberOfTimesInReviewList = FXCollections.observableArrayList();
+	@FXML private TableColumn<AdjectiveAmountStatistics, String> adjectiveWordColumn;
+	@FXML private TableColumn<AdjectiveAmountStatistics, Integer> adjectiveNumberOfAppearencesColumn;
+	@FXML private TableColumn<AdjectiveAmountStatistics, Integer> adjectiveAmountOfReviewsColumn;
+	@FXML private TableColumn<AdjectiveAmountStatistics, Double> adjectiveNumberOfApperancesCorrelationColumn;
 
 	@FXML private TableView<AdjectivesStatistics> adjectiveTableView;
 	private final ObservableList<AdjectivesStatistics> adjectiveStatisticsList = FXCollections.observableArrayList();
@@ -202,6 +210,13 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		standardDeviationColumn.setCellValueFactory(rowData -> rowData.getValue().standardDeviation);
 		ratingIntervalColumn.setCellValueFactory(rowData -> rowData.getValue().ratingInterval);
 
+		adjectiveNumberOfTimesInReviewTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		adjectiveNumberOfTimesInReviewTableView.setItems(adjectiveNumberOfTimesInReviewList);
+		adjectiveWordColumn.setCellValueFactory(rowData -> rowData.getValue().adjective);
+		adjectiveNumberOfAppearencesColumn.setCellValueFactory(rowData -> rowData.getValue().numberOfAppearencesInReviews);
+		adjectiveAmountOfReviewsColumn.setCellValueFactory(rowData -> rowData.getValue().amountOfReviews);
+		adjectiveNumberOfApperancesCorrelationColumn.setCellValueFactory(rowData -> rowData.getValue().correlation);
+
 		adjectiveTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		adjectiveTableView.setItems(adjectiveStatisticsList);
 		adjectiveColumn.setCellValueFactory(rowData -> rowData.getValue().adjective);
@@ -236,6 +251,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		sentimentButton.setToggleGroup(sentimentAdjectivesGroup);
 		sentimentButton.setSelected(true);
 		adjectivesButton.setToggleGroup(sentimentAdjectivesGroup);
+		adjectiveFrequencyInReviewButton.setToggleGroup(sentimentAdjectivesGroup);
 		sentenceButton.setToggleGroup(sentimentAdjectivesGroup);
 
 		tableButton.setToggleGroup(visualsGroup);
@@ -251,6 +267,12 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			RadioButton tempButton = (RadioButton) sentimentAdjectivesGroup.getSelectedToggle();
 			selectedSentimentOrAdjective = tempButton.getText();
 			if(selectedSentimentOrAdjective.equals("Sentence") ){
+				tableButton.setVisible(false);
+				scatterChartButton.setVisible(false);
+				averageRadioButton.setVisible(false);
+				meanRadioButton.setVisible(false);
+			}
+			else if(selectedSentimentOrAdjective.equals("AdjectiveFrequencyInReview")){
 				tableButton.setVisible(false);
 				scatterChartButton.setVisible(false);
 				averageRadioButton.setVisible(false);
@@ -801,6 +823,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		sentimentTableView.setManaged(false);
 		showAllAdjectivesButton.setVisible(false);
 		showAllAdjectivesButton.setManaged(false);
+		//adjectiveFrequencyInReviewButton.setVisible(false);
+		//adjectiveFrequencyInReviewButton.setManaged(false);
 		showNegativeCorrelationAdjectivesButton.setVisible(false);
 		showNegativeCorrelationAdjectivesButton.setManaged(false);
 		showPositiveCorrelationAdjectivesButton.setVisible(false);
@@ -838,6 +862,11 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			else {
 				ReviewBackendAPIService.getInstance().getNumberOfReviewsByRatingAndMedianScoreTotalMatrix(this);
 			}
+		}
+		else if(selectedSentimentOrAdjective.equals("AdjectiveFrequencyInReview")){
+			//ReviewBackendAPIService.getInstance().getAllReviewsWithAdjective()
+			//ReviewBackendAPIService.getInstance().getListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviews(this);
+			ReviewBackendAPIService.getInstance().getMatrixWithListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviews(this);
 		}
 		else{
 			ReviewBackendAPIService.getInstance().getAllReviewsWithAdjectiveMatrix(this);
@@ -1210,6 +1239,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			}
 		showAllAdjectivesButton.setVisible(true);
 		showAllAdjectivesButton.setManaged(true);
+		//adjectiveFrequencyInReviewButton.setVisible(true);
+		//adjectiveFrequencyInReviewButton.setManaged(true);
 		showNegativeCorrelationAdjectivesButton.setVisible(true);
 		showNegativeCorrelationAdjectivesButton.setManaged(true);
 		showPositiveCorrelationAdjectivesButton.setVisible(true);
@@ -1267,6 +1298,28 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		final ClipboardContent clipboardContent = new ClipboardContent();
 		clipboardContent.putString(strb.toString());
 		Clipboard.getSystemClipboard().setContent(clipboardContent);
+	}
+
+	/*@Override
+	public void processGetListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviewsCallBack(List<Pair<String, Long>> listOfAdjectivesAndTimesItAppearsInReviews) {
+		adjectiveNumberOfTimesInReviewTableView.setVisible(true);
+		adjectiveNumberOfTimesInReviewTableView.setManaged(true);
+		listOfAdjectivesAndTimesItAppearsInReviews.sort((a1,a2)-> a2.second.compareTo(a1.second));
+		for(int i = 0; i < 10; i++) {
+			ReviewBackendAPIService.getInstance().getAllReviewsWithAdjective(listOfAdjectivesAndTimesItAppearsInReviews.get(i).first, this);
+		}
+	}*/
+
+	@Override
+	public void processGetMatrixWithListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviewsCallBack(List<AdjectiveReviewAmountAppearence> result) {
+		adjectiveNumberOfTimesInReviewTableView.setVisible(true);
+		adjectiveNumberOfTimesInReviewTableView.setManaged(true);
+		for(AdjectiveReviewAmountAppearence a: result){
+			StatisticResult stats = StatisticsCalculator.getCorrelationCoefficient(a.getReviewRatingByScoreMatrix());
+			adjectiveNumberOfTimesInReviewList.add(new AdjectiveAmountStatistics(a.getAdjective(), a.getNumberOfAppearancesPerReview(), stats.totalRatings, stats.correlationCofficient));
+		}
+		progressIndicator.setManaged(false);
+		progressIndicator.setVisible(false);
 	}
 }
 

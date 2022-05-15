@@ -180,6 +180,14 @@
                                              <TableColumn fx:id="amountOfReviewsColumn" prefWidth="75.0" text="Amount of Reviews" />
                                          </columns>
                                      </TableView>
+                                     <TableView fx:id="adjectiveNumberOfTimesInReviewTableView" prefHeight="541.0" prefWidth="966.0" visible="false">
+                                         <columns>
+                                             <TableColumn fx:id="adjectiveWordColumn" prefWidth="75.0" text="Adjective" />
+                                             <TableColumn fx:id="adjectiveNumberOfAppearencesColumn" prefWidth="75.0" text="Number appearences in each review" />
+                                             <TableColumn fx:id="adjectiveAmountOfReviewsColumn" prefWidth="75.0" text="Number of Reviews it appears in" />
+                                             <TableColumn fx:id="adjectiveNumberOfApperancesCorrelationColumn" prefWidth="150.0" text="Correlation" />
+                                         </columns>
+                                     </TableView>
                                     <TableView fx:id="sentimentTableView" layoutX="-2.0" layoutY="-1.0" prefHeight="544.0" prefWidth="970.0" visible="false">
                                       <columns>
                                           <TableColumn fx:id="ratingIntervalColumn" prefWidth="75.0" text="Rating Interval" />
@@ -214,6 +222,7 @@
                         <RadioButton fx:id="sentimentButton" layoutX="15.0" layoutY="23.0" mnemonicParsing="false" text="Sentiment" />
                         <RadioButton fx:id="adjectivesButton" layoutX="103.0" layoutY="23.0" mnemonicParsing="false" text="Adjective" />
                         <RadioButton fx:id="sentenceButton" layoutX="191.0" layoutY="23.0" mnemonicParsing="false" text="Sentence" />
+                         <RadioButton fx:id="adjectiveFrequencyInReviewButton" layoutX="279.0" layoutY="23.0" mnemonicParsing="false" text="AdjectiveFrequencyInReview" />
                         <RadioButton fx:id="tableButton" layoutX="15.0" layoutY="67.0" mnemonicParsing="false" text="Table" />
                         <RadioButton fx:id="scatterChartButton" layoutX="103.0" layoutY="67.0" mnemonicParsing="false" text="Chart" />
                         <Button fx:id="showAllAdjectivesButton" layoutX="664.0" layoutY="49.0" mnemonicParsing="false" onAction="#showAllAdjectives" text="Show All" />

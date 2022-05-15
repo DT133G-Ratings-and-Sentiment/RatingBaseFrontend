@@ -489,6 +489,36 @@ public class ReviewBackendAPIService {
 		});
 	}
 
+	public void getAllReviewsWithAdjective(String adjective, GetAllReviewsWithAdjectiveCallBack getAllReviewsWithAdjectiveCallBack){
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<ReviewBackendEntity>> reviewRequest = reviewService.getAllReviewsWithAdjective(adjective);
+		reviewRequest.enqueue(new Callback<List<ReviewBackendEntity>>() {
+
+			@Override
+			public void onResponse(Call<List<ReviewBackendEntity>> call, Response<List<ReviewBackendEntity>> response) {
+				if(response.isSuccessful()) {
+					List<ReviewBackendEntity> reviews= response.body();
+					getAllReviewsWithAdjectiveCallBack.processGetAllReviewsWithAdjectiveCallBack(reviews);
+				}
+				else {
+					Platform.runLater(() -> {
+						Alert alert = new Alert(AlertType.WARNING , "Response code: " + response.code() + " response message: " + response.message().toString() + " error body:"+ response.errorBody().toString());
+						alert.show();
+					});
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<ReviewBackendEntity>> call, Throwable t) {
+				Platform.runLater(() -> {
+					Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+					alert.show();
+				});
+
+			}
+		});
+	}
+
 	public void getNumberOfReviewsWithAMountOfSentencesMatrix(GetNumberOfReviewsWithAMountOfSentencesMatrixCallBack getNumberOfReviewsWithAMountOfSentencesMatrixCallBack){
 		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
 		Call<List<Pair<Long,Long>>> reviewRequest = reviewService.getNumberOfReviewsWithAMountOfSentencesMatrix();
@@ -514,6 +544,70 @@ public class ReviewBackendAPIService {
 
 			@Override
 			public void onFailure(Call<List<Pair<Long,Long>>> call, Throwable t) {
+				Platform.runLater(() -> {
+					Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+					alert.show();
+				});
+
+			}
+		});
+	}
+
+	public void getListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviews(GetListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviewsCallBack getListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviewsCallBack){
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<Pair<String,Long>>> reviewRequest = reviewService.getListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviews();
+		reviewRequest.enqueue(new Callback<List<Pair<String,Long>>>() {
+
+			@Override
+			public void onResponse(Call<List<Pair<String,Long>>> call, Response<List<Pair<String,Long>>> response) {
+				if(response.isSuccessful()) {
+					List<Pair<String,Long>> data= response.body();
+					/*List<Pair<String,Long>> listOfAdjectivesAndTimesItAppearsInReviews = new ArrayList<>();
+					for(Pair<String,Long> p: data){
+						listOfAdjectivesAndTimesItAppearsInReviews.add(p);
+					}*/
+					getListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviewsCallBack.processGetListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviewsCallBack(data);
+				}
+				else {
+					Platform.runLater(() -> {
+						Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+						alert.show();
+					});
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<Pair<String,Long>>> call, Throwable t) {
+				Platform.runLater(() -> {
+					Alert alert = new Alert(AlertType.WARNING ,"Request failed");
+					alert.show();
+				});
+
+			}
+		});
+	}
+
+	public void getMatrixWithListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviews(GetMatrixWithListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviewsCallBack getMatrixWithListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviewsCallBack){
+		ReviewService reviewService = ServiceBuilder.getInstance().buildService(ReviewService.class);
+		Call<List<AdjectiveReviewAmountAppearence>> reviewRequest = reviewService.getMatrixWithListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviews();
+		reviewRequest.enqueue(new Callback<List<AdjectiveReviewAmountAppearence>>() {
+
+			@Override
+			public void onResponse(Call<List<AdjectiveReviewAmountAppearence>> call, Response<List<AdjectiveReviewAmountAppearence>> response) {
+				if(response.isSuccessful()) {
+					List<AdjectiveReviewAmountAppearence> data= response.body();
+					getMatrixWithListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviewsCallBack.processGetMatrixWithListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviewsCallBack(data);
+				}
+				else {
+					Platform.runLater(() -> {
+						Alert alert = new Alert(AlertType.WARNING , response.errorBody().toString());
+						alert.show();
+					});
+				}
+			}
+
+			@Override
+			public void onFailure(Call<List<AdjectiveReviewAmountAppearence>> call, Throwable t) {
 				Platform.runLater(() -> {
 					Alert alert = new Alert(AlertType.WARNING ,"Request failed");
 					alert.show();
