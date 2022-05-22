@@ -12,6 +12,48 @@ public class AdjectivesStatistics {
     ObjectProperty<Long> amount = new SimpleObjectProperty(0);
     ObjectProperty<Double> correlation = new SimpleObjectProperty<>(0.0);
 
+    ObjectProperty<Double> standardDeviation = new SimpleObjectProperty<>(0.0);
+
+    public Double getCorrelationMoreThanOneSentence() {
+        return correlationMoreThanOneSentence.get();
+    }
+
+    public ObjectProperty<Double> correlationMoreThanOneSentenceProperty() {
+        return correlationMoreThanOneSentence;
+    }
+
+    public void setCorrelationMoreThanOneSentence(Double correlationMoreThanOneSentence) {
+        this.correlationMoreThanOneSentence.set(correlationMoreThanOneSentence);
+    }
+
+    public Long getAmountMoreThanOneSentence() {
+        return amountMoreThanOneSentence.get();
+    }
+
+    public ObjectProperty<Long> amountMoreThanOneSentenceProperty() {
+        return amountMoreThanOneSentence;
+    }
+
+    public void setAmountMoreThanOneSentence(Long amountMoreThanOneSentence) {
+        this.amountMoreThanOneSentence.set(amountMoreThanOneSentence);
+    }
+
+    ObjectProperty<Double> correlationMoreThanOneSentence = new SimpleObjectProperty<>(0.0);
+    ObjectProperty<Long> amountMoreThanOneSentence = new SimpleObjectProperty<>(0L);
+
+    public Double getStandardDeviation() {
+        return standardDeviation.get();
+    }
+
+    public ObjectProperty<Double> standardDeviationProperty() {
+        return standardDeviation;
+    }
+
+    public void setStandardDeviation(Double standardDeviation) {
+        this.standardDeviation.set(standardDeviation);
+    }
+
+
     public Double getPercent() {
         return percent.get();
     }
@@ -26,11 +68,14 @@ public class AdjectivesStatistics {
 
     ObjectProperty<Double> percent = new SimpleObjectProperty<>(0.0);
 
-    AdjectivesStatistics( String adjective, Long amount, Double correlation, Double percent) {
+    AdjectivesStatistics( String adjective, Long amount, Double correlation, Double percent, Double standardDeviation, Double correlationMoreThanOne, Long amountMoreThanOne) {
         this.adjective.set(adjective);
         this.amount.set(amount);
         this.correlation.set(correlation);
         this.percent.set(percent);
+        this.standardDeviation.set(standardDeviation);
+        this.correlationMoreThanOneSentence.set(correlationMoreThanOne);
+        this.amountMoreThanOneSentence.set(amountMoreThanOne);
     }
 
     public String getAdjective() {

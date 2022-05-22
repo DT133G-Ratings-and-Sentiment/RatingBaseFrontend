@@ -29,7 +29,7 @@ public class ServiceBuilder {
 	}
 	
 	private static final OkHttpClient.Builder okHttp = new OkHttpClient.Builder()
-			.readTimeout(1000, TimeUnit.SECONDS);
+			.readTimeout(100000, TimeUnit.SECONDS);
 	
 	private static final Gson gson = new GsonBuilder().create();
 	

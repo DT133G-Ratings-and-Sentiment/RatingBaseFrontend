@@ -141,6 +141,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private TableColumn<AdjectiveAmountStatistics, Integer> adjectiveAmountOfReviewsColumn;
 	@FXML private TableColumn<AdjectiveAmountStatistics, Double> adjectiveNumberOfApperancesCorrelationColumn;
 
+
 	@FXML private TableView<AdjectivesStatistics> adjectiveTableView;
 	private final ObservableList<AdjectivesStatistics> adjectiveStatisticsList = FXCollections.observableArrayList();
 	private final ObservableList<AdjectivesStatistics> temporaryHolderAdjectiveStatisticsList = FXCollections.observableArrayList();
@@ -148,10 +149,15 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private TableColumn<AdjectivesStatistics, Long> adjectiveAmountColumn;
 	@FXML private TableColumn<AdjectivesStatistics, Double> adjectiveCorrelationColumn;
 	@FXML private TableColumn<AdjectivesStatistics, Double> percentOfAllColumn;
+	@FXML private TableColumn<AdjectivesStatistics, Double> adjectiveStandardDeviation;
+	@FXML private TableColumn<AdjectivesStatistics, Double> adjectiveMoreThanOneSentenceCorrelation;
+	@FXML private TableColumn<AdjectivesStatistics, Long> adjectivesFrequencyMoreThanOneSentence;
+
 	@FXML private TableView<AmountOfRatingsWithAMountOfScentences> sentenceTableView;
 	private final ObservableList<AmountOfRatingsWithAMountOfScentences> scentenceStatisticsList = FXCollections.observableArrayList();
 	@FXML private TableColumn<AmountOfRatingsWithAMountOfScentences, Long> amountOfSentencesColumn;
 	@FXML private TableColumn<AmountOfRatingsWithAMountOfScentences, Long> amountOfReviewsColumn;
+	@FXML private TableColumn<AmountOfRatingsWithAMountOfScentences, Double> amountOfReviewsPercent;
 	@FXML private Button showAllAdjectivesButton;
 	@FXML private Button showPositiveCorrelationAdjectivesButton;
 	@FXML private Button showNegativeCorrelationAdjectivesButton;
@@ -162,6 +168,9 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	@FXML private Label minLabel;
 	@FXML private Label maxLabel;
 
+	@FXML private AreaChart<Number, Number> areaChartMean;
+	@FXML final NumberAxis areaXAxis = new NumberAxis(-10, 105, 0.5);
+	@FXML final NumberAxis areaYAxis = new NumberAxis(-10, 105, 0.5);
 	@FXML private ScatterChart<Number, Number> scatterChartMedian;
 	@FXML private ScatterChart<Number, Number> scatterChartMean;
 	@FXML private Label coefficientLabel;
@@ -223,11 +232,15 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		adjectiveAmountColumn.setCellValueFactory(rowData-> rowData.getValue().amount);
 		adjectiveCorrelationColumn.setCellValueFactory(rowData -> rowData.getValue().correlation);
 		percentOfAllColumn.setCellValueFactory(rowData -> rowData.getValue().percent);
+		adjectiveStandardDeviation.setCellValueFactory(rowData -> rowData.getValue().standardDeviation);
+		adjectiveMoreThanOneSentenceCorrelation.setCellValueFactory(rowData -> rowData.getValue().correlationMoreThanOneSentence);
+		adjectivesFrequencyMoreThanOneSentence.setCellValueFactory(rowData -> rowData.getValue().amountMoreThanOneSentence);
 
 		sentenceTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		sentenceTableView.setItems(scentenceStatisticsList);
 		amountOfSentencesColumn.setCellValueFactory(rowData -> rowData.getValue().amountOfSentencesProperty());
 		amountOfReviewsColumn.setCellValueFactory(rowData-> rowData.getValue().amountOfRatingsProperty());
+		amountOfReviewsPercent.setCellValueFactory(rowData -> rowData.getValue().percentProperty());
 
 		root.setOnKeyPressed(event -> {
 			if(event.getCode().equals(KeyCode.ENTER)) {
@@ -812,6 +825,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	}
 
 	private void setAllVisibleFalse(){
+		areaChartMean.setManaged(false);
+		areaChartMean.setVisible(false);
 		scatterChartMedian.setManaged(false);
 		scatterChartMedian.setVisible(false);
 		scatterChartMean.setManaged(false);
@@ -851,147 +866,30 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		progressIndicator.setManaged(true);
 		progressIndicator.setVisible(true);
 		progressIndicator.setProgress(-1d);
-		if(selectedSentimentOrAdjective.equals("Sentence")) {
-			ReviewBackendAPIService.getInstance().getNumberOfReviewsWithAMountOfSentencesMatrix(this);
-		}
-		else if(selectedSentimentOrAdjective.equals("Sentiment")) {
+		switch (selectedSentimentOrAdjective) {
+			case "Sentence":
+				ReviewBackendAPIService.getInstance().getNumberOfReviewsWithAMountOfSentencesMatrix(this);
+				break;
+			case "Sentiment":
 
-			if (selectedAnalyseFormRadioButton.equals("Mean")) {
-				ReviewBackendAPIService.getInstance().getNumberOfReviewsByRatingAndAverageScoreTotal(this);
-			}
-			else {
-				ReviewBackendAPIService.getInstance().getNumberOfReviewsByRatingAndMedianScoreTotalMatrix(this);
-			}
-		}
-		else if(selectedSentimentOrAdjective.equals("AdjectiveFrequencyInReview")){
-			//ReviewBackendAPIService.getInstance().getAllReviewsWithAdjective()
-			//ReviewBackendAPIService.getInstance().getListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviews(this);
-			ReviewBackendAPIService.getInstance().getMatrixWithListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviews(this);
-		}
-		else{
-			ReviewBackendAPIService.getInstance().getAllReviewsWithAdjectiveMatrix(this);
-		}
-	}
-/*
-	private void analyseAndSaveAnalysedSentimentToTable(List<SentimentStatisticsBackendEntity> response){
-		if (selectedAnalysisRadioButton.equals("Scale 1-3")) {
-			double positiveNumberOfCorrelations = 0;
-			double positiveTotal = 0;
-			double neutralNumberOfCorrelations = 0;
-			double neutralTotal = 0;
-			double negativeNumberOfCorrelations = 0;
-			double negativeTotal = 0;
-
-			for (SentimentStatisticsBackendEntity sentiment : response) {
-				if (sentiment.getAmount() > 0) {
-					// Positive
-					if (sentiment.getRating() >= 61) {
-						if (sentiment.getMinScore() >= 60) {
-							positiveNumberOfCorrelations += sentiment.getAmount();
-						}
-						positiveTotal += sentiment.getAmount();
-					} else if (sentiment.getRating() >= 40 && sentiment.getRating() <= 60) {
-						if (sentiment.getMaxScore() <= 60 && sentiment.getMinScore() >= 40) {
-							neutralNumberOfCorrelations += sentiment.getAmount();
-						}
-						neutralTotal += sentiment.getAmount();
-					} else {
-						if (sentiment.getMaxScore() <= 40) {
-							negativeNumberOfCorrelations += sentiment.getAmount();
-						}
-						negativeTotal += sentiment.getAmount();
-					}
+				if (selectedAnalyseFormRadioButton.equals("Mean")) {
+					ReviewBackendAPIService.getInstance().getNumberOfReviewsByRatingAndAverageScoreTotal(this);
+				} else {
+					ReviewBackendAPIService.getInstance().getNumberOfReviewsByRatingAndMedianScoreTotalMatrix(this);
 				}
-			}
-
-			SentimentCorrelationStatistics positive = new SentimentCorrelationStatistics("61-100", "Positive", 0, 0, 0);
-			SentimentCorrelationStatistics neutral = new SentimentCorrelationStatistics("41-60", "Neutral", 0, 0, 0);
-			SentimentCorrelationStatistics negative = new SentimentCorrelationStatistics("0-40", "Negative", 0, 0, 0);
-
-			insertSentimentStats(positive, positiveTotal, positiveNumberOfCorrelations);
-			insertSentimentStats(neutral, neutralTotal, neutralNumberOfCorrelations);
-			insertSentimentStats(negative, negativeTotal, negativeNumberOfCorrelations);
-
-			sentimentCorrelationStatisticsList.add(positive);
-			sentimentCorrelationStatisticsList.add(neutral);
-			sentimentCorrelationStatisticsList.add(negative);
+				break;
+			case "AdjectiveFrequencyInReview":
+				//ReviewBackendAPIService.getInstance().getAllReviewsWithAdjective()
+				//ReviewBackendAPIService.getInstance().getListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviews(this);
+				ReviewBackendAPIService.getInstance().getMatrixWithListOfAdjectiveWordAndTotalNumberOfTimesItAppearsInAllReviews(this);
+				break;
+			default:
+				ReviewBackendAPIService.getInstance().getAllReviewsWithAdjectiveMatrix(this);
+				break;
 		}
-		else {
 
-			double veryPositiveNumberOfCorrelations = 0;
-			double veryPositiveTotal = 0;
-			double positiveNumberOfCorrelations = 0;
-			double positiveTotal = 0;
-			double neutralNumberOfCorrelations = 0;
-			double neutralTotal = 0;
-			double negativeNumberOfCorrelations = 0;
-			double negativeTotal = 0;
-			double veryNegativeNumberOfCorrelations = 0;
-			double veryNegativeTotal = 0;
-
-			for (SentimentStatisticsBackendEntity sentiment : response) {
-				if (sentiment.getAmount() > 0) {
-					// Negative
-					if (sentiment.getRating() >= 20 && sentiment.getRating() < 41) {
-						if (sentiment.getMinScore() >= 20 && sentiment.getMinScore() < 41) {
-							negativeNumberOfCorrelations += sentiment.getAmount();
-						}
-						negativeTotal += sentiment.getAmount();
-					}
-					//  Neutral
-					else if (sentiment.getRating() >= 40 && sentiment.getRating() < 61) {
-						if (sentiment.getMaxScore() < 61 && sentiment.getMinScore() >= 40) {
-							neutralNumberOfCorrelations += sentiment.getAmount();
-						}
-						neutralTotal += sentiment.getAmount();
-						// Positive
-					} else if(sentiment.getRating() >= 60 && sentiment.getRating() < 81) {
-						if (sentiment.getMaxScore() < 81 && sentiment.getMinScore() >= 60) {
-							positiveNumberOfCorrelations += sentiment.getAmount();
-						}
-						positiveTotal += sentiment.getAmount();
-					}
-					//  Very positive
-					else if(sentiment.getRating() >= 81){
-						if(sentiment.getMinScore() >= 80){
-							veryPositiveNumberOfCorrelations += sentiment.getAmount();
-						}
-						veryPositiveTotal += sentiment.getAmount();
-					}
-					// Very negative
-					else{
-						if(sentiment.getMaxScore() < 21) {
-							veryNegativeNumberOfCorrelations += sentiment.getAmount();
-						}
-						veryNegativeTotal += sentiment.getAmount();
-					}
-				}
-			}
-
-			SentimentCorrelationStatistics veryPositive = new SentimentCorrelationStatistics("81-100", "Very Positive", 0, 0, 0);
-			SentimentCorrelationStatistics positive = new SentimentCorrelationStatistics("61-80", "Positive", 0, 0, 0);
-			SentimentCorrelationStatistics neutral = new SentimentCorrelationStatistics("41-60", "Neutral", 0, 0, 0);
-			SentimentCorrelationStatistics negative = new SentimentCorrelationStatistics("21-40", "Negative", 0, 0, 0);
-			SentimentCorrelationStatistics veryNegative = new SentimentCorrelationStatistics("1-20", "Very Negative", 0, 0, 0);
-
-			insertSentimentStats(veryPositive, veryPositiveTotal, veryPositiveNumberOfCorrelations);
-			insertSentimentStats(positive, positiveTotal, positiveNumberOfCorrelations);
-			insertSentimentStats(neutral, neutralTotal, neutralNumberOfCorrelations);
-			insertSentimentStats(negative, negativeTotal, negativeNumberOfCorrelations);
-			insertSentimentStats(veryNegative, veryNegativeTotal, veryNegativeNumberOfCorrelations);
-
-			sentimentCorrelationStatisticsList.add(veryPositive);
-			sentimentCorrelationStatisticsList.add(positive);
-			sentimentCorrelationStatisticsList.add(neutral);
-			sentimentCorrelationStatisticsList.add(negative);
-			sentimentCorrelationStatisticsList.add(veryNegative);
-
-		}
-		progressIndicator.setManaged(false);
-		progressIndicator.setVisible(false);
-		sentimentSearchButton.setDisable(false);
 	}
-*/
+
 	@Override
 	public void processGetNumberOfReviewsByRatingAndAverageScoreCallBack(List<SentimentStatisticsBackendEntity> response) {
 	Platform.runLater(() ->{
@@ -1065,11 +963,20 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				scatterChartMedian.setVisible(true);
 				scatterChartMedian.setManaged(true);
 				coefficientLabel.setVisible(false);
+
+
+
 			}
 			else{
+				/*
 				scatterChartMean.getData().clear();
 				scatterChartMean.setVisible(true);
 				scatterChartMean.setManaged(true);
+
+				 */
+				areaChartMean.getData().clear();
+				areaChartMean.setVisible(true);
+				areaChartMean.setManaged(true);
 			}
 
 			double coefficient = StatisticsCalculator.getCorrelationCoefficient(response).correlationCofficient;
@@ -1101,6 +1008,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 					continue;
 				}
 				double size = calculateSize(sentimentStatisticsBackendEntity.getAmount(), totalAmount);
+
 				if(size >= 9){
 					highest.getData().add(new XYChart.Data(sentimentStatisticsBackendEntity.getRating(), sentimentStatisticsBackendEntity.getMinScore()));
 				}
@@ -1116,6 +1024,8 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				else{
 					lowest.getData().add(new XYChart.Data(sentimentStatisticsBackendEntity.getRating(), sentimentStatisticsBackendEntity.getMinScore()));
 				}
+
+
 			}
 
 		if(selectedAnalyseFormRadioButton.equals("Median")) {
@@ -1145,25 +1055,6 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 			return 1;
 		}
 		return Math.ceil(percent*100);
-
-/*
-		if(amount > (totalAmount/10)){
-			return 5;
-		}
-		else if(amount > (totalAmount/20)){
-			return 4;
-		}
-		else if(amount > (totalAmount/30)){
-			return 3;
-		}
-		else if(amount > (totalAmount/40)){
-			return 2;
-		}
-		else{
-			return 1;
-		}
-		*/
-
 	}
 
 	@Override
@@ -1172,7 +1063,7 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		adjectiveTableView.setVisible(true);
 		adjectiveTableView.setManaged(true);
 		for(Pair<String, Long> p: response){
-			AdjectivesStatistics as = new AdjectivesStatistics(p.first, p.second, 0.0, 0.0);
+			AdjectivesStatistics as = new AdjectivesStatistics(p.first, p.second, 0.0, 0.0, 0.0, 0.0, 0L);
 			adjectiveStatisticsList.add(as);
 		}
 		progressIndicator.setManaged(false);
@@ -1186,23 +1077,85 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 		adjectiveTableView.setManaged(true);
 		double negativeTotal = 0;
 		double positiveTotal = 0;
+		List<SentimentStatisticsBackendEntity> moreThanOneSentences = new ArrayList<>();
+		List<SentimentStatisticsBackendEntity> moreThanTwoSentences = new ArrayList<>();
+		List<SentimentStatisticsBackendEntity> moreThanThreeSentences = new ArrayList<>();
+		List<SentimentStatisticsBackendEntity> moreThanFourSentences = new ArrayList<>();
+		List<SentimentStatisticsBackendEntity> moreThanFiveSentences = new ArrayList<>();
+		List<SentimentStatisticsBackendEntity> moreThanSixSentences = new ArrayList<>();
+		List<SentimentStatisticsBackendEntity> moreThanSevenSentences = new ArrayList<>();
+		List<SentimentStatisticsBackendEntity> moreThanEightSentences = new ArrayList<>();
+		List<SentimentStatisticsBackendEntity> moreThanNineSentences = new ArrayList<>();
+		List<SentimentStatisticsBackendEntity> moreThanTenSentences = new ArrayList<>();
+		List<SentimentStatisticsBackendEntity> goodMoreThanOneSentence = new ArrayList<>();
 
 			for (ReviewsByAdjective rba : response) {
 
 				List<SentimentStatisticsBackendEntity> sentimentStatisticsBackendEntityList = new ArrayList<>();
+				List<SentimentStatisticsBackendEntity> moreThanOneList = new ArrayList<>();
+				Long amountMoreThanOne = 0L;
 				for (ReviewBackendEntity rbe : rba.getReviews()) {
 					SentimentStatisticsBackendEntity sentimentStatisticsBackendEntity;
+					SentimentStatisticsBackendEntity moreThanOneSentenceForAdjective = null;
+
+
 					if (selectedAnalyseFormRadioButton.equals("Mean")) {
+
 						sentimentStatisticsBackendEntity = new SentimentStatisticsBackendEntity(rbe.getRating(), rbe.normalisedAverageSentenceScore, rbe.normalisedAverageSentenceScore, 1);
+						if(rbe.sentences.size() > 1) {
+							amountMoreThanOne++;
+							moreThanOneSentenceForAdjective = new SentimentStatisticsBackendEntity(rbe.getRating(), rbe.normalisedAverageSentenceScore, rbe.normalisedAverageSentenceScore, 1);
+						}
 					}
 					else{
 						sentimentStatisticsBackendEntity = new SentimentStatisticsBackendEntity(rbe.getRating(), rbe.normalisedMedianSentenceScore, rbe.normalisedMedianSentenceScore, 1);
+						if(rbe.sentences.size() > 1) {
+							amountMoreThanOne++;
+							moreThanOneSentenceForAdjective = new SentimentStatisticsBackendEntity(rbe.getRating(), rbe.normalisedMedianSentenceScore, rbe.normalisedMedianSentenceScore, 1);
+						}
 					}
 					sentimentStatisticsBackendEntityList.add(sentimentStatisticsBackendEntity);
+					if(moreThanOneSentenceForAdjective != null) {
+						moreThanOneList.add(moreThanOneSentenceForAdjective);
+					}
+
+					if(rbe.sentences.size() > 1){
+
+						moreThanOneSentences.add(sentimentStatisticsBackendEntity);
+					}
+					if(rbe.sentences.size() > 2){
+						moreThanTwoSentences.add(sentimentStatisticsBackendEntity);
+					}
+					if(rbe.sentences.size() > 3){
+						moreThanThreeSentences.add(sentimentStatisticsBackendEntity);
+					}
+					if(rbe.sentences.size() > 4){
+						moreThanFourSentences.add(sentimentStatisticsBackendEntity);
+					}
+					if(rbe.sentences.size() > 5){
+						moreThanFiveSentences.add(sentimentStatisticsBackendEntity);
+					}
+					if(rbe.sentences.size() > 6){
+						moreThanSixSentences.add(sentimentStatisticsBackendEntity);
+					}
+					if(rbe.sentences.size() > 7){
+						moreThanSevenSentences.add(sentimentStatisticsBackendEntity);
+					}
+					if(rbe.sentences.size() > 8){
+						moreThanEightSentences.add(sentimentStatisticsBackendEntity);
+					}
+					if(rbe.sentences.size() > 9){
+						moreThanNineSentences.add(sentimentStatisticsBackendEntity);
+					}
+					if(rbe.sentences.size() > 10){
+						moreThanTenSentences.add(sentimentStatisticsBackendEntity);
+					}
+
 				}
 
 				//  Här är statistics result
 				StatisticResult sr = StatisticsCalculator.getCorrelationCoefficient(sentimentStatisticsBackendEntityList);
+				StatisticResult srMoreThanOne = StatisticsCalculator.getCorrelationCoefficient(moreThanOneList);
 				if(sr.correlationCofficient > 0){
 					positiveTotal += rba.getReviews().size();
 				}
@@ -1211,9 +1164,11 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				}
 				//  Här sätts resultatet in
 				if(Double.isNaN(sr.correlationCofficient)){
-					System.out.println(rba.adjective + "is NaN");
 				}
 				rba.setCorrelationCoefficient(sr.correlationCofficient);
+				rba.standardDeviation = sr.getRatingStandardDeviation();
+				rba.moreThanOneCorrelation = srMoreThanOne.correlationCofficient;
+				rba.moreThanOneAmount = amountMoreThanOne;
 			}
 			response.sort(Comparator.comparingDouble(ReviewsByAdjective::getCorrelationCoefficient));
 
@@ -1229,14 +1184,82 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 				}
 				AdjectivesStatistics adjectivesStatistics;
 				if(rba.getCorrelationCoefficient() > 0){
-					adjectivesStatistics = new AdjectivesStatistics(rba.getAdjective(), (long) rba.getReviews().size(), rba.getCorrelationCoefficient(), Utility.round(((rba.getReviews().size()/positiveTotal) * 100), 2));
+					adjectivesStatistics = new AdjectivesStatistics(rba.getAdjective(), (long) rba.getReviews().size(), rba.getCorrelationCoefficient(), Utility.round(((rba.getReviews().size()/positiveTotal) * 100), 5), rba.standardDeviation, rba.moreThanOneCorrelation, rba.moreThanOneAmount);
 				}
 				else{
-					adjectivesStatistics = new AdjectivesStatistics(rba.getAdjective(), (long) rba.getReviews().size(), rba.getCorrelationCoefficient(), Utility.round(((rba.getReviews().size()/positiveTotal) * 100), 2));
+					adjectivesStatistics = new AdjectivesStatistics(rba.getAdjective(), (long) rba.getReviews().size(), rba.getCorrelationCoefficient(), Utility.round(((rba.getReviews().size()/negativeTotal) * 100), 5),rba.standardDeviation, rba.moreThanOneCorrelation, rba.moreThanOneAmount);
 				}
 
 				adjectiveStatisticsList.add(adjectivesStatistics);
 			}
+
+			System.out.println("Size more than one: " + moreThanOneSentences.size());
+			StatisticResult moreThanOneSentencesStatistics = StatisticsCalculator.getCorrelationCoefficient(moreThanOneSentences);
+			System.out.println("Coeffiecient more than one: " + moreThanOneSentencesStatistics.correlationCofficient);
+		System.out.println("Rating SD more than one: " + moreThanOneSentencesStatistics.getRatingStandardDeviation());
+		System.out.println("Sentiment SD more than one: " + moreThanOneSentencesStatistics.getSentimentScoreStandardDeviation());
+
+			System.out.println("Size more than two: " + moreThanTwoSentences.size());
+			StatisticResult moreThanTwoSentencesStatistics = StatisticsCalculator.getCorrelationCoefficient(moreThanTwoSentences);
+			System.out.println("Coeffiecient more than two: " + moreThanTwoSentencesStatistics.correlationCofficient);
+		System.out.println("Rating SD more than one: " + moreThanTwoSentencesStatistics.getRatingStandardDeviation());
+		System.out.println("Sentiment SD more than one: " + moreThanTwoSentencesStatistics.getSentimentScoreStandardDeviation());
+
+			System.out.println("Size more than three: " + moreThanThreeSentences.size());
+			StatisticResult moreThanThreeSentencesStatistics = StatisticsCalculator.getCorrelationCoefficient(moreThanThreeSentences);
+			System.out.println("Coeffiecient more than Three: " + moreThanThreeSentencesStatistics.correlationCofficient);
+		System.out.println("Rating SD more than one: " + moreThanThreeSentencesStatistics.getRatingStandardDeviation());
+		System.out.println("Sentiment SD more than one: " + moreThanThreeSentencesStatistics.getSentimentScoreStandardDeviation());
+
+		System.out.println("Size more than Four: " + moreThanFourSentences.size());
+		StatisticResult moreThanFourSentencesStatistics = StatisticsCalculator.getCorrelationCoefficient(moreThanFourSentences);
+		System.out.println("Coeffiecient more than Four: " + moreThanFourSentencesStatistics.correlationCofficient);
+		System.out.println("Rating SD more than one: " + moreThanFourSentencesStatistics.getRatingStandardDeviation());
+		System.out.println("Sentiment SD more than one: " + moreThanFourSentencesStatistics.getSentimentScoreStandardDeviation());
+
+		System.out.println("Size more than Five: " + moreThanFiveSentences.size());
+		StatisticResult moreThanFiveSentencesStatistics = StatisticsCalculator.getCorrelationCoefficient(moreThanFiveSentences);
+		System.out.println("Coeffiecient more than Five: " + moreThanFiveSentencesStatistics.correlationCofficient);
+		System.out.println("Rating SD more than one: " + moreThanFiveSentencesStatistics.getRatingStandardDeviation());
+		System.out.println("Sentiment SD more than one: " + moreThanFiveSentencesStatistics.getSentimentScoreStandardDeviation());
+
+		System.out.println("Size more than Six: " + moreThanSixSentences.size());
+		StatisticResult moreThanSixSentencesStatistics = StatisticsCalculator.getCorrelationCoefficient(moreThanSixSentences);
+		System.out.println("Coeffiecient more than Six: " + moreThanSixSentencesStatistics.correlationCofficient);
+		System.out.println("Rating SD more than one: " + moreThanSixSentencesStatistics.getRatingStandardDeviation());
+		System.out.println("Sentiment SD more than one: " + moreThanSixSentencesStatistics.getSentimentScoreStandardDeviation());
+
+		System.out.println("Size more than Seven: " + moreThanSevenSentences.size());
+		StatisticResult moreThanSevenSentencesStatistics = StatisticsCalculator.getCorrelationCoefficient(moreThanSevenSentences);
+		System.out.println("Coeffiecient more than Seven: " + moreThanSevenSentencesStatistics.correlationCofficient);
+		System.out.println("Rating SD more than one: " + moreThanSevenSentencesStatistics.getRatingStandardDeviation());
+		System.out.println("Sentiment SD more than one: " + moreThanSevenSentencesStatistics.getSentimentScoreStandardDeviation());
+
+		System.out.println("Size more than Eight: " + moreThanEightSentences.size());
+		StatisticResult moreThanEightSentencesStatistics = StatisticsCalculator.getCorrelationCoefficient(moreThanEightSentences);
+		System.out.println("Coeffiecient more than Eight: " + moreThanEightSentencesStatistics.correlationCofficient);
+		System.out.println("Rating SD more than one: " + moreThanEightSentencesStatistics.getRatingStandardDeviation());
+		System.out.println("Sentiment SD more than one: " + moreThanEightSentencesStatistics.getSentimentScoreStandardDeviation());
+
+		System.out.println("Size more than Nine: " + moreThanNineSentences.size());
+		StatisticResult moreThanNineSentencesStatistics = StatisticsCalculator.getCorrelationCoefficient(moreThanNineSentences);
+		System.out.println("Coeffiecient more than Nine: " + moreThanNineSentencesStatistics.correlationCofficient);
+		System.out.println("Rating SD more than one: " + moreThanNineSentencesStatistics.getRatingStandardDeviation());
+		System.out.println("Sentiment SD more than one: " + moreThanNineSentencesStatistics.getSentimentScoreStandardDeviation());
+
+		System.out.println("Size more than Ten: " + moreThanTenSentences.size());
+		StatisticResult moreThanTenSentencesStatistics = StatisticsCalculator.getCorrelationCoefficient(moreThanTenSentences);
+		System.out.println("Coeffiecient more than Ten: " + moreThanTenSentencesStatistics.correlationCofficient);
+		System.out.println("Rating SD more than one: " + moreThanTenSentencesStatistics.getRatingStandardDeviation());
+		System.out.println("Sentiment SD more than one: " + moreThanTenSentencesStatistics.getSentimentScoreStandardDeviation());
+
+		StatisticResult moreThanOneSentencesStatisticsGood = StatisticsCalculator.getCorrelationCoefficient(goodMoreThanOneSentence);
+		System.out.println("Good more than one sentence: " + goodMoreThanOneSentence.size());
+		System.out.println("Coeffiecient more than Ten: " + moreThanOneSentencesStatisticsGood.correlationCofficient);
+		System.out.println("Rating SD more than one: " + moreThanOneSentencesStatisticsGood.getRatingStandardDeviation());
+		System.out.println("Sentiment SD more than one: " + moreThanOneSentencesStatisticsGood.getSentimentScoreStandardDeviation());
+
+
 		showAllAdjectivesButton.setVisible(true);
 		showAllAdjectivesButton.setManaged(true);
 		//adjectiveFrequencyInReviewButton.setVisible(true);
@@ -1267,6 +1290,14 @@ public class Controller  implements Initializable, GetReviewsCallBack, GetRating
 	public void processGetNumberOfReviewsWithAMountOfSentencesMatrixCallBack(List<AmountOfRatingsWithAMountOfScentences> response) {
 		sentenceTableView.setVisible(true);
 		sentenceTableView.setManaged(true);
+		double total = 0;
+		for( AmountOfRatingsWithAMountOfScentences amount : response){
+			total += amount.getAmountOfRatings();
+		}
+		for( AmountOfRatingsWithAMountOfScentences amount : response){
+			amount.setPercent(Utility.round((amount.getAmountOfRatings() / total)*100, 2));
+		}
+
 		scentenceStatisticsList.addAll(response);
 		progressIndicator.setManaged(false);
 		progressIndicator.setVisible(false);

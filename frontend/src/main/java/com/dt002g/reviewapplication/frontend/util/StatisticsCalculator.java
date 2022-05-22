@@ -329,7 +329,7 @@ public class StatisticsCalculator {
         stats.deviationSentimentScore = 0;
 
      for(SentimentStatisticsBackendEntity ssbe: reviewRatingByScoreMatrix){
-            System.out.println("Rating: " + ssbe.rating + " minScore: " + ssbe.minScore + " maxScore: " + ssbe.maxScore + " amount: " + ssbe.amount);
+            //System.out.println("Rating: " + ssbe.rating + " minScore: " + ssbe.minScore + " maxScore: " + ssbe.maxScore + " amount: " + ssbe.amount);
             stats.ratingAmount[ssbe.rating] += ssbe.amount;
             stats.sentimentScoreAmount[(int)ssbe.minScore] += ssbe.amount;
             stats.ratingSentimentScoreAmount[ssbe.rating][(int)ssbe.minScore] += ssbe.amount;
@@ -371,13 +371,13 @@ public class StatisticsCalculator {
 
         stats.correlationCofficient = stats.covarriance / (Math.sqrt((stats.deviationRating*stats.deviationSentimentScore)));
 
-        System.out.println("ratingExpectedValue: " + stats.ratingExpectedValue);System.out.println("sentimentScoreExpectedValue: " + stats.sentimentScoreExpectedValue);
-        System.out.println("deviationRating: " + stats.deviationRating);
-        System.out.println("deviationSentimentScore: " + stats.deviationSentimentScore);
-        System.out.println("covarriance: " + stats.covarriance);
-        System.out.println("correlationCofficient: " + stats.correlationCofficient);
-        System.out.println("Rating standard deviation: " + stats.getRatingStandardDeviation());
-        System.out.println("Sentiment score standartd deviation: " + stats.getSentimentScoreStandardDeviation());
+        //System.out.println("ratingExpectedValue: " + stats.ratingExpectedValue);System.out.println("sentimentScoreExpectedValue: " + stats.sentimentScoreExpectedValue);
+        //System.out.println("deviationRating: " + stats.deviationRating);
+        //System.out.println("deviationSentimentScore: " + stats.deviationSentimentScore);
+        //System.out.println("covarriance: " + stats.covarriance);
+        //System.out.println("correlationCofficient: " + stats.correlationCofficient);
+        //System.out.println("Rating standard deviation: " + stats.getRatingStandardDeviation());
+        //System.out.println("Sentiment score standartd deviation: " + stats.getSentimentScoreStandardDeviation());
         ConfidenceInterval ratingConfidenceInterval = caclulateConfidenceInterval(stats.ratingExpectedValue, 1.96, stats.getRatingStandardDeviation(), stats.totalRatings);
         ConfidenceInterval sentimentScoreConfidenceInterval = caclulateConfidenceInterval(stats.sentimentScoreExpectedValue, 1.96, stats.getSentimentScoreStandardDeviation(), stats.totalRatings);
 //        System.out.println("Rating confidence interval: minvalue: " + ratingConfidenceInterval.min + ", maxValue:" + ratingConfidenceInterval.max + " width: " + ratingConfidenceInterval.width + " halfWidth: " + ratingConfidenceInterval.width/2);

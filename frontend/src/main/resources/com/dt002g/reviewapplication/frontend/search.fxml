@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.AreaChart?>
 <?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
@@ -171,13 +172,17 @@
                                         <TableColumn fx:id="adjectiveColumn" prefWidth="75.0" text="Adjective" />
                                         <TableColumn fx:id="adjectiveAmountColumn" prefWidth="75.0" text="Amount" />
                                           <TableColumn fx:id="adjectiveCorrelationColumn" prefWidth="75.0" text="Correlation" />
+                                          <TableColumn fx:id="adjectiveStandardDeviation" prefWidth="75.0" text="Standard Deviation" />
                                           <TableColumn fx:id="percentOfAllColumn" prefWidth="75.0" text="\% of total Adjectives" />
+                                          <TableColumn fx:id="adjectiveMoreThanOneSentenceCorrelation" prefWidth="75.0" text="Correlation Where Sentence &gt; 1" />
+                                          <TableColumn fx:id="adjectivesFrequencyMoreThanOneSentence" prefWidth="75.0" text="Amount Where Sentence &gt; 1" />
                                       </columns>
                                     </TableView>
                                      <TableView fx:id="sentenceTableView" prefHeight="541.0" prefWidth="966.0" visible="false">
                                          <columns>
                                              <TableColumn fx:id="amountOfSentencesColumn" prefWidth="75.0" text="Amount Of Sentences" />
                                              <TableColumn fx:id="amountOfReviewsColumn" prefWidth="75.0" text="Amount of Reviews" />
+                                          <TableColumn fx:id="amountOfReviewsPercent" prefWidth="75.0" text="\% of reviews" />
                                          </columns>
                                      </TableView>
                                      <TableView fx:id="adjectiveNumberOfTimesInReviewTableView" prefHeight="541.0" prefWidth="966.0" visible="false">
@@ -203,6 +208,14 @@
                                         <NumberAxis fx:id="yAxisScatter" side="LEFT" />
                                       </yAxis>
                                     </ScatterChart>
+                                    <AreaChart fx:id="areaChartMean" prefHeight="537.0" prefWidth="963.0">
+                                      <xAxis>
+                                        <NumberAxis side="BOTTOM" />
+                                      </xAxis>
+                                      <yAxis>
+                                        <NumberAxis side="LEFT" />
+                                      </yAxis>
+                                    </AreaChart>
                                     <ScatterChart fx:id="scatterChartMean" layoutX="10.0" layoutY="10.0" prefHeight="544.0" prefWidth="973.0" styleClass="default-colour0" stylesheets="@css/stylesheet.css" title="Correlation" visible="false">
                                        <xAxis>
                                           <NumberAxis side="BOTTOM" fx:id="xAxis" />

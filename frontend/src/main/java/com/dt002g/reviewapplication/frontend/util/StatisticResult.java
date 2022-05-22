@@ -18,6 +18,7 @@ public class StatisticResult {
     public int[] ratingAmount;
     public int[] sentimentScoreAmount;
     public int totalRatings = 0;
+    public double CV = 0;
     public double confidenceIntervalRating;
     public double confidenceIntervalSentiment;
     public double getRatingStandardDeviation(){

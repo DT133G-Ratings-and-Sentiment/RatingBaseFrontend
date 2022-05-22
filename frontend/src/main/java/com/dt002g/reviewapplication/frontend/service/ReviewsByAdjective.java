@@ -7,6 +7,9 @@ public class ReviewsByAdjective {
     public String adjective;
     public List<ReviewBackendEntity> reviews= new ArrayList<>();
     public double correlationCoefficient = 0.0;
+    public double standardDeviation = 0.0;
+    public double moreThanOneCorrelation;
+    public long moreThanOneAmount;
     public ReviewsByAdjective(){}
 
     public ReviewsByAdjective(String adjective, List<ReviewBackendEntity> reviews) {
